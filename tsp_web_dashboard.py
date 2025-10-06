@@ -302,7 +302,7 @@ class TSPDashboard:
         fig, ax = plt.subplots(figsize=(12, 8))
         
         metrics = list(self.data['metrics'].keys())
-        values = [self.data['metrics'][m].value for m in metrics]  # Extract values from MetricData objects
+        scores = [self.data['metrics'][m].score for m in metrics]  # Use scores instead of raw values
         signals = [self.data['metric_signals'][m] for m in metrics]
         
         # Color based on signal
@@ -315,22 +315,28 @@ class TSPDashboard:
             else:
                 colors.append('#e74c3c')
         
-        bars = ax.bar(range(len(metrics)), values, color=colors, alpha=0.8)
+        bars = ax.bar(range(len(metrics)), scores, color=colors, alpha=0.8)
         
         # Customize chart
         ax.set_xlabel('Economic Indicators', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Current Value', fontsize=12, fontweight='bold')
-        ax.set_title('Economic Indicators Dashboard', fontsize=16, fontweight='bold')
+        ax.set_ylabel('Risk Score (0-100)', fontsize=12, fontweight='bold')
+        ax.set_title('Economic Indicators Risk Scores', fontsize=16, fontweight='bold')
         ax.set_xticks(range(len(metrics)))
         ax.set_xticklabels([m.replace('_', ' ').title() for m in metrics], rotation=45, ha='right')
+        ax.set_ylim(0, 100)  # Set fixed scale from 0-100
         
         # Add value labels on bars
-        for bar, value, signal in zip(bars, values, signals):
+        for bar, score, signal in zip(bars, scores, signals):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + abs(height)*0.01,
-                   f'{value:.2f}\n{signal}', ha='center', va='bottom', fontweight='bold')
+            ax.text(bar.get_x() + bar.get_width()/2., height + 2,
+                   f'{score:.0f}\n{signal}', ha='center', va='bottom', fontweight='bold')
+        
+        # Add horizontal lines for risk levels
+        ax.axhline(y=33, color='green', linestyle='--', alpha=0.5, label='Low Risk')
+        ax.axhline(y=66, color='orange', linestyle='--', alpha=0.5, label='High Risk')
         
         ax.grid(True, alpha=0.3)
+        ax.legend(loc='upper right')
         plt.tight_layout()
         self.charts['metrics'] = self.fig_to_base64(fig)
     
