@@ -25,11 +25,16 @@ class MetricData:
             setattr(self, key, value)
 
 class TSPDashboard:
-    def __init__(self):
-        """Initialize the TSP dashboard."""
-        self.engine = TSPAllocationEngine()
+    def __init__(self, years_to_retirement=None):
+        """Initialize the TSP dashboard.
+        
+        Args:
+            years_to_retirement (int, optional): Years until retirement for age-based adjustments
+        """
+        self.engine = TSPAllocationEngine(years_to_retirement=years_to_retirement)
         self.data = None
         self.charts = {}
+        self.years_to_retirement = years_to_retirement
         
     def generate_data(self):
         """Generate all data needed for the dashboard."""
@@ -61,6 +66,9 @@ class TSPDashboard:
                 else:
                     metric_signals[metric_name] = 'Red'
             
+            # Get age-related information
+            age_category = self.engine.get_age_category() if hasattr(self.engine, 'get_age_category') else 'Not Specified'
+            
             # Prepare data for dashboard
             self.data = {
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -73,6 +81,8 @@ class TSPDashboard:
                 'bond_outlook': self._get_bond_outlook(getattr(self.engine, 'bond_score', 50)),
                 'fear_greed_score': getattr(self.engine.current_data.get('fear_greed_index', {}), 'value', 50),
                 'fear_greed_sentiment': self._get_fear_greed_sentiment(getattr(self.engine.current_data.get('fear_greed_index', {}), 'value', 50)),
+                'years_to_retirement': self.years_to_retirement,
+                'age_category': age_category,
                 'fund_info': {
                     'C': {'name': 'C Fund', 'description': 'Common Stock Index (S&P 500)', 'color': '#1f77b4'},
                     'S': {'name': 'S Fund', 'description': 'Small Cap Stock Index', 'color': '#ff7f0e'},
@@ -443,6 +453,14 @@ dashboard = TSPDashboard()
 @app.route('/')
 def index():
     """Main dashboard view."""
+    # Get years_to_retirement from query parameter
+    years_to_retirement = request.args.get('years_to_retirement', type=int)
+    
+    # Update dashboard with age parameter if provided
+    if years_to_retirement is not None:
+        dashboard.years_to_retirement = years_to_retirement
+        dashboard.engine = TSPAllocationEngine(years_to_retirement=years_to_retirement)
+    
     success = dashboard.generate_data()
     if not success:
         return "Error generating dashboard data", 500
@@ -454,6 +472,14 @@ def index():
 @app.route('/print')
 def print_view():
     """Print-friendly dashboard view."""
+    # Get years_to_retirement from query parameter
+    years_to_retirement = request.args.get('years_to_retirement', type=int)
+    
+    # Update dashboard with age parameter if provided
+    if years_to_retirement is not None:
+        dashboard.years_to_retirement = years_to_retirement
+        dashboard.engine = TSPAllocationEngine(years_to_retirement=years_to_retirement)
+    
     success = dashboard.generate_data()
     if not success:
         return "Error generating dashboard data", 500
