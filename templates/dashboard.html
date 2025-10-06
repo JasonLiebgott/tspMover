@@ -99,11 +99,11 @@
             <div class="col-md-3">
                 <div class="card metric-card text-center h-100">
                     <div class="card-body">
-                        <i class="fas fa-pie-chart text-warning fa-2x mb-3"></i>
-                        <h5 class="card-title">Top Fund</h5>
-                        {% set max_fund = data.allocation.items() | list | max(attribute=1) %}
-                        <span class="badge bg-warning score-badge">{{ max_fund[0] }} Fund</span>
-                        <p class="card-text mt-2">{{ max_fund[1] }}% Allocation</p>
+                        <i class="fas fa-heart-pulse text-warning fa-2x mb-3"></i>
+                        <h5 class="card-title">Market Sentiment</h5>
+                        {% set fg_color = 'success' if data.fear_greed_score >= 55 else ('warning' if data.fear_greed_score >= 45 else 'danger') %}
+                        <span class="badge bg-{{ fg_color }} score-badge">{{ "%.0f"|format(data.fear_greed_score) }}/100</span>
+                        <p class="card-text mt-2">{{ data.fear_greed_sentiment }}</p>
                     </div>
                 </div>
             </div>

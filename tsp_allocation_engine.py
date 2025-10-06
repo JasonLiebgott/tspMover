@@ -17,16 +17,17 @@ class TSPAllocationEngine:
         
         # Metric weights (sum to 1.0) - based on recession prediction accuracy
         self.METRIC_WEIGHTS = {
-            'sahm_rule': 0.20,        # Unemployment trend - best predictor
-            'yield_curve': 0.15,      # 10Y-3M inversion
-            'jobless_claims': 0.15,   # Weekly claims trend
-            'lei_index': 0.12,        # Conference Board LEI
-            'ism_pmi': 0.10,          # Manufacturing PMI
-            'gdp_growth': 0.10,       # Real GDP growth
-            'sp500_ma200': 0.08,      # S&P 500 vs 200-day MA
-            'vix_level': 0.05,        # Market volatility
+            'sahm_rule': 0.18,        # Unemployment trend - best predictor
+            'yield_curve': 0.14,      # 10Y-3M inversion
+            'jobless_claims': 0.14,   # Weekly claims trend
+            'lei_index': 0.11,        # Conference Board LEI
+            'ism_pmi': 0.09,          # Manufacturing PMI
+            'gdp_growth': 0.09,       # Real GDP growth
+            'sp500_ma200': 0.07,      # S&P 500 vs 200-day MA
+            'fear_greed_index': 0.08, # Market sentiment composite
+            'vix_level': 0.04,        # Market volatility (reduced as part of fear/greed)
             'credit_spreads': 0.03,   # Corporate bond spreads
-            'core_pce': 0.02          # Core inflation
+            'core_pce': 0.03          # Core inflation
         }
         
         # Signal thresholds for each metric
@@ -38,6 +39,7 @@ class TSPAllocationEngine:
             'ism_pmi': {'red': 48.0, 'yellow': 50.0, 'green': 52.0},
             'gdp_growth': {'red': -1.0, 'yellow': 1.0, 'green': 2.5},
             'sp500_ma200': {'red': -10.0, 'yellow': -5.0, 'green': 5.0},
+            'fear_greed_index': {'red': 25.0, 'yellow': 50.0, 'green': 75.0},  # Extreme fear to extreme greed
             'vix_level': {'red': 30.0, 'yellow': 20.0, 'green': 15.0},
             'credit_spreads': {'red': 3.0, 'yellow': 2.0, 'green': 1.5},
             'core_pce': {'red': 4.5, 'yellow': 3.5, 'green': 2.5}
@@ -287,6 +289,106 @@ class TSPAllocationEngine:
         except Exception as e:
             return 2.5, f"Core PCE: Data unavailable"
     
+    def calculate_fear_greed_index(self):
+        """Calculate Fear & Greed Index - composite market sentiment indicator."""
+        try:
+            # Initialize components
+            components = {}
+            
+            # 1. VIX (Market Volatility) - 20% weight
+            vix = self.fetch_market_data('^VIX', 30)
+            if len(vix) > 0:
+                current_vix = float(vix.iloc[-1])
+                # Invert VIX: Low VIX = Greed (high score), High VIX = Fear (low score)
+                vix_score = max(0, min(100, 100 - (current_vix - 10) * 2.5))
+                components['vix'] = {'score': vix_score, 'weight': 0.20, 'value': current_vix}
+            
+            # 2. S&P 500 vs 125-day Moving Average - 20% weight
+            sp500 = self.fetch_market_data('^GSPC', 150)
+            if len(sp500) >= 125:
+                current_price = float(sp500.iloc[-1])
+                ma_125 = float(sp500.rolling(125).mean().iloc[-1])
+                price_vs_ma = ((current_price - ma_125) / ma_125) * 100
+                # Above MA = Greed, Below MA = Fear
+                ma_score = max(0, min(100, 50 + price_vs_ma * 2))
+                components['sp500_ma'] = {'score': ma_score, 'weight': 0.20, 'value': price_vs_ma}
+            
+            # 3. Stock Price Momentum (50 vs 200 day MA) - 15% weight
+            if len(sp500) >= 200:
+                ma_50 = float(sp500.rolling(50).mean().iloc[-1])
+                ma_200 = float(sp500.rolling(200).mean().iloc[-1])
+                momentum = ((ma_50 - ma_200) / ma_200) * 100
+                momentum_score = max(0, min(100, 50 + momentum * 3))
+                components['momentum'] = {'score': momentum_score, 'weight': 0.15, 'value': momentum}
+            
+            # 4. High/Low Ratio (New Highs vs New Lows) - 15% weight
+            # Use S&P 500 20-day performance as proxy
+            if len(sp500) >= 20:
+                recent_high = float(sp500.rolling(20).max().iloc[-1])
+                current_price = float(sp500.iloc[-1])
+                proximity_to_high = (current_price / recent_high) * 100
+                hl_score = max(0, min(100, proximity_to_high * 1.25 - 25))
+                components['high_low'] = {'score': hl_score, 'weight': 0.15, 'value': proximity_to_high}
+            
+            # 5. Safe Haven Demand (TLT vs SPY performance) - 10% weight
+            try:
+                tlt = self.fetch_market_data('TLT', 60)  # 20+ Year Treasury ETF
+                if len(tlt) >= 20 and len(sp500) >= 20:
+                    tlt_return = ((float(tlt.iloc[-1]) - float(tlt.iloc[-20])) / float(tlt.iloc[-20])) * 100
+                    spy_return = ((float(sp500.iloc[-1]) - float(sp500.iloc[-20])) / float(sp500.iloc[-20])) * 100
+                    safe_haven_demand = spy_return - tlt_return  # Positive = risk-on, Negative = risk-off
+                    safe_haven_score = max(0, min(100, 50 + safe_haven_demand * 2))
+                    components['safe_haven'] = {'score': safe_haven_score, 'weight': 0.10, 'value': safe_haven_demand}
+            except:
+                pass
+            
+            # 6. Put/Call Ratio Proxy (VIX vs recent average) - 10% weight
+            if len(vix) >= 20:
+                vix_20d_avg = float(vix.rolling(20).mean().iloc[-1])
+                current_vix = float(vix.iloc[-1])
+                vix_vs_avg = (current_vix - vix_20d_avg) / vix_20d_avg * 100
+                # Lower than average VIX = Greed, Higher = Fear
+                putcall_score = max(0, min(100, 50 - vix_vs_avg * 2))
+                components['putcall'] = {'score': putcall_score, 'weight': 0.10, 'value': vix_vs_avg}
+            
+            # 7. Junk Bond Demand (Credit Spreads) - 10% weight
+            try:
+                spreads = self.fetch_fred_data('BAMLC0A0CM', 6)
+                if len(spreads) > 0:
+                    current_spread = float(spreads.iloc[-1])
+                    # Lower spreads = more risk appetite = Greed
+                    spread_score = max(0, min(100, 100 - (current_spread - 1) * 25))
+                    components['credit'] = {'score': spread_score, 'weight': 0.10, 'value': current_spread}
+            except:
+                pass
+            
+            # Calculate weighted average
+            if components:
+                total_weight = sum(comp['weight'] for comp in components.values())
+                weighted_score = sum(comp['score'] * comp['weight'] for comp in components.values()) / total_weight
+                
+                # Determine sentiment level
+                if weighted_score >= 75:
+                    sentiment = "Extreme Greed"
+                elif weighted_score >= 55:
+                    sentiment = "Greed"
+                elif weighted_score >= 45:
+                    sentiment = "Neutral"
+                elif weighted_score >= 25:
+                    sentiment = "Fear"
+                else:
+                    sentiment = "Extreme Fear"
+                
+                # Store component details for reporting
+                self.fear_greed_components = components
+                
+                return weighted_score, f"Fear & Greed: {weighted_score:.0f} ({sentiment})"
+            else:
+                return 50.0, "Fear & Greed: Data unavailable"
+                
+        except Exception as e:
+            return 50.0, f"Fear & Greed: Error calculating - {e}"
+    
     def analyze_bond_market_environment(self):
         """Analyze bond market conditions for F Fund allocation adjustment."""
         try:
@@ -402,6 +504,7 @@ class TSPAllocationEngine:
             'ism_pmi': self.calculate_ism_pmi(),
             'gdp_growth': self.calculate_gdp_growth(),
             'sp500_ma200': self.calculate_sp500_ma200(),
+            'fear_greed_index': self.calculate_fear_greed_index(),
             'vix_level': self.calculate_vix_level(),
             'credit_spreads': self.calculate_credit_spreads(),
             'core_pce': self.calculate_core_pce()
@@ -457,6 +560,34 @@ class TSPAllocationEngine:
         # Get base allocation
         base_allocation = self.TSP_ALLOCATIONS[allocation_type].copy()
         
+        # Apply Fear & Greed Index adjustments
+        fear_greed_score = 50  # Default neutral
+        fear_greed_adjustment = ""
+        
+        if 'fear_greed_index' in self.current_data:
+            fear_greed_score = 100 - self.current_data['fear_greed_index']['score']  # Invert for recession scoring
+            original_fg_score = self.current_data['fear_greed_index']['value']
+            
+            if original_fg_score >= 75:  # Extreme Greed
+                # Reduce risk exposure slightly (market may be overheated)
+                c_reduction = min(5, base_allocation['C'])
+                s_reduction = min(3, base_allocation['S'])
+                base_allocation['C'] -= c_reduction
+                base_allocation['S'] -= s_reduction
+                base_allocation['F'] += c_reduction + s_reduction
+                fear_greed_adjustment = f"Extreme Greed: Reduced equity exposure by {c_reduction + s_reduction}%"
+            elif original_fg_score <= 25:  # Extreme Fear
+                # Increase equity exposure (contrarian opportunity)
+                if risk_level in ["Very Low", "Low"]:  # Only if not already in high-risk environment
+                    f_reduction = min(5, base_allocation['F'])
+                    g_reduction = min(3, base_allocation['G'])
+                    base_allocation['F'] -= f_reduction
+                    base_allocation['G'] -= g_reduction
+                    base_allocation['C'] += f_reduction + g_reduction
+                    fear_greed_adjustment = f"Extreme Fear: Increased equity exposure by {f_reduction + g_reduction}%"
+                else:
+                    fear_greed_adjustment = "Extreme Fear: No adjustment (high recession risk overrides)"
+        
         # Adjust F Fund allocation based on bond market conditions
         if bond_score >= 70:
             # Very favorable bond environment - increase F Fund
@@ -483,6 +614,7 @@ class TSPAllocationEngine:
         self.bond_score = bond_score
         self.bond_adjustments = bond_adjustments
         self.bond_adjustment_note = bond_adjustment_note
+        self.fear_greed_adjustment = fear_greed_adjustment
         
         return allocation_type, risk_level
     
@@ -501,6 +633,19 @@ class TSPAllocationEngine:
                 print("Bond Market Factors:")
                 for adjustment in self.bond_adjustments[:3]:  # Show top 3 factors
                     print(f"  • {adjustment}")
+        
+        # Display Fear & Greed analysis
+        if 'fear_greed_index' in self.current_data:
+            fg_value = self.current_data['fear_greed_index']['value']
+            fg_desc = self.current_data['fear_greed_index']['description']
+            print(f"Market Sentiment: {fg_desc}")
+            
+            if hasattr(self, 'fear_greed_components'):
+                print("Sentiment Components:")
+                for comp_name, comp_data in self.fear_greed_components.items():
+                    comp_score = comp_data['score']
+                    comp_weight = comp_data['weight'] * 100
+                    print(f"  • {comp_name.title()}: {comp_score:.0f}/100 ({comp_weight:.0f}% weight)")
         
         allocation_type, risk_level = self.determine_allocation()
         print(f"Risk Level: {risk_level}")
@@ -521,6 +666,10 @@ class TSPAllocationEngine:
         # Show bond market adjustment if any
         if hasattr(self, 'bond_adjustment_note'):
             print(f"\nBond Market Adjustment: {self.bond_adjustment_note}")
+        
+        # Show Fear & Greed adjustment if any
+        if hasattr(self, 'fear_greed_adjustment') and self.fear_greed_adjustment:
+            print(f"Market Sentiment Adjustment: {self.fear_greed_adjustment}")
         
         print("\nTop Risk Factors:")
         print("-" * 20)

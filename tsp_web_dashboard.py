@@ -71,6 +71,8 @@ class TSPDashboard:
                 'metric_signals': metric_signals,
                 'bond_score': getattr(self.engine, 'bond_score', 50),
                 'bond_outlook': self._get_bond_outlook(getattr(self.engine, 'bond_score', 50)),
+                'fear_greed_score': getattr(self.engine.current_data.get('fear_greed_index', {}), 'value', 50),
+                'fear_greed_sentiment': self._get_fear_greed_sentiment(getattr(self.engine.current_data.get('fear_greed_index', {}), 'value', 50)),
                 'fund_info': {
                     'C': {'name': 'C Fund', 'description': 'Common Stock Index (S&P 500)', 'color': '#1f77b4'},
                     'S': {'name': 'S Fund', 'description': 'Small Cap Stock Index', 'color': '#ff7f0e'},
@@ -105,6 +107,19 @@ class TSPDashboard:
             return "Unfavorable"
         else:
             return "Very Unfavorable"
+    
+    def _get_fear_greed_sentiment(self, fear_greed_score):
+        """Determine market sentiment from Fear & Greed score."""
+        if fear_greed_score >= 75:
+            return "Extreme Greed"
+        elif fear_greed_score >= 55:
+            return "Greed"
+        elif fear_greed_score >= 45:
+            return "Neutral"
+        elif fear_greed_score >= 25:
+            return "Fear"
+        else:
+            return "Extreme Fear"
     
     def fig_to_base64(self, fig):
         """Convert matplotlib figure to base64 string."""
