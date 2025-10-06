@@ -398,31 +398,55 @@ class TSPDashboard:
         """Generate risk factors breakdown chart."""
         fig, ax = plt.subplots(figsize=(12, 8))
         
-        # Get weighted contributions to recession score
+        # Get actual weighted contributions to recession score from engine
         engine = self.engine
-        contributions = {}
-        for metric, weight in engine.METRIC_WEIGHTS.items():
-            if metric in self.data['metric_signals']:
-                signal = self.data['metric_signals'][metric]
-                if signal == 'Red':
-                    score = 100
-                elif signal == 'Yellow':
-                    score = 50
+        
+        # Get all metrics and their weighted contributions
+        all_metrics = []
+        all_values = []
+        all_signals = []
+        
+        # Collect all metrics including zero contributions
+        for metric_key, metric_data in engine.current_data.items():
+            if isinstance(metric_data, dict) and 'weighted_score' in metric_data:
+                weighted_value = metric_data['weighted_score']
+                all_metrics.append(metric_key)
+                all_values.append(weighted_value)
+                
+                # Determine signal based on score
+                score = metric_data['score']
+                if score <= 25:
+                    all_signals.append('Green')  # Low risk
+                elif score <= 50:
+                    all_signals.append('Yellow')  # Moderate risk
                 else:
-                    score = 0
-                contributions[metric] = weight * score
+                    all_signals.append('Red')  # High risk
         
-        # Sort by contribution
-        sorted_contributions = dict(sorted(contributions.items(), key=lambda x: x[1], reverse=True))
+        # Separate zero and non-zero contributions
+        non_zero_metrics = [(m, v, s) for m, v, s in zip(all_metrics, all_values, all_signals) if v > 0.05]
+        zero_metrics = [(m, v, s) for m, v, s in zip(all_metrics, all_values, all_signals) if v <= 0.05]
         
-        metrics = list(sorted_contributions.keys())
-        values = list(sorted_contributions.values())
+        # Sort non-zero by value (descending), limit to top 8
+        non_zero_metrics.sort(key=lambda x: x[1], reverse=True)
+        top_contributors = non_zero_metrics[:8]
         
-        # Color by signal level
+        # Add up to 3 zero-contribution metrics to show they're tracked
+        display_zeros = zero_metrics[:3]
+        
+        # Combine for display
+        display_metrics = top_contributors + display_zeros
+        
+        # Extract data for plotting
+        metrics = [item[0] for item in display_metrics]
+        values = [item[1] for item in display_metrics]
+        signals = [item[2] for item in display_metrics]
+        
+        # Create colors based on signals and zero status
         colors = []
-        for metric in metrics:
-            signal = self.data['metric_signals'][metric]
-            if signal == 'Green':
+        for i, (metric, value, signal) in enumerate(display_metrics):
+            if value <= 0.05:  # Zero contribution metrics
+                colors.append('#bdc3c7')  # Light gray for zero contributions
+            elif signal == 'Green':
                 colors.append('#2ecc71')
             elif signal == 'Yellow':
                 colors.append('#f1c40f')
@@ -431,17 +455,43 @@ class TSPDashboard:
         
         bars = ax.barh(range(len(metrics)), values, color=colors, alpha=0.8)
         
-        ax.set_xlabel('Contribution to Recession Score', fontweight='bold')
+        ax.set_xlabel('Weighted Contribution to Recession Score', fontweight='bold')
         ax.set_ylabel('Economic Indicators', fontweight='bold')
-        ax.set_title('Risk Factor Contributions', fontsize=16, fontweight='bold')
+        ax.set_title('Risk Factor Contributions (Top Contributors + Low Risk Indicators)', fontsize=14, fontweight='bold')
         ax.set_yticks(range(len(metrics)))
         ax.set_yticklabels([m.replace('_', ' ').title() for m in metrics])
         
-        # Add value labels
-        for i, (bar, value) in enumerate(zip(bars, values)):
+        # Add value labels with better formatting
+        for i, (bar, value, signal) in enumerate(zip(bars, values, signals)):
             width = bar.get_width()
-            ax.text(width + 0.1, bar.get_y() + bar.get_height()/2,
-                   f'{value:.1f}', ha='left', va='center', fontweight='bold')
+            if value <= 0.05:
+                label_text = '0.00 (Low Risk)'
+                ax.text(max(values) * 0.05, bar.get_y() + bar.get_height()/2,
+                       label_text, ha='left', va='center', fontweight='bold', 
+                       style='italic', color='#7f8c8d')
+            else:
+                ax.text(width + max(values) * 0.01, bar.get_y() + bar.get_height()/2,
+                       f'{value:.2f}', ha='left', va='center', fontweight='bold')
+        
+        # Add total recession score and legend
+        total_score = sum(all_values)  # Use all values for total
+        ax.text(0.98, 0.95, f'Total Recession Score: {engine.recession_score:.1f}/100', 
+                transform=ax.transAxes, ha='right', va='top', 
+                bbox=dict(boxstyle='round', facecolor='lightgray', alpha=0.8),
+                fontweight='bold', fontsize=12)
+        
+        # Add legend explaining gray bars
+        if display_zeros:
+            ax.text(0.02, 0.05, '• Gray bars = Low risk indicators (healthy economy)', 
+                    transform=ax.transAxes, ha='left', va='bottom', 
+                    fontsize=10, style='italic', color='#7f8c8d')
+        
+        ax.grid(True, alpha=0.3, axis='x')
+        plt.tight_layout()
+        ax.text(0.98, 0.95, f'Total Recession Score: {engine.recession_score:.1f}/100', 
+                transform=ax.transAxes, ha='right', va='top', 
+                bbox=dict(boxstyle='round', facecolor='lightgray', alpha=0.8),
+                fontweight='bold', fontsize=12)
         
         ax.grid(True, alpha=0.3, axis='x')
         plt.tight_layout()

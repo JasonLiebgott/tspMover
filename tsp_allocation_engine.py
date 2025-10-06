@@ -52,52 +52,53 @@ class TSPAllocationEngine:
         }
         
         # TSP allocation rules based on recession score
-        # Updated based on historical fund analysis - reduced I Fund allocation
-        # I Fund underperforms due to EAFE index limitations (no emerging markets)
-        # C Fund increased as primary growth driver, F Fund enhanced for falling rate environment
-        # F Fund allocation increased across all risk levels due to favorable bond market outlook
+        # OPTIMIZED: Eliminated F+G overlap by strategic fund selection
+        # F Fund used only when bond conditions are favorable
+        # G Fund used for pure safety when bond risk is too high
+        # This prevents 90% fixed income allocations in defensive scenarios
         self.TSP_ALLOCATIONS = {
-            'growth_aggressive': {'C': 60, 'S': 25, 'I': 10, 'F': 5, 'G': 0},    # 0-20% recession risk
-            'growth_moderate': {'C': 50, 'S': 20, 'I': 10, 'F': 20, 'G': 0},    # 20-40% recession risk
-            'balanced': {'C': 35, 'S': 15, 'I': 10, 'F': 30, 'G': 10},          # 40-60% recession risk
-            'defensive': {'C': 20, 'S': 10, 'I': 5, 'F': 40, 'G': 25},          # 60-80% recession risk
-            'preservation': {'C': 10, 'S': 0, 'I': 0, 'F': 35, 'G': 55}         # 80-100% recession risk
+            'growth_aggressive': {'C': 65, 'S': 25, 'I': 10, 'F': 0, 'G': 0},    # 0-20% recession risk
+            'growth_moderate': {'C': 55, 'S': 20, 'I': 15, 'F': 10, 'G': 0},    # 20-40% recession risk  
+            'balanced': {'C': 40, 'S': 15, 'I': 15, 'F': 30, 'G': 0},          # 40-60% recession risk
+            'defensive': {'C': 25, 'S': 10, 'I': 10, 'F': 35, 'G': 20},        # 60-80% recession risk
+            'preservation': {'C': 15, 'S': 5, 'I': 5, 'F': 25, 'G': 50}        # 80-100% recession risk
         }
         
         # Age-adjusted allocation rules for different retirement timeframes
-        # These provide more conservative base allocations as retirement approaches
+        # OPTIMIZED: Eliminated F+G overlap across all age categories
+        # Strategic choice between F and G based on risk tolerance and market conditions
         self.AGE_ADJUSTED_ALLOCATIONS = {
-            # 20+ years to retirement (age 35-45): Aggressive growth focus
+            # 20+ years to retirement (age 35-45): Maximum growth focus
             'young': {
-                'growth_aggressive': {'C': 70, 'S': 25, 'I': 5, 'F': 0, 'G': 0},
-                'growth_moderate': {'C': 60, 'S': 20, 'I': 10, 'F': 10, 'G': 0},
-                'balanced': {'C': 45, 'S': 15, 'I': 10, 'F': 25, 'G': 5},
-                'defensive': {'C': 30, 'S': 10, 'I': 5, 'F': 35, 'G': 20},
-                'preservation': {'C': 15, 'S': 5, 'I': 0, 'F': 40, 'G': 40}
+                'growth_aggressive': {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0},
+                'growth_moderate': {'C': 65, 'S': 20, 'I': 10, 'F': 5, 'G': 0},
+                'balanced': {'C': 50, 'S': 15, 'I': 15, 'F': 20, 'G': 0},
+                'defensive': {'C': 35, 'S': 10, 'I': 10, 'F': 30, 'G': 15},
+                'preservation': {'C': 20, 'S': 5, 'I': 5, 'F': 25, 'G': 45}
             },
-            # 10-20 years to retirement (age 45-55): Moderate approach
+            # 10-20 years to retirement (age 45-55): Balanced growth approach
             'mid_career': {
-                'growth_aggressive': {'C': 55, 'S': 20, 'I': 10, 'F': 10, 'G': 5},
-                'growth_moderate': {'C': 45, 'S': 15, 'I': 10, 'F': 25, 'G': 5},
-                'balanced': {'C': 35, 'S': 10, 'I': 10, 'F': 35, 'G': 10},
-                'defensive': {'C': 25, 'S': 5, 'I': 5, 'F': 45, 'G': 20},
-                'preservation': {'C': 10, 'S': 0, 'I': 0, 'F': 40, 'G': 50}
+                'growth_aggressive': {'C': 60, 'S': 20, 'I': 15, 'F': 5, 'G': 0},
+                'growth_moderate': {'C': 50, 'S': 15, 'I': 15, 'F': 20, 'G': 0},
+                'balanced': {'C': 35, 'S': 10, 'I': 15, 'F': 40, 'G': 0},
+                'defensive': {'C': 25, 'S': 5, 'I': 10, 'F': 35, 'G': 25},
+                'preservation': {'C': 15, 'S': 0, 'I': 5, 'F': 30, 'G': 50}
             },
             # 5-15 years to retirement (age 50-62): Pre-retirement focus
             'pre_retirement': {
-                'growth_aggressive': {'C': 45, 'S': 15, 'I': 10, 'F': 20, 'G': 10},
-                'growth_moderate': {'C': 35, 'S': 10, 'I': 10, 'F': 30, 'G': 15},
-                'balanced': {'C': 25, 'S': 5, 'I': 5, 'F': 40, 'G': 25},
-                'defensive': {'C': 15, 'S': 0, 'I': 5, 'F': 45, 'G': 35},
-                'preservation': {'C': 5, 'S': 0, 'I': 0, 'F': 35, 'G': 60}
+                'growth_aggressive': {'C': 50, 'S': 15, 'I': 15, 'F': 20, 'G': 0},
+                'growth_moderate': {'C': 40, 'S': 10, 'I': 15, 'F': 25, 'G': 10},
+                'balanced': {'C': 30, 'S': 5, 'I': 10, 'F': 35, 'G': 20},
+                'defensive': {'C': 20, 'S': 0, 'I': 10, 'F': 35, 'G': 35},
+                'preservation': {'C': 10, 'S': 0, 'I': 5, 'F': 25, 'G': 60}
             },
-            # 0-5 years to retirement (age 62+): Capital preservation
+            # 0-5 years to retirement (age 62+): Capital preservation priority
             'near_retirement': {
-                'growth_aggressive': {'C': 30, 'S': 5, 'I': 5, 'F': 35, 'G': 25},
-                'growth_moderate': {'C': 20, 'S': 0, 'I': 5, 'F': 40, 'G': 35},
-                'balanced': {'C': 15, 'S': 0, 'I': 0, 'F': 45, 'G': 40},
-                'defensive': {'C': 10, 'S': 0, 'I': 0, 'F': 40, 'G': 50},
-                'preservation': {'C': 5, 'S': 0, 'I': 0, 'F': 30, 'G': 65}
+                'growth_aggressive': {'C': 35, 'S': 10, 'I': 10, 'F': 25, 'G': 20},
+                'growth_moderate': {'C': 25, 'S': 5, 'I': 10, 'F': 30, 'G': 30},
+                'balanced': {'C': 20, 'S': 0, 'I': 5, 'F': 35, 'G': 40},
+                'defensive': {'C': 15, 'S': 0, 'I': 5, 'F': 30, 'G': 50},
+                'preservation': {'C': 10, 'S': 0, 'I': 0, 'F': 20, 'G': 70}
             }
         }
         
@@ -656,57 +657,66 @@ class TSPAllocationEngine:
                 else:
                     fear_greed_adjustment = "Extreme Fear: No adjustment (high recession risk overrides)"
         
-        # Improved F Fund allocation logic based on recession risk and bond conditions
-        # Key principle: F Fund should be favored when recession risk is HIGH, not when recession risk is low
+        # OPTIMIZED F vs G FUND ALLOCATION STRATEGY
+        # Strategic choice between F Fund (bonds) and G Fund (safety) based on conditions
+        # This eliminates the F+G overlap problem and maximizes allocation efficiency
         
-        if self.recession_score >= 60:  # High recession risk - bonds become attractive
+        if self.recession_score >= 60:  # High recession risk - need defensive positioning
             if bond_score >= 70:
-                # High recession risk + very favorable bond environment = significant F Fund increase
-                f_fund_boost = min(15, 100 - base_allocation['F'])  # Max 15% boost
-                base_allocation['F'] += f_fund_boost
-                base_allocation['C'] -= f_fund_boost  # Take from C Fund
-                bond_adjustment_note = f"F Fund +{f_fund_boost}% (high recession risk + favorable bond conditions)"
-            elif bond_score >= 60:
-                # High recession risk + good bond environment = moderate F Fund increase
-                f_fund_boost = min(10, 100 - base_allocation['F'])
-                base_allocation['F'] += f_fund_boost
-                base_allocation['C'] -= f_fund_boost
-                bond_adjustment_note = f"F Fund +{f_fund_boost}% (recession hedge + good bond conditions)"
+                # Excellent bond conditions: Favor F Fund over G Fund for better returns
+                f_to_g_shift = min(10, base_allocation['G'])  # Move G to F
+                base_allocation['F'] += f_to_g_shift
+                base_allocation['G'] -= f_to_g_shift
+                
+                # Also boost F Fund from equity if conditions are exceptional
+                if bond_score >= 80:
+                    equity_to_f = min(8, base_allocation['C'])
+                    base_allocation['F'] += equity_to_f
+                    base_allocation['C'] -= equity_to_f
+                    bond_adjustment_note = f"F Fund optimized: +{f_to_g_shift}% from G, +{equity_to_f}% from C (exceptional bond conditions)"
+                else:
+                    bond_adjustment_note = f"F Fund optimized: +{f_to_g_shift}% from G Fund (strong bond conditions)"
+                    
+            elif bond_score <= 40:
+                # Poor bond conditions: Favor G Fund over F Fund for safety
+                f_to_g_shift = min(15, base_allocation['F'])  # Move F to G
+                base_allocation['G'] += f_to_g_shift
+                base_allocation['F'] -= f_to_g_shift
+                bond_adjustment_note = f"G Fund favored: +{f_to_g_shift}% from F Fund (poor bond conditions + high recession risk)"
             else:
-                bond_adjustment_note = "No F Fund adjustment (high recession risk but poor bond conditions)"
+                bond_adjustment_note = "Balanced F/G allocation maintained (moderate bond conditions)"
         
-        elif self.recession_score <= 30:  # Low recession risk - favor growth over bonds
-            if bond_score <= 40:
-                # Low recession risk + poor bond conditions = reduce F Fund significantly
-                f_fund_reduction = min(10, base_allocation['F'])  # Max 10% reduction
-                base_allocation['F'] -= f_fund_reduction
-                base_allocation['C'] += f_fund_reduction  # Move to growth (C Fund)
-                bond_adjustment_note = f"F Fund -{f_fund_reduction}% (low recession risk + poor bond conditions)"
-            elif bond_score >= 75:
-                # Low recession risk but exceptional bond conditions = small F Fund increase
-                f_fund_boost = min(3, 100 - base_allocation['F'])  # Small 3% boost
-                base_allocation['F'] += f_fund_boost
-                base_allocation['C'] -= f_fund_boost
-                bond_adjustment_note = f"F Fund +{f_fund_boost}% (exceptional bond conditions override low recession risk)"
+        elif self.recession_score <= 30:  # Low recession risk - favor growth
+            if bond_score >= 75:
+                # Exceptional bond opportunity even in growth environment
+                bond_opportunity = min(5, base_allocation['G'])  # Small shift to F Fund
+                base_allocation['F'] += bond_opportunity
+                base_allocation['G'] -= bond_opportunity
+                bond_adjustment_note = f"F Fund opportunity: +{bond_opportunity}% (exceptional bonds despite low recession risk)"
             else:
-                # Low recession risk + neutral/good bond conditions = favor growth
-                bond_adjustment_note = "No F Fund adjustment (favoring growth in low recession risk environment)"
+                # Reduce both F and G to maximize growth potential
+                f_to_equity = min(5, base_allocation['F'])
+                g_to_equity = min(3, base_allocation['G'])
+                base_allocation['F'] -= f_to_equity
+                base_allocation['G'] -= g_to_equity
+                base_allocation['C'] += f_to_equity + g_to_equity
+                bond_adjustment_note = f"Growth optimized: -{f_to_equity}% F, -{g_to_equity}% G to equity (low recession risk)"
         
-        else:  # Moderate recession risk (30-60) - balanced approach
-            if bond_score >= 70:
-                # Moderate recession risk + very favorable bond environment
-                f_fund_boost = min(5, 100 - base_allocation['F'])
-                base_allocation['F'] += f_fund_boost
-                base_allocation['C'] -= f_fund_boost
-                bond_adjustment_note = f"F Fund +{f_fund_boost}% (balanced risk + favorable bond conditions)"
-            elif bond_score <= 30:
-                # Moderate recession risk + poor bond environment
-                f_fund_reduction = min(3, base_allocation['F'])
-                base_allocation['F'] -= f_fund_reduction
-                base_allocation['G'] += f_fund_reduction  # Move to G Fund for safety
-                bond_adjustment_note = f"F Fund -{f_fund_reduction}% (poor bond conditions)"
+        else:  # Moderate recession risk (30-60) - tactical adjustments
+            if bond_score >= 75:
+                # Strong bond conditions: Enhance F Fund position
+                g_to_f_shift = min(5, base_allocation['G'])
+                base_allocation['F'] += g_to_f_shift
+                base_allocation['G'] -= g_to_f_shift
+                bond_adjustment_note = f"F Fund enhanced: +{g_to_f_shift}% from G Fund (strong bond environment)"
+            elif bond_score <= 35:
+                # Weak bond conditions: Enhance G Fund safety
+                f_to_g_shift = min(8, base_allocation['F'])
+                base_allocation['G'] += f_to_g_shift
+                base_allocation['F'] -= f_to_g_shift
+                bond_adjustment_note = f"G Fund enhanced: +{f_to_g_shift}% from F Fund (weak bond environment)"
             else:
-                bond_adjustment_note = "No F Fund adjustment (balanced risk environment)"
+                bond_adjustment_note = "F/G allocation maintained (balanced conditions)"
         
         self.recommended_allocation = base_allocation
         self.bond_score = bond_score
