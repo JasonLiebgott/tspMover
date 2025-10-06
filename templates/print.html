@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP Allocation Report - Print View</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .page-break { page-break-before: always; }
+            .no-print { display: none !important; }
+            body { font-size: 12pt; }
+            .container-fluid { padding: 0; }
+        }
+        
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            page-break-inside: avoid;
+        }
+        
+        .metric-summary {
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f8f9fa;
+        }
+        
+        .allocation-table {
+            font-size: 14pt;
+        }
+        
+        .fund-breakdown {
+            page-break-inside: avoid;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-4">TSP Allocation Report</h1>
+            <h3 class="text-muted">Investment Strategy Analysis</h3>
+            <p class="lead">Generated on {{ data.timestamp }}</p>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="metric-summary">
+            <h2 class="text-primary mb-3">Executive Summary</h2>
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <h4>Recession Risk</h4>
+                    <h2 class="text-danger">{{ "%.0f"|format(data.recession_score) }}%</h2>
+                    <p>{{ data.recession_level }} Risk</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <h4>Bond Opportunity</h4>
+                    <h2 class="text-success">{{ data.bond_score }}%</h2>
+                    <p>Market Score</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <h4>Strategy</h4>
+                    <h3 class="text-info">{{ data.strategy }}</h3>
+                    <p>Recommended</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <h4>Analysis Date</h4>
+                    <p class="h5">{{ data.timestamp.split()[0] }}</p>
+                    <p>{{ data.timestamp.split()[1] }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fund Allocation -->
+        <div class="fund-breakdown">
+            <h2 class="text-primary mb-3">Recommended Fund Allocation</h2>
+            <div class="table-responsive">
+                <table class="table table-striped allocation-table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 15%;">Fund</th>
+                            <th style="width: 45%;">Description</th>
+                            <th style="width: 15%;">Allocation</th>
+                            <th style="width: 25%;">Investment Focus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set fund_details = {
+                            'C': {'name': 'C Fund', 'desc': 'S&P 500 Index Fund', 'focus': 'Large-cap U.S. stocks'},
+                            'S': {'name': 'S Fund', 'desc': 'Small & Mid Cap Stock Index Fund', 'focus': 'Small/mid-cap U.S. stocks'},
+                            'I': {'name': 'I Fund', 'desc': 'International Stock Index Fund', 'focus': 'International developed markets'},
+                            'F': {'name': 'F Fund', 'desc': 'Fixed Income Index Fund', 'focus': 'U.S. government/corporate bonds'},
+                            'G': {'name': 'G Fund', 'desc': 'Government Securities Investment Fund', 'focus': 'U.S. Treasury securities'}
+                        } %}
+                        
+                        {% for fund, percentage in data.allocation.items() %}
+                        <tr>
+                            <td><strong>{{ fund_details[fund].name }}</strong></td>
+                            <td>{{ fund_details[fund].desc }}</td>
+                            <td class="text-center"><span class="badge bg-primary fs-6">{{ percentage }}%</span></td>
+                            <td>{{ fund_details[fund].focus }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if data.bond_adjustment_note != 'No adjustment' %}
+            <div class="alert alert-info">
+                <strong>Bond Market Adjustment:</strong> {{ data.bond_adjustment_note }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Page Break for Charts -->
+        <div class="page-break"></div>
+
+        <!-- Charts Section -->
+        <h2 class="text-primary mb-4">Visual Analysis</h2>
+        
+        <!-- Allocation Chart -->
+        <div class="chart-container">
+            <h4 class="text-center mb-3">Portfolio Allocation Breakdown</h4>
+            <div class="text-center">
+                <img src="data:image/png;base64,{{ charts.allocation_pie }}" class="img-fluid" style="max-width: 500px;" alt="TSP Allocation Chart">
+            </div>
+        </div>
+
+        <!-- Recession Gauge -->
+        <div class="chart-container">
+            <h4 class="text-center mb-3">Economic Risk Assessment</h4>
+            <div class="text-center">
+                <img src="data:image/png;base64,{{ charts.recession_gauge }}" class="img-fluid" style="max-width: 500px;" alt="Recession Gauge">
+            </div>
+        </div>
+
+        <!-- Economic Metrics -->
+        <div class="chart-container">
+            <h4 class="text-center mb-3">Economic Indicators Overview</h4>
+            <div class="text-center">
+                <img src="data:image/png;base64,{{ charts.metrics_bar }}" class="img-fluid" alt="Economic Metrics Chart">
+            </div>
+        </div>
+
+        <!-- Market Assessment -->
+        <div class="chart-container">
+            <h4 class="text-center mb-3">Bond Market vs Recession Risk</h4>
+            <div class="text-center">
+                <img src="data:image/png;base64,{{ charts.bond_recession }}" class="img-fluid" style="max-width: 500px;" alt="Bond vs Recession Chart">
+            </div>
+        </div>
+
+        <!-- Page Break for Detailed Analysis -->
+        <div class="page-break"></div>
+
+        <!-- Detailed Metrics -->
+        <h2 class="text-primary mb-4">Detailed Economic Analysis</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Economic Indicator</th>
+                        <th>Current Status</th>
+                        <th>Risk Score</th>
+                        <th>Weight</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric_name, metric_data in data.metrics.items() %}
+                    <tr>
+                        <td><strong>{{ metric_name.replace('_', ' ').title() }}</strong></td>
+                        <td>{{ metric_data.description }}</td>
+                        <td class="text-center">{{ "%.1f"|format(metric_data.score) }}</td>
+                        <td class="text-center">
+                            {% if metric_data.score != 0 %}
+                                {{ "%.0f"|format(metric_data.weighted_score / metric_data.score * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                        <td class="text-center">{{ "%.2f"|format(metric_data.weighted_score) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bond Market Insights -->
+        {% if data.bond_adjustments %}
+        <div class="mt-4">
+            <h3 class="text-primary mb-3">Bond Market Analysis</h3>
+            <ul class="list-group">
+                {% for adjustment in data.bond_adjustments %}
+                <li class="list-group-item">{{ adjustment }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Risk Assessment -->
+        <div class="chart-container mt-4">
+            <h4 class="text-center mb-3">Primary Risk Factors</h4>
+            <div class="text-center">
+                <img src="data:image/png;base64,{{ charts.risk_factors }}" class="img-fluid" alt="Risk Factors Chart">
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-5 pt-4 border-top text-center">
+            <p><strong>Important Disclaimer:</strong></p>
+            <p class="small">This analysis is for informational purposes only and should not be considered as financial advice. 
+            Past performance does not guarantee future results. The Thrift Savings Plan (TSP) is subject to market risks, 
+            and investment values may fluctuate. Please consult with a qualified financial advisor before making investment decisions.</p>
+            <p class="small text-muted">Generated by TSP Allocation Engine | {{ data.timestamp }}</p>
+        </div>
+    </div>
+</body>
+</html>
