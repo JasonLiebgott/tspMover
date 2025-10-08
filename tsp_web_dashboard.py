@@ -96,6 +96,7 @@ class TSPDashboard:
             self.generate_allocation_chart()
             self.generate_recession_gauge()
             self.generate_metrics_chart()
+            self.generate_enhanced_sahm_chart()
             self.generate_bond_vs_recession_chart()
             self.generate_risk_factors_chart()
             
@@ -332,14 +333,42 @@ class TSPDashboard:
         ax.set_ylabel('Risk Score (0-100)', fontsize=12, fontweight='bold')
         ax.set_title('Economic Indicators Risk Scores', fontsize=16, fontweight='bold')
         ax.set_xticks(range(len(metrics)))
-        ax.set_xticklabels([m.replace('_', ' ').title() for m in metrics], rotation=45, ha='right')
+        
+        # Custom labels for better display of Enhanced Sahm Rule
+        custom_labels = []
+        for m in metrics:
+            if m == 'sahm_rule':
+                # Check if this is the enhanced version
+                sahm_desc = self.data['metrics'][m].description
+                if 'Enhanced Sahm' in sahm_desc:
+                    custom_labels.append('Enhanced\nSahm Rule')
+                else:
+                    custom_labels.append('Sahm Rule')
+            else:
+                custom_labels.append(m.replace('_', ' ').title())
+        
+        ax.set_xticklabels(custom_labels, rotation=45, ha='right', fontsize=10)
         ax.set_ylim(0, 100)  # Set fixed scale from 0-100
         
-        # Add value labels on bars
-        for bar, score, signal in zip(bars, scores, signals):
+        # Add value labels on bars with enhanced Sahm Rule details
+        for i, (bar, score, signal, metric) in enumerate(zip(bars, scores, signals, metrics)):
             height = bar.get_height()
+            
+            # Special handling for Enhanced Sahm Rule
+            if metric == 'sahm_rule' and 'Enhanced Sahm' in self.data['metrics'][metric].description:
+                # Extract the enhanced value from description
+                desc = self.data['metrics'][metric].description
+                # Parse "Enhanced Sahm: X.XX (Base: Y.YY, Adj: ...)"
+                if 'Enhanced Sahm:' in desc:
+                    enhanced_val = desc.split('Enhanced Sahm: ')[1].split(' ')[0]
+                    label_text = f'{score:.0f}\n{signal}\n({enhanced_val})'
+                else:
+                    label_text = f'{score:.0f}\n{signal}'
+            else:
+                label_text = f'{score:.0f}\n{signal}'
+            
             ax.text(bar.get_x() + bar.get_width()/2., height + 2,
-                   f'{score:.0f}\n{signal}', ha='center', va='bottom', fontweight='bold')
+                   label_text, ha='center', va='bottom', fontweight='bold', fontsize=9)
         
         # Add horizontal lines for risk levels
         ax.axhline(y=33, color='green', linestyle='--', alpha=0.5, label='Low Risk')
@@ -349,6 +378,123 @@ class TSPDashboard:
         ax.legend(loc='upper right')
         plt.tight_layout()
         self.charts['metrics'] = self.fig_to_base64(fig)
+    
+    def generate_enhanced_sahm_chart(self):
+        """Generate detailed Enhanced Sahm Rule comparison chart."""
+        if 'sahm_rule' not in self.data['metrics']:
+            return
+            
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        
+        # Get Sahm Rule data
+        sahm_data = self.data['metrics']['sahm_rule']
+        sahm_desc = sahm_data.description
+        
+        # Parse traditional and enhanced values from description
+        traditional_sahm = 0.0
+        enhanced_sahm = 0.0
+        adjustments = []
+        
+        if 'Enhanced Sahm:' in sahm_desc:
+            # Parse "Enhanced Sahm: X.XX (Base: Y.YY, Adj: ...)"
+            try:
+                enhanced_val_str = sahm_desc.split('Enhanced Sahm: ')[1].split(' ')[0]
+                enhanced_sahm = float(enhanced_val_str)
+                
+                if 'Base: ' in sahm_desc:
+                    base_val_str = sahm_desc.split('Base: ')[1].split(',')[0].replace(')', '')
+                    traditional_sahm = float(base_val_str)
+                
+                # Extract adjustments
+                if 'Adj: ' in sahm_desc:
+                    adj_str = sahm_desc.split('Adj: ')[1].replace(')', '')
+                    adjustments = [adj.strip() for adj in adj_str.split(',')]
+                    
+            except ValueError:
+                enhanced_sahm = sahm_data.value
+                traditional_sahm = sahm_data.value
+        else:
+            # Fallback to raw value
+            traditional_sahm = enhanced_sahm = sahm_data.value
+        
+        # Chart 1: Traditional vs Enhanced Sahm Rule comparison
+        categories = ['Traditional\nSahm Rule', 'Enhanced\nSahm Rule']
+        values = [traditional_sahm, enhanced_sahm]
+        
+        # Color based on Sahm Rule thresholds (0.5 = recession trigger)
+        colors = []
+        for val in values:
+            if val >= 0.5:
+                colors.append('#e74c3c')  # Red - recession signal
+            elif val >= 0.3:
+                colors.append('#f1c40f')  # Yellow - warning
+            else:
+                colors.append('#2ecc71')  # Green - no concern
+        
+        bars1 = ax1.bar(categories, values, color=colors, alpha=0.8, edgecolor='black', linewidth=1)
+        
+        # Customize first chart
+        ax1.set_ylabel('Sahm Rule Value', fontweight='bold')
+        ax1.set_title('Traditional vs Enhanced Sahm Rule', fontweight='bold', fontsize=14)
+        ax1.axhline(y=0.5, color='red', linestyle='--', alpha=0.7, label='Recession Trigger (0.5)')
+        ax1.axhline(y=0.3, color='orange', linestyle='--', alpha=0.7, label='Warning Level (0.3)')
+        ax1.grid(True, alpha=0.3)
+        ax1.legend()
+        
+        # Add value labels on bars
+        for bar, val in zip(bars1, values):
+            height = bar.get_height()
+            ax1.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+                    f'{val:.2f}', ha='center', va='bottom', fontweight='bold', fontsize=12)
+        
+        # Chart 2: Enhancement Components breakdown
+        if adjustments and len(adjustments) > 0:
+            # Parse adjustment components
+            adj_names = []
+            adj_values = []
+            for adj in adjustments[:4]:  # Show top 4 adjustments
+                if ':' in adj:
+                    name, value_str = adj.split(':', 1)
+                    try:
+                        value = float(value_str.strip().replace('+', ''))
+                        adj_names.append(name.strip())
+                        adj_values.append(value)
+                    except ValueError:
+                        continue
+            
+            if adj_names:
+                # Create horizontal bar chart for adjustments
+                y_pos = range(len(adj_names))
+                bars2 = ax2.barh(y_pos, adj_values, 
+                               color=['#3498db' if v >= 0 else '#e67e22' for v in adj_values],
+                               alpha=0.8)
+                
+                ax2.set_yticks(y_pos)
+                ax2.set_yticklabels(adj_names)
+                ax2.set_xlabel('Adjustment Value', fontweight='bold')
+                ax2.set_title('Enhanced Sahm Rule\nAdjustment Components', fontweight='bold', fontsize=14)
+                ax2.axvline(x=0, color='black', linestyle='-', alpha=0.5)
+                ax2.grid(True, alpha=0.3)
+                
+                # Add value labels
+                for bar, val in zip(bars2, adj_values):
+                    width = bar.get_width()
+                    ax2.text(width + (0.01 if width >= 0 else -0.01), bar.get_y() + bar.get_height()/2.,
+                            f'{val:+.2f}', ha='left' if width >= 0 else 'right', va='center', 
+                            fontweight='bold', fontsize=10)
+            else:
+                ax2.text(0.5, 0.5, 'No adjustment\ndata available', 
+                        ha='center', va='center', transform=ax2.transAxes,
+                        fontsize=14, fontweight='bold')
+                ax2.set_title('Enhanced Sahm Rule\nAdjustment Components', fontweight='bold', fontsize=14)
+        else:
+            ax2.text(0.5, 0.5, 'Traditional Sahm Rule\n(No enhancements)', 
+                    ha='center', va='center', transform=ax2.transAxes,
+                    fontsize=14, fontweight='bold')
+            ax2.set_title('Enhanced Sahm Rule\nAdjustment Components', fontweight='bold', fontsize=14)
+        
+        plt.tight_layout()
+        self.charts['enhanced_sahm'] = self.fig_to_base64(fig)
     
     def generate_bond_vs_recession_chart(self):
         """Generate bond outlook vs recession risk comparison."""

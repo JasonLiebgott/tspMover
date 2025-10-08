@@ -128,25 +128,140 @@ class TSPAllocationEngine:
             return pd.Series()
     
     def calculate_sahm_rule(self):
-        """Calculate Sahm Rule indicator."""
+        """Calculate enhanced Sahm Rule with real-time labor market indicators."""
         try:
+            # Traditional Sahm Rule calculation
             unemp = self.fetch_fred_data('UNRATE', 24)  # 24 months of unemployment data
-            if len(unemp) < 12:
-                return 0.0, "Insufficient unemployment data"
+            traditional_sahm = 0.0
             
-            # 3-month moving average
-            unemp_3m = unemp.rolling(3).mean()
+            if len(unemp) >= 12:
+                # 3-month moving average
+                unemp_3m = unemp.rolling(3).mean()
+                # 12-month minimum
+                unemp_12m_min = unemp.rolling(12).min()
+                # Current Sahm Rule value
+                traditional_sahm = float(unemp_3m.iloc[-1] - unemp_12m_min.iloc[-1])
             
-            # 12-month minimum
-            unemp_12m_min = unemp.rolling(12).min()
+            # Enhanced Sahm Rule with real-time labor indicators
+            enhanced_sahm = traditional_sahm
+            labor_adjustments = []
             
-            # Current Sahm Rule value
-            current_sahm = float(unemp_3m.iloc[-1] - unemp_12m_min.iloc[-1])
+            # 1. ADP Employment Momentum Adjustment
+            adp_adjustment = self.get_adp_sahm_adjustment()
+            if adp_adjustment is not None:
+                enhanced_sahm += adp_adjustment
+                labor_adjustments.append(f"ADP: {adp_adjustment:+.2f}")
             
-            return current_sahm, f"Sahm Rule: {current_sahm:.2f}"
+            # 2. Job Openings Trend Adjustment  
+            jolts_adjustment = self.get_jolts_sahm_adjustment()
+            if jolts_adjustment is not None:
+                enhanced_sahm += jolts_adjustment
+                labor_adjustments.append(f"JOLTS: {jolts_adjustment:+.2f}")
+            
+            # 3. Consumer Spending Employment Signal
+            spending_adjustment = self.get_spending_sahm_adjustment()
+            if spending_adjustment is not None:
+                enhanced_sahm += spending_adjustment
+                labor_adjustments.append(f"Spending: {spending_adjustment:+.2f}")
+            
+            # 4. Real-time job posting trends (Indeed proxy using continuing claims momentum)
+            continuing_claims_adj = self.get_continuing_claims_adjustment()
+            if continuing_claims_adj is not None:
+                enhanced_sahm += continuing_claims_adj
+                labor_adjustments.append(f"Claims Trend: {continuing_claims_adj:+.2f}")
+            
+            # Create description
+            if labor_adjustments:
+                description = f"Enhanced Sahm: {enhanced_sahm:.2f} (Base: {traditional_sahm:.2f}, Adj: {', '.join(labor_adjustments)})"
+            else:
+                description = f"Sahm Rule: {traditional_sahm:.2f}"
+            
+            return enhanced_sahm, description
             
         except Exception as e:
-            return 0.0, f"Sahm Rule: Data unavailable"
+            return 0.0, f"Sahm Rule: Error calculating - {e}"
+    
+    def get_adp_sahm_adjustment(self):
+        """Get ADP employment momentum adjustment to Sahm Rule."""
+        try:
+            adp_data = self.fetch_fred_data('ADPMNNG', 6)
+            if len(adp_data) < 3:
+                return None
+                
+            # Calculate 3-month employment change rate
+            recent_adp = float(adp_data.iloc[-1])
+            prior_adp = float(adp_data.iloc[-3])
+            change_rate = (recent_adp - prior_adp) / prior_adp * 100
+            
+            # Convert to Sahm adjustment: 
+            # Strong job growth (-2%+ change) = -0.1 Sahm adjustment (better)
+            # Weak job growth (+2%+ change) = +0.1 Sahm adjustment (worse)
+            adjustment = -change_rate * 0.05  # Scale factor
+            return max(-0.2, min(0.2, adjustment))  # Cap adjustment
+            
+        except:
+            return None
+    
+    def get_jolts_sahm_adjustment(self):
+        """Get JOLTS job openings trend adjustment to Sahm Rule."""
+        try:
+            job_openings = self.fetch_fred_data('JTSJOL', 6)
+            if len(job_openings) < 3:
+                return None
+                
+            # 3-month trend in job openings
+            recent_openings = float(job_openings.iloc[-1])
+            prior_openings = float(job_openings.iloc[-3])
+            openings_change = (recent_openings - prior_openings) / prior_openings * 100
+            
+            # Convert to Sahm adjustment:
+            # Rising openings = negative adjustment (better employment outlook)
+            # Falling openings = positive adjustment (worse employment outlook) 
+            adjustment = -openings_change * 0.02  # Scale factor
+            return max(-0.15, min(0.15, adjustment))
+            
+        except:
+            return None
+    
+    def get_spending_sahm_adjustment(self):
+        """Get consumer spending employment confidence adjustment."""
+        try:
+            # Use retail sales as real-time consumer spending proxy
+            retail_sales = self.fetch_fred_data('RSAFS', 6)
+            if len(retail_sales) < 3:
+                return None
+                
+            recent_sales = float(retail_sales.iloc[-1])
+            prior_sales = float(retail_sales.iloc[-3])
+            sales_momentum = (recent_sales - prior_sales) / prior_sales * 100
+            
+            # Strong consumer spending suggests employment confidence
+            # 3%+ quarterly growth = -0.05 Sahm adjustment
+            adjustment = -sales_momentum * 0.015  # Scale factor
+            return max(-0.1, min(0.1, adjustment))
+            
+        except:
+            return None
+    
+    def get_continuing_claims_adjustment(self):
+        """Get continuing claims trend as employment duration indicator."""
+        try:
+            continuing_claims = self.fetch_fred_data('CCSA', 8)  # 8 weeks
+            if len(continuing_claims) < 4:
+                return None
+                
+            # 4-week trend in continuing claims
+            recent_avg = float(continuing_claims.iloc[-4:].mean())
+            prior_avg = float(continuing_claims.iloc[-8:-4].mean())
+            
+            claims_trend = (recent_avg - prior_avg) / prior_avg * 100
+            
+            # Rising continuing claims = longer unemployment duration = worse
+            adjustment = claims_trend * 0.01  # Scale factor  
+            return max(-0.1, min(0.1, adjustment))
+            
+        except:
+            return None
     
     def calculate_yield_curve(self):
         """Calculate 10Y-3M yield curve spread."""
@@ -169,20 +284,171 @@ class TSPAllocationEngine:
             return 1.0, f"Yield Curve: Data unavailable"
     
     def calculate_jobless_claims(self):
-        """Calculate 4-week moving average of initial jobless claims."""
+        """Calculate enhanced labor market indicators using multiple real-time sources."""
         try:
+            # Traditional jobless claims as baseline
             claims = self.fetch_fred_data('ICSA', 3)  # 3 months of weekly data
-            if len(claims) < 4:
-                return 350000.0, "Jobless Claims: Data unavailable"
+            baseline_score = 350000.0
+            traditional_claims = baseline_score
             
-            # 4-week moving average
-            claims_4w = claims.rolling(4).mean()
-            current_claims = float(claims_4w.iloc[-1])
+            if len(claims) >= 4:
+                claims_4w = claims.rolling(4).mean()
+                traditional_claims = float(claims_4w.iloc[-1])
             
-            return current_claims, f"4-week MA Claims: {current_claims:,.0f}"
+            # Enhanced real-time labor market composite
+            labor_market_score = 50  # Start neutral
+            labor_signals = []
+            
+            # 1. ADP Employment Proxy (40% weight)
+            adp_signal = self.calculate_adp_employment_proxy()
+            if adp_signal is not None:
+                labor_market_score += adp_signal * 0.4
+                labor_signals.append(f"ADP Employment: {adp_signal:+.1f}")
+            
+            # 2. Job Openings vs Unemployment Ratio (30% weight)
+            job_openings_signal = self.calculate_job_openings_ratio()
+            if job_openings_signal is not None:
+                labor_market_score += job_openings_signal * 0.3
+                labor_signals.append(f"Job Openings Ratio: {job_openings_signal:+.1f}")
+            
+            # 3. Consumer Spending Proxy for Employment Health (30% weight)
+            spending_signal = self.calculate_consumer_spending_employment_proxy()
+            if spending_signal is not None:
+                labor_market_score += spending_signal * 0.3
+                labor_signals.append(f"Consumer Spending Signal: {spending_signal:+.1f}")
+            
+            # Convert enhanced score back to traditional claims equivalent for compatibility
+            # Higher labor market score = better employment = lower equivalent claims
+            if labor_signals:
+                enhanced_claims_equivalent = 350000 * (100 - labor_market_score) / 50
+                enhanced_claims_equivalent = max(200000, min(600000, enhanced_claims_equivalent))
+                
+                description = f"Enhanced Labor Market: {enhanced_claims_equivalent:,.0f} equiv claims"
+                if labor_signals:
+                    description += f" ({'; '.join(labor_signals)})"
+                
+                return enhanced_claims_equivalent, description
+            else:
+                # Fallback to traditional claims
+                return traditional_claims, f"4-week MA Claims: {traditional_claims:,.0f}"
             
         except Exception as e:
-            return 350000.0, f"Jobless Claims: Data unavailable"
+            return 350000.0, f"Labor Market: Error calculating - {e}"
+    
+    def calculate_adp_employment_proxy(self):
+        """Calculate ADP employment momentum as unemployment proxy."""
+        try:
+            # ADP Total Nonfarm Private Payrolls (ADP Research Institute)
+            adp_data = self.fetch_fred_data('ADPMNNG', 6)  # 6 months of monthly data
+            
+            if len(adp_data) < 3:
+                return None
+                
+            # Calculate 3-month employment momentum
+            recent_adp = float(adp_data.iloc[-1])
+            prior_adp = float(adp_data.iloc[-3])
+            
+            # Convert to thousands for easier interpretation
+            momentum = (recent_adp - prior_adp) / 1000
+            
+            # Score: Positive momentum = good for employment = negative signal for recession
+            # Scale: +200k jobs = -20 points, -200k jobs = +20 points
+            score = -momentum / 10  # Invert: job gains reduce recession risk
+            score = max(-25, min(25, score))  # Cap at ±25 points
+            
+            return score
+            
+        except Exception as e:
+            print(f"ADP Employment data error: {e}")
+            return None
+    
+    def calculate_job_openings_ratio(self):
+        """Calculate job openings to unemployment ratio as labor market health indicator."""
+        try:
+            # JOLTS Job Openings (monthly data)
+            job_openings = self.fetch_fred_data('JTSJOL', 6)  # 6 months
+            
+            # Unemployment level
+            unemployment_level = self.fetch_fred_data('UNEMPLOY', 6)  # 6 months
+            
+            if len(job_openings) < 2 or len(unemployment_level) < 2:
+                return None
+            
+            # Calculate current ratio
+            current_openings = float(job_openings.iloc[-1])
+            current_unemployed = float(unemployment_level.iloc[-1])
+            
+            if current_unemployed == 0:
+                return None
+                
+            current_ratio = current_openings / current_unemployed
+            
+            # Calculate 3-month average ratio for comparison
+            if len(job_openings) >= 3 and len(unemployment_level) >= 3:
+                avg_openings = float(job_openings.iloc[-3:].mean())
+                avg_unemployed = float(unemployment_level.iloc[-3:].mean())
+                avg_ratio = avg_openings / avg_unemployed if avg_unemployed > 0 else current_ratio
+            else:
+                avg_ratio = current_ratio
+            
+            # Score based on ratio trend
+            # Ratio > 1.2 = very tight labor market (good for employment)
+            # Ratio < 0.8 = loose labor market (concerning for employment)
+            ratio_change = (current_ratio - avg_ratio) / avg_ratio * 100
+            
+            # Score: Improving ratio = better employment = negative recession signal
+            score = -ratio_change * 2  # Scale factor
+            score = max(-20, min(20, score))  # Cap at ±20 points
+            
+            return score
+            
+        except Exception as e:
+            print(f"Job Openings ratio error: {e}")
+            return None
+    
+    def calculate_consumer_spending_employment_proxy(self):
+        """Calculate consumer spending momentum as employment health proxy."""
+        try:
+            # Personal Consumption Expenditures (real)
+            pce_real = self.fetch_fred_data('PCEC96', 6)  # 6 months of monthly data
+            
+            if len(pce_real) < 3:
+                return None
+            
+            # Calculate 3-month spending momentum
+            recent_pce = float(pce_real.iloc[-1])
+            prior_pce = float(pce_real.iloc[-3])
+            
+            spending_growth = (recent_pce - prior_pce) / prior_pce * 100
+            
+            # Score: Strong spending growth suggests employment confidence
+            # 2%+ quarterly growth = -15 points (good employment), -2% = +15 points
+            score = -spending_growth * 7.5  # Scale factor
+            score = max(-20, min(20, score))  # Cap at ±20 points
+            
+            # Additional signal: Consumer Credit growth (employment confidence)
+            try:
+                consumer_credit = self.fetch_fred_data('TOTALSL', 6)
+                if len(consumer_credit) >= 3:
+                    recent_credit = float(consumer_credit.iloc[-1])
+                    prior_credit = float(consumer_credit.iloc[-3])
+                    credit_growth = (recent_credit - prior_credit) / prior_credit * 100
+                    
+                    # Moderate credit growth (2-6%) is healthy, too high or negative concerning
+                    if 2 <= credit_growth <= 6:
+                        score -= 5  # Healthy credit growth
+                    elif credit_growth > 8:
+                        score += 3   # Excessive borrowing (concerning)
+                    elif credit_growth < 0:
+                        score += 5   # Credit contraction (concerning)
+            except:
+                pass  # Credit data optional
+            
+            return score
+            
+        except Exception as e:
+            print(f"Consumer spending proxy error: {e}")
+            return None
     
     def calculate_lei_index(self):
         """Calculate Leading Economic Index year-over-year change."""
@@ -264,18 +530,130 @@ class TSPAllocationEngine:
             return self.TSP_ALLOCATIONS  # Use default if no age specified
     
     def calculate_ism_pmi(self):
-        """Calculate ISM Manufacturing PMI."""
+        """Calculate ISM Manufacturing PMI using multiple data sources."""
         try:
-            # Try FRED first, fallback to manual if needed
-            pmi = self.fetch_fred_data('NAPM', 6)
-            if len(pmi) == 0:
-                return 50.0, "PMI data unavailable - assuming neutral"
+            # Try multiple FRED series IDs for ISM PMI data
+            pmi_series_ids = [
+                'ISIMANPMI',      # ISM Manufacturing: PMI Composite Index
+                'NAPMPROD',       # ISM Manufacturing: Production Index
+                'NAPMPI',         # ISM Manufacturing: Prices Index
+                'NAPM',           # Original ISM PMI series (legacy)
+                'AISMMANGPMI',    # All Items ISM Manufacturing PMI
+                'ISIMANPRODI'     # ISM Manufacturing: Production Index
+            ]
             
-            current_pmi = pmi.iloc[-1]
-            return float(current_pmi), f"ISM PMI: {current_pmi:.1f}"
+            pmi_data = None
+            used_series = None
+            
+            for series_id in pmi_series_ids:
+                try:
+                    pmi_data = self.fetch_fred_data(series_id, 6)
+                    if len(pmi_data) > 0:
+                        # Validate that the data looks like PMI (should be 20-80 range)
+                        latest_value = float(pmi_data.iloc[-1])
+                        if 20 <= latest_value <= 80:
+                            used_series = series_id
+                            break
+                        else:
+                            pmi_data = None  # Reset if data doesn't look like PMI
+                except:
+                    continue
+            
+            if pmi_data is not None and len(pmi_data) > 0:
+                current_pmi = float(pmi_data.iloc[-1])
+                return current_pmi, f"ISM PMI: {current_pmi:.1f} (source: {used_series})"
+            
+            # Fallback: Create PMI proxy using other available indicators
+            return self._estimate_pmi_from_components()
             
         except Exception as e:
-            return 50.0, f"Error calculating PMI: {e}"
+            return self._estimate_pmi_from_components()
+    
+    def _estimate_pmi_from_components(self):
+        """Estimate PMI using other economic indicators when PMI data unavailable."""
+        try:
+            # Create a composite PMI estimate using available indicators
+            pmi_estimate = 50.0  # Start at neutral (50)
+            components_used = []
+            
+            # 1. Industrial Production as production proxy (30% weight)
+            try:
+                industrial_prod = self.fetch_fred_data('INDPRO', 6)
+                if len(industrial_prod) >= 3:
+                    # Calculate 3-month growth rate
+                    recent_ip = float(industrial_prod.iloc[-1])
+                    prior_ip = float(industrial_prod.iloc[-3])
+                    ip_growth = (recent_ip - prior_ip) / prior_ip * 100
+                    
+                    # Convert to PMI-like scale: positive growth = above 50
+                    ip_contribution = 50 + (ip_growth * 10)  # Scale factor
+                    ip_contribution = max(20, min(80, ip_contribution))  # Bound it
+                    pmi_estimate += (ip_contribution - 50) * 0.3
+                    components_used.append(f"IndProd: {ip_growth:.1f}%")
+            except Exception as e:
+                pass
+            
+            # 2. Manufacturing Capacity Utilization as employment proxy (25% weight)
+            try:
+                capacity_util = self.fetch_fred_data('CUMFNS', 6)  # Manufacturing capacity utilization
+                if len(capacity_util) >= 3:
+                    recent_cap = float(capacity_util.iloc[-1])
+                    prior_cap = float(capacity_util.iloc[-3])
+                    cap_change = recent_cap - prior_cap
+                    
+                    # High capacity utilization suggests strong manufacturing activity
+                    cap_contribution = 50 + (cap_change * 5)  # Scale factor
+                    cap_contribution = max(25, min(75, cap_contribution))
+                    pmi_estimate += (cap_contribution - 50) * 0.25
+                    components_used.append(f"CapUtil: {cap_change:+.1f}pts")
+            except Exception as e:
+                pass
+            
+            # 3. New Orders proxy using durables (25% weight)
+            try:
+                new_orders = self.fetch_fred_data('DGORDER', 6)  # Durable Goods New Orders
+                if len(new_orders) >= 3:
+                    recent_orders = float(new_orders.iloc[-1])
+                    prior_orders = float(new_orders.iloc[-3])
+                    orders_growth = (recent_orders - prior_orders) / prior_orders * 100
+                    
+                    orders_contribution = 50 + (orders_growth * 5)  # Scale factor
+                    orders_contribution = max(30, min(70, orders_contribution))
+                    pmi_estimate += (orders_contribution - 50) * 0.25
+                    components_used.append(f"Orders: {orders_growth:.1f}%")
+            except Exception as e:
+                pass
+            
+            # 4. Business Confidence proxy using stock market performance (20% weight)
+            try:
+                # Use industrial ETF performance as confidence proxy
+                sp500 = self.fetch_market_data('^GSPC', 60)
+                if len(sp500) >= 20:
+                    recent_price = float(sp500.iloc[-1])
+                    avg_price = float(sp500.rolling(20).mean().iloc[-1])
+                    price_momentum = (recent_price - avg_price) / avg_price * 100
+                    
+                    # Market momentum suggests business confidence
+                    confidence_contribution = 50 + (price_momentum * 2)  # Scale factor
+                    confidence_contribution = max(35, min(65, confidence_contribution))
+                    pmi_estimate += (confidence_contribution - 50) * 0.20
+                    components_used.append(f"Market: {price_momentum:+.1f}%")
+            except Exception as e:
+                pass
+            
+            # Bound the final estimate
+            pmi_estimate = max(25, min(75, pmi_estimate))
+            
+            if components_used:
+                description = f"PMI Estimate: {pmi_estimate:.1f} (proxy: {', '.join(components_used[:2])})"
+            else:
+                description = "PMI: 50.0 (neutral estimate - no data available)"
+                pmi_estimate = 50.0
+            
+            return pmi_estimate, description
+            
+        except Exception as e:
+            return 50.0, "PMI: 50.0 (neutral fallback)"
     
     def calculate_gdp_growth(self):
         """Calculate real GDP growth rate."""
@@ -357,101 +735,187 @@ class TSPAllocationEngine:
             return 2.5, f"Core PCE: Data unavailable"
     
     def calculate_fear_greed_index(self):
-        """Calculate Fear & Greed Index - composite market sentiment indicator."""
+        """Calculate contrarian Fear & Greed Index weighted against macroeconomic fundamentals.
+        
+        Uses sentiment as contrarian indicator: High greed during weak fundamentals = major warning.
+        When greed is high but fundamentals are deteriorating, recession risk increases significantly.
+        """
         try:
-            # Initialize components
-            components = {}
+            # First calculate raw sentiment components
+            sentiment_components = {}
             
-            # 1. VIX (Market Volatility) - 20% weight
-            vix = self.fetch_market_data('^VIX', 30)
-            if len(vix) > 0:
-                current_vix = float(vix.iloc[-1])
-                # Invert VIX: Low VIX = Greed (high score), High VIX = Fear (low score)
-                vix_score = max(0, min(100, 100 - (current_vix - 10) * 2.5))
-                components['vix'] = {'score': vix_score, 'weight': 0.20, 'value': current_vix}
-            
-            # 2. S&P 500 vs 125-day Moving Average - 20% weight
+            # 1. S&P 500 vs 125-day average - 25% weight
             sp500 = self.fetch_market_data('^GSPC', 150)
             if len(sp500) >= 125:
                 current_price = float(sp500.iloc[-1])
-                ma_125 = float(sp500.rolling(125).mean().iloc[-1])
-                price_vs_ma = ((current_price - ma_125) / ma_125) * 100
-                # Above MA = Greed, Below MA = Fear
-                ma_score = max(0, min(100, 50 + price_vs_ma * 2))
-                components['sp500_ma'] = {'score': ma_score, 'weight': 0.20, 'value': price_vs_ma}
+                avg_125 = float(sp500.rolling(125).mean().iloc[-1])
+                deviation = (current_price - avg_125) / avg_125 * 100
+                momentum_score = max(0, min(100, 50 + deviation * 2))
+                sentiment_components['momentum'] = {'score': momentum_score, 'weight': 0.25, 'value': deviation}
             
-            # 3. Stock Price Momentum (50 vs 200 day MA) - 15% weight
-            if len(sp500) >= 200:
-                ma_50 = float(sp500.rolling(50).mean().iloc[-1])
-                ma_200 = float(sp500.rolling(200).mean().iloc[-1])
-                momentum = ((ma_50 - ma_200) / ma_200) * 100
-                momentum_score = max(0, min(100, 50 + momentum * 3))
-                components['momentum'] = {'score': momentum_score, 'weight': 0.15, 'value': momentum}
-            
-            # 4. High/Low Ratio (New Highs vs New Lows) - 15% weight
-            # Use S&P 500 20-day performance as proxy
-            if len(sp500) >= 20:
-                recent_high = float(sp500.rolling(20).max().iloc[-1])
-                current_price = float(sp500.iloc[-1])
-                proximity_to_high = (current_price / recent_high) * 100
-                hl_score = max(0, min(100, proximity_to_high * 1.25 - 25))
-                components['high_low'] = {'score': hl_score, 'weight': 0.15, 'value': proximity_to_high}
-            
-            # 5. Safe Haven Demand (TLT vs SPY performance) - 10% weight
-            try:
-                tlt = self.fetch_market_data('TLT', 60)  # 20+ Year Treasury ETF
-                if len(tlt) >= 20 and len(sp500) >= 20:
-                    tlt_return = ((float(tlt.iloc[-1]) - float(tlt.iloc[-20])) / float(tlt.iloc[-20])) * 100
-                    spy_return = ((float(sp500.iloc[-1]) - float(sp500.iloc[-20])) / float(sp500.iloc[-20])) * 100
-                    safe_haven_demand = spy_return - tlt_return  # Positive = risk-on, Negative = risk-off
-                    safe_haven_score = max(0, min(100, 50 + safe_haven_demand * 2))
-                    components['safe_haven'] = {'score': safe_haven_score, 'weight': 0.10, 'value': safe_haven_demand}
-            except:
-                pass
-            
-            # 6. Put/Call Ratio Proxy (VIX vs recent average) - 10% weight
-            if len(vix) >= 20:
-                vix_20d_avg = float(vix.rolling(20).mean().iloc[-1])
+            # 2. VIX vs 3-month average - 20% weight
+            vix = self.fetch_market_data('^VIX', 90)
+            if len(vix) > 0:
                 current_vix = float(vix.iloc[-1])
-                vix_vs_avg = (current_vix - vix_20d_avg) / vix_20d_avg * 100
-                # Lower than average VIX = Greed, Higher = Fear
-                putcall_score = max(0, min(100, 50 - vix_vs_avg * 2))
-                components['putcall'] = {'score': putcall_score, 'weight': 0.10, 'value': vix_vs_avg}
+                vix_avg = float(vix.mean())
+                vix_deviation = (vix_avg - current_vix) / vix_avg * 100  # Inverted: low VIX = greed
+                vix_score = max(0, min(100, 50 + vix_deviation * 2))
+                sentiment_components['vix'] = {'score': vix_score, 'weight': 0.20, 'value': current_vix}
             
-            # 7. Junk Bond Demand (Credit Spreads) - 10% weight
+            # 3. Credit Spreads (Junk Bond Demand) - 20% weight
             try:
                 spreads = self.fetch_fred_data('BAMLC0A0CM', 6)
                 if len(spreads) > 0:
                     current_spread = float(spreads.iloc[-1])
-                    # Lower spreads = more risk appetite = Greed
-                    spread_score = max(0, min(100, 100 - (current_spread - 1) * 25))
-                    components['credit'] = {'score': spread_score, 'weight': 0.10, 'value': current_spread}
+                    spread_avg = float(spreads.mean())
+                    spread_deviation = (spread_avg - current_spread) / spread_avg * 100  # Low spreads = greed
+                    spread_score = max(0, min(100, 50 + spread_deviation * 3))
+                    sentiment_components['credit'] = {'score': spread_score, 'weight': 0.20, 'value': current_spread}
             except:
                 pass
             
-            # Calculate weighted average
-            if components:
-                total_weight = sum(comp['weight'] for comp in components.values())
-                weighted_score = sum(comp['score'] * comp['weight'] for comp in components.values()) / total_weight
-                
-                # Determine sentiment level
-                if weighted_score >= 75:
-                    sentiment = "Extreme Greed"
-                elif weighted_score >= 55:
-                    sentiment = "Greed"
-                elif weighted_score >= 45:
-                    sentiment = "Neutral"
-                elif weighted_score >= 25:
-                    sentiment = "Fear"
-                else:
-                    sentiment = "Extreme Fear"
-                
-                # Store component details for reporting
-                self.fear_greed_components = components
-                
-                return weighted_score, f"Fear & Greed: {weighted_score:.0f} ({sentiment})"
+            # 4. Safe Haven Demand (TLT vs SPY performance) - 15% weight
+            try:
+                tlt = self.fetch_market_data('TLT', 60)
+                if len(tlt) >= 20 and len(sp500) >= 20:
+                    bond_return = (float(tlt.iloc[-1]) - float(tlt.iloc[-20])) / float(tlt.iloc[-20])
+                    stock_return = (float(sp500.iloc[-1]) - float(sp500.iloc[-20])) / float(sp500.iloc[-20])
+                    relative_perf = stock_return - bond_return
+                    safe_haven_score = max(0, min(100, 50 + relative_perf * 100))
+                    sentiment_components['safe_haven'] = {'score': safe_haven_score, 'weight': 0.15, 'value': relative_perf}
+            except:
+                pass
+            
+            # 5. Dollar Strength (DXY proxy via EUR/USD) - 20% weight
+            try:
+                eurusd = self.fetch_market_data('EURUSD=X', 60)
+                if len(eurusd) >= 20:
+                    current_eur = float(eurusd.iloc[-1])
+                    avg_eur = float(eurusd.rolling(60).mean().iloc[-1])
+                    dxy_strength = (avg_eur - current_eur) / current_eur * 100  # Falling EUR = stronger USD
+                    # Strong dollar can indicate risk-off sentiment
+                    dollar_score = max(0, min(100, 50 - dxy_strength * 1.5))
+                    sentiment_components['dollar'] = {'score': dollar_score, 'weight': 0.20, 'value': dxy_strength}
+            except:
+                pass
+            
+            # Calculate raw sentiment score
+            raw_sentiment = 50  # Default neutral
+            if sentiment_components:
+                total_weight = sum(comp['weight'] for comp in sentiment_components.values())
+                raw_sentiment = sum(comp['score'] * comp['weight'] for comp in sentiment_components.values()) / total_weight
+            
+            # Now get fundamental indicators for contrarian analysis
+            fundamentals_score = 50  # Start neutral
+            fundamental_warnings = []
+            
+            # Yield Curve (10Y-2Y inversion)
+            try:
+                ten_year = self.fetch_fred_data('DGS10', 3)
+                two_year = self.fetch_fred_data('DGS2', 3)
+                if len(ten_year) > 0 and len(two_year) > 0:
+                    curve_spread = float(ten_year.iloc[-1]) - float(two_year.iloc[-1])
+                    if curve_spread < 0:
+                        fundamentals_score -= 15
+                        fundamental_warnings.append("Yield curve inverted")
+                    elif curve_spread < 0.5:
+                        fundamentals_score -= 8
+                        fundamental_warnings.append("Yield curve flattening")
+            except:
+                pass
+            
+            # Unemployment trend (Sahm Rule)
+            try:
+                unemployment = self.fetch_fred_data('UNRATE', 12)
+                if len(unemployment) >= 6:
+                    current_rate = float(unemployment.iloc[-1])
+                    min_rate_3m = float(unemployment.iloc[-3:].min())
+                    sahm_indicator = current_rate - min_rate_3m
+                    if sahm_indicator >= 0.5:
+                        fundamentals_score -= 20
+                        fundamental_warnings.append(f"Sahm Rule triggered ({sahm_indicator:.2f})")
+                    elif sahm_indicator >= 0.3:
+                        fundamentals_score -= 10
+                        fundamental_warnings.append("Unemployment rising rapidly")
+            except:
+                pass
+            
+            # PMI manufacturing data
+            try:
+                pmi = self.fetch_fred_data('NAPM', 6)
+                if len(pmi) > 0:
+                    current_pmi = float(pmi.iloc[-1])
+                    if current_pmi < 48:
+                        fundamentals_score -= 15
+                        fundamental_warnings.append(f"Manufacturing contracting (PMI {current_pmi:.1f})")
+                    elif current_pmi < 50:
+                        fundamentals_score -= 8
+                        fundamental_warnings.append("Manufacturing weakening")
+            except:
+                pass
+            
+            # Consumer confidence
+            try:
+                confidence = self.fetch_fred_data('UMCSENT', 6)
+                if len(confidence) >= 3:
+                    current_conf = float(confidence.iloc[-1])
+                    prior_conf = float(confidence.iloc[-3])
+                    conf_change = (current_conf - prior_conf) / prior_conf * 100
+                    if conf_change < -10:
+                        fundamentals_score -= 10
+                        fundamental_warnings.append("Consumer confidence falling")
+            except:
+                pass
+            
+            # Corporate earnings trend (simulate with sector performance)
+            try:
+                if len(sp500) >= 60:
+                    recent_return = (float(sp500.iloc[-1]) - float(sp500.iloc[-60])) / float(sp500.iloc[-60]) * 100
+                    if recent_return < -5:
+                        fundamentals_score -= 8
+                        fundamental_warnings.append("Equity performance declining")
+            except:
+                pass
+            
+            # CONTRARIAN LOGIC: High greed + weak fundamentals = major warning
+            if raw_sentiment >= 70 and fundamentals_score <= 40:
+                # Extreme greed with deteriorating fundamentals
+                contrarian_adjustment = -30
+                warning_level = "EXTREME WARNING"
+            elif raw_sentiment >= 60 and fundamentals_score <= 45:
+                # High greed with weak fundamentals  
+                contrarian_adjustment = -20
+                warning_level = "HIGH WARNING"
+            elif raw_sentiment >= 55 and fundamentals_score <= 50:
+                # Moderate greed with declining fundamentals
+                contrarian_adjustment = -10
+                warning_level = "CAUTION"
+            elif raw_sentiment <= 30 and fundamentals_score >= 60:
+                # Fear with strong fundamentals = potential opportunity
+                contrarian_adjustment = +15
+                warning_level = "POTENTIAL OPPORTUNITY"
+            elif raw_sentiment <= 25 and fundamentals_score >= 55:
+                # Extreme fear with decent fundamentals = opportunity
+                contrarian_adjustment = +20
+                warning_level = "STRONG OPPORTUNITY"
             else:
-                return 50.0, "Fear & Greed: Data unavailable"
+                contrarian_adjustment = 0
+                warning_level = "ALIGNED"
+            
+            # Final contrarian score
+            final_score = max(0, min(100, raw_sentiment + contrarian_adjustment))
+            
+            # Store detailed analysis
+            self.fear_greed_components = sentiment_components
+            self.fundamental_warnings = fundamental_warnings
+            self.contrarian_analysis = {
+                'raw_sentiment': raw_sentiment,
+                'fundamentals_score': fundamentals_score,
+                'contrarian_adjustment': contrarian_adjustment,
+                'warning_level': warning_level
+            }
+            
+            return final_score, f"Contrarian F&G: {final_score:.0f} (Raw: {raw_sentiment:.0f}, Fund: {fundamentals_score:.0f}, {warning_level})"
                 
         except Exception as e:
             return 50.0, f"Fear & Greed: Error calculating - {e}"

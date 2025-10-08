@@ -163,14 +163,26 @@
             </div>
             <div class="col-lg-6 mb-4">
                 <div class="chart-container">
-                    <h3 class="text-center mb-3">Bond vs Recession Analysis</h3>
-                    <img src="data:image/png;base64,{{ charts.bond_vs_recession }}" class="img-fluid" alt="Bond vs Recession Chart">
+                    <h3 class="text-center mb-3">Enhanced Sahm Rule Analysis</h3>
+                    {% if charts.enhanced_sahm %}
+                    <img src="data:image/png;base64,{{ charts.enhanced_sahm }}" class="img-fluid" alt="Enhanced Sahm Rule Chart">
+                    {% else %}
+                    <div class="text-center p-4">
+                        <p class="text-muted">Enhanced Sahm Rule data not available</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-12 mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h3 class="text-center mb-3">Bond vs Recession Analysis</h3>
+                    <img src="data:image/png;base64,{{ charts.bond_vs_recession }}" class="img-fluid" alt="Bond vs Recession Chart">
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
                 <div class="chart-container">
                     <h3 class="text-center mb-3">Risk Factor Contributions</h3>
                     <img src="data:image/png;base64,{{ charts.risk_factors }}" class="img-fluid" alt="Risk Factors Chart">
