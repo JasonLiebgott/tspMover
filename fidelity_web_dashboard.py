@@ -38,8 +38,13 @@ class FidelityFund:
         self.score = 0
 
 class FidelityDashboard:
-    def __init__(self):
-        """Initialize the Fidelity fund analysis dashboard."""
+    def __init__(self, timeframe_years=3):
+        """Initialize the Fidelity fund analysis dashboard.
+        
+        Args:
+            timeframe_years (int): Investment timeframe in years (1, 2, 3, 5, 10+)
+        """
+        self.timeframe_years = timeframe_years
         self.economic_engine = TSPAllocationEngine()
         self.funds = self._initialize_funds()
         self.money_market_rate = self._get_fdrxx_yield()  # FDRXX money market yield
@@ -345,21 +350,99 @@ class FidelityDashboard:
         # Base score from risk-adjusted excess return
         base_score = metrics['excess_return'] + metrics['sharpe_ratio'] * 10
         
-        # Penalty for high volatility
-        volatility_penalty = max(0, metrics['volatility'] - 15) * 0.5
+        # Timeframe-based adjustments
+        timeframe_adjustment = self._get_timeframe_adjustment(fund)
         
-        # Penalty for large drawdowns
-        drawdown_penalty = abs(metrics['max_drawdown']) * 0.3
+        # Penalty for high volatility (adjusted by timeframe)
+        volatility_penalty = max(0, metrics['volatility'] - 15) * self._get_volatility_penalty_factor()
+        
+        # Penalty for large drawdowns (adjusted by timeframe)
+        drawdown_penalty = abs(metrics['max_drawdown']) * self._get_drawdown_penalty_factor()
         
         # Economic condition adjustments
         condition_adjustment = metrics['total_adjustment']
         
-        # Expense ratio penalty (annual)
-        expense_penalty = fund.expense_ratio * 100
+        # Expense ratio penalty (annual, but adjusted for timeframe importance)
+        expense_penalty = fund.expense_ratio * 100 * self._get_expense_penalty_factor()
         
-        final_score = base_score - volatility_penalty - drawdown_penalty + condition_adjustment - expense_penalty
+        final_score = (base_score + timeframe_adjustment - volatility_penalty - 
+                      drawdown_penalty + condition_adjustment - expense_penalty)
         
         return final_score
+    
+    def _get_timeframe_adjustment(self, fund):
+        """Get timeframe-based scoring adjustments."""
+        # Timeframe categories and their risk preferences
+        if self.timeframe_years <= 1:
+            # 1 year: Heavily favor low volatility, bonds, money market alternatives
+            if fund.category in ['Bond', 'Treasury', 'Total Market']:
+                return 5  # Bonus for safer options
+            elif fund.category in ['Technology', 'Small Cap', 'Emerging Markets']:
+                return -10  # Penalty for high-risk
+            elif 'Dividend' in fund.category:
+                return 3  # Moderate bonus for dividend funds
+            return 0
+            
+        elif self.timeframe_years <= 2:
+            # 2 years: Moderate risk tolerance
+            if fund.category in ['Large Cap', 'Dividend', 'Total Market']:
+                return 3
+            elif fund.category in ['Technology', 'Small Cap']:
+                return -5
+            elif fund.category in ['Emerging Markets']:
+                return -8
+            return 0
+            
+        elif self.timeframe_years <= 5:
+            # 3-5 years: Balanced approach
+            if fund.category in ['Large Cap', 'Total Market']:
+                return 2
+            elif fund.category in ['Small Cap', 'Technology']:
+                return -2
+            elif fund.category in ['Emerging Markets']:
+                return -3
+            return 0
+            
+        else:
+            # 10+ years: Can handle higher volatility for growth
+            if fund.category in ['Small Cap', 'Technology', 'Emerging Markets']:
+                return 3  # Bonus for growth potential
+            elif fund.category in ['Total Market', 'Large Cap']:
+                return 1
+            return 0
+    
+    def _get_volatility_penalty_factor(self):
+        """Get volatility penalty factor based on timeframe."""
+        if self.timeframe_years <= 1:
+            return 1.5  # Heavy penalty for volatility in short term
+        elif self.timeframe_years <= 2:
+            return 1.0  # Moderate penalty
+        elif self.timeframe_years <= 5:
+            return 0.5  # Reduced penalty
+        else:
+            return 0.2  # Minimal penalty for long term
+    
+    def _get_drawdown_penalty_factor(self):
+        """Get drawdown penalty factor based on timeframe."""
+        if self.timeframe_years <= 1:
+            return 0.8  # High penalty for drawdowns
+        elif self.timeframe_years <= 2:
+            return 0.5  # Moderate penalty
+        elif self.timeframe_years <= 5:
+            return 0.3  # Reduced penalty
+        else:
+            return 0.1  # Low penalty for long term
+    
+    def _get_expense_penalty_factor(self):
+        """Get expense ratio penalty factor based on timeframe."""
+        if self.timeframe_years <= 1:
+            return 0.5  # Lower impact of expenses for short term
+        elif self.timeframe_years <= 2:
+            return 0.7
+        elif self.timeframe_years <= 5:
+            return 1.0  # Standard impact
+        else:
+            return 1.5  # Higher impact for long term (compound effect)
     
     def categorize_funds(self):
         """Categorize funds into good, neutral, bad based on scores."""
@@ -377,6 +460,45 @@ class FidelityDashboard:
         self.recommendations['good'] = [fund for fund, score in scored_funds[:good_threshold]]
         self.recommendations['neutral'] = [fund for fund, score in scored_funds[good_threshold:bad_threshold]]
         self.recommendations['bad'] = [fund for fund, score in scored_funds[bad_threshold:]]
+    
+    def get_timeframe_strategy(self):
+        """Get investment strategy recommendations based on timeframe."""
+        if self.timeframe_years <= 1:
+            return {
+                'title': '1 Year Investment Horizon',
+                'strategy': 'Capital Preservation',
+                'description': 'Focus on low volatility and capital preservation. Avoid high-risk growth funds.',
+                'risk_tolerance': 'Very Low',
+                'recommended_allocation': 'Money Market (60%), Bonds (30%), Large Cap (10%)',
+                'avoid': 'Small Cap, Technology, Emerging Markets, High Volatility Funds'
+            }
+        elif self.timeframe_years <= 2:
+            return {
+                'title': '2 Year Investment Horizon',
+                'strategy': 'Conservative Growth',
+                'description': 'Moderate risk with focus on stability and modest growth.',
+                'risk_tolerance': 'Low to Moderate',
+                'recommended_allocation': 'Large Cap (40%), Bonds (30%), Total Market (20%), Dividend (10%)',
+                'avoid': 'High volatility sectors, Emerging Markets'
+            }
+        elif self.timeframe_years <= 5:
+            return {
+                'title': '3-5 Year Investment Horizon',
+                'strategy': 'Balanced Growth',
+                'description': 'Balanced approach allowing for market cycles while maintaining reasonable risk.',
+                'risk_tolerance': 'Moderate',
+                'recommended_allocation': 'Total Market (50%), Large Cap (20%), International (15%), Small Cap (10%), Bonds (5%)',
+                'avoid': 'Excessive concentration in volatile sectors'
+            }
+        else:
+            return {
+                'title': '10+ Year Investment Horizon',
+                'strategy': 'Growth Focused',
+                'description': 'Long-term growth strategy that can weather volatility for higher returns.',
+                'risk_tolerance': 'Moderate to High',
+                'recommended_allocation': 'Total Market (40%), Small Cap (20%), Technology (15%), International (15%), Emerging Markets (10%)',
+                'avoid': 'Over-allocation to bonds or conservative funds'
+            }
     
     def generate_charts(self):
         """Generate all dashboard charts."""
@@ -752,17 +874,26 @@ class FidelityDashboard:
             return False
 
 # Create global dashboard instance
-dashboard = FidelityDashboard()
+dashboard = None
 
 @app.route('/')
 def index():
     """Main dashboard page."""
+    global dashboard
+    
+    # Get timeframe from query parameter (default to 3 years)
+    timeframe = request.args.get('timeframe', 3, type=int)
+    
+    # Create new dashboard instance with timeframe
+    dashboard = FidelityDashboard(timeframe_years=timeframe)
+    
     success = dashboard.generate_data()
     if not success:
         return "Error generating dashboard data", 500
     
     return render_template('fidelity_dashboard.html', 
-                         dashboard=dashboard)
+                         dashboard=dashboard,
+                         timeframe_strategy=dashboard.get_timeframe_strategy())
 
 @app.route('/fund/<symbol>')
 def fund_detail(symbol):

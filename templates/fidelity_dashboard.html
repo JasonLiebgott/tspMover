@@ -98,6 +98,49 @@
     </div>
 
     <div class="container-fluid">
+        <!-- Timeframe Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="mb-0"><i class="fas fa-clock"></i> {{ timeframe_strategy.title }}</h5>
+                                <p class="mb-0 text-muted">{{ timeframe_strategy.description }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <label for="timeframe" class="form-label">Investment Timeframe:</label>
+                                        <div class="input-group">
+                                            <select class="form-select" id="timeframe" onchange="updateTimeframe()">
+                                                <option value="1" {% if dashboard.timeframe_years == 1 %}selected{% endif %}>1 Year</option>
+                                                <option value="2" {% if dashboard.timeframe_years == 2 %}selected{% endif %}>2 Years</option>
+                                                <option value="3" {% if dashboard.timeframe_years == 3 %}selected{% endif %}>3 Years</option>
+                                                <option value="5" {% if dashboard.timeframe_years == 5 %}selected{% endif %}>5 Years</option>
+                                                <option value="10" {% if dashboard.timeframe_years == 10 %}selected{% endif %}>10+ Years</option>
+                                            </select>
+                                            <button class="btn btn-outline-primary" type="button" onclick="updateTimeframe()" title="Refresh Analysis">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle"></i> Changing timeframe automatically updates all fund rankings and recommendations
+                                        </small>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <small class="text-muted">
+                                            <strong>Strategy:</strong> {{ timeframe_strategy.strategy }}<br>
+                                            <strong>Risk Tolerance:</strong> {{ timeframe_strategy.risk_tolerance }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Economic Conditions Summary -->
         <div class="row mb-4">
             <div class="col-12">
@@ -180,6 +223,36 @@
                         <h3 class="text-danger">{{ dashboard.recommendations.bad|length }}</h3>
                         <p class="mb-0"><i class="fas fa-thumbs-down"></i> Avoid</p>
                         <small class="text-muted">High risk/low return</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeframe Strategy Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-bullseye"></i> Investment Strategy for {{ timeframe_strategy.title }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-chart-pie"></i> Recommended Allocation:</h6>
+                                <p class="mb-2">{{ timeframe_strategy.recommended_allocation }}</p>
+                                
+                                <h6><i class="fas fa-exclamation-triangle"></i> Avoid:</h6>
+                                <p class="text-warning">{{ timeframe_strategy.avoid }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle"></i> Strategy Notes:</h6>
+                                    <p class="mb-0">{{ timeframe_strategy.description }}</p>
+                                    <hr>
+                                    <small><strong>Risk Level:</strong> {{ timeframe_strategy.risk_tolerance }}</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -457,6 +530,36 @@
             
             // Initialize tooltips if needed
             console.log('Fidelity Dashboard loaded');
+        });
+        
+        // Timeframe update function
+        function updateTimeframe() {
+            const timeframe = document.getElementById('timeframe').value;
+            const refreshBtn = document.querySelector('button[onclick="updateTimeframe()"]');
+            
+            // Show loading indicator
+            if (refreshBtn) {
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                refreshBtn.disabled = true;
+            }
+            
+            // Add a small delay to show loading indicator
+            setTimeout(() => {
+                window.location.href = `/?timeframe=${timeframe}`;
+            }, 200);
+        }
+        
+        // Add visual feedback when dropdown changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeframeSelect = document.getElementById('timeframe');
+            if (timeframeSelect) {
+                timeframeSelect.addEventListener('change', function() {
+                    this.style.backgroundColor = '#e3f2fd';
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                    }, 300);
+                });
+            }
         });
     </script>
 </body>
