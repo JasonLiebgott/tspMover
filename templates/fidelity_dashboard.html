@@ -705,19 +705,19 @@
                                                             <div class="col-md-6">
                                                                 <div class="text-center p-3 border rounded">
                                                                     <h6 class="mb-1">Traditional Risk Level</h6>
-                                                                    <div class="h3 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_score_10 <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_score_10 <= 6 else 'text-danger' }}">
-                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_score_10) }}/10
+                                                                    <div class="h3 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.baseline_scale['base_score_10'] <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.baseline_scale['base_score_10'] <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.baseline_scale['base_score_10']) }}/10
                                                                     </div>
-                                                                    <div class="small font-weight-bold">{{ dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_label }}</div>
+                                                                    <div class="small font-weight-bold">{{ dashboard.economic_data.enhanced_recession_risk.baseline_scale['base_label'] }}</div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="text-center p-3 border rounded">
                                                                     <h6 class="mb-1">Enhanced Risk Level</h6>
-                                                                    <div class="h3 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_score_10 <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_score_10 <= 6 else 'text-danger' }}">
-                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_score_10) }}/10
+                                                                    <div class="h3 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.baseline_scale['enhanced_score_10'] <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.baseline_scale['enhanced_score_10'] <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.baseline_scale['enhanced_score_10']) }}/10
                                                                     </div>
-                                                                    <div class="small font-weight-bold">{{ dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_label }}</div>
+                                                                    <div class="small font-weight-bold">{{ dashboard.economic_data.enhanced_recession_risk.baseline_scale['enhanced_label'] }}</div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -749,6 +749,166 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Component Baselines Section -->
+                                        {% if dashboard.economic_data.enhanced_recession_risk.component_baselines %}
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <div class="card border-info">
+                                                    <div class="card-header bg-info bg-opacity-10">
+                                                        <h6 class="mb-0 text-info">
+                                                            <i class="fas fa-gauge"></i> Enhanced Analysis Component Baselines
+                                                        </h6>
+                                                        <small class="text-muted">Individual risk factors on 0-10 baseline scale</small>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <!-- Employment Risk -->
+                                                            <div class="col-md-4">
+                                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['score'] <= 3 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['score'] <= 6 else 'bg-danger bg-opacity-10' }}">
+                                                                    <h6 class="mb-1">Employment Risk</h6>
+                                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['score'] <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['score'] <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['score']) }}/10
+                                                                    </div>
+                                                                    <div class="small fw-bold">{{ dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['risk_level'] }}</div>
+                                                                    <div class="small text-muted mt-1">{{ dashboard.economic_data.enhanced_recession_risk.component_baselines['employment']['label'] }}</div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <!-- Investment Flows Risk -->
+                                                            <div class="col-md-4">
+                                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['score'] <= 3 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['score'] <= 6 else 'bg-danger bg-opacity-10' }}">
+                                                                    <h6 class="mb-1">Investment Flows Risk</h6>
+                                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['score'] <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['score'] <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['score']) }}/10
+                                                                    </div>
+                                                                    <div class="small fw-bold">{{ dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['risk_level'] }}</div>
+                                                                    <div class="small text-muted mt-1">{{ dashboard.economic_data.enhanced_recession_risk.component_baselines['investment_flows']['label'] }}</div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <!-- Consumer Sentiment Risk -->
+                                                            <div class="col-md-4">
+                                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['score'] <= 3 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['score'] <= 6 else 'bg-danger bg-opacity-10' }}">
+                                                                    <h6 class="mb-1">Consumer Sentiment Risk</h6>
+                                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['score'] <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['score'] <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['score']) }}/10
+                                                                    </div>
+                                                                    <div class="small fw-bold">{{ dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['risk_level'] }}</div>
+                                                                    <div class="small text-muted mt-1">{{ dashboard.economic_data.enhanced_recession_risk.component_baselines['consumer_sentiment']['label'] }}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3">
+                                                            <div class="alert alert-light">
+                                                                <h6 class="mb-2"><i class="fas fa-info-circle text-info"></i> Component Baseline Scale Guide</h6>
+                                                                <div class="row small">
+                                                                    <div class="col-md-4">
+                                                                        <span class="badge bg-success me-2">0-3</span><strong>Low Risk:</strong> Full Growth to Moderate Growth conditions
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <span class="badge bg-warning me-2">4-6</span><strong>Moderate Risk:</strong> Caution to High Risk conditions
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <span class="badge bg-danger me-2">7-10</span><strong>High Risk:</strong> Very High Risk to 5-Alarm Fire conditions
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Economic Indicator Baselines Section -->
+                                        {% if dashboard.economic_data.enhanced_recession_risk.indicator_baselines %}
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <div class="card border-primary">
+                                                    <div class="card-header bg-primary bg-opacity-10">
+                                                        <h6 class="mb-0 text-primary">
+                                                            <i class="fas fa-chart-line"></i> Economic Indicator Baselines
+                                                        </h6>
+                                                        <small class="text-muted">All 11 key recession indicators on 0-10 baseline scale</small>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            {% for indicator_name, indicator_data in dashboard.economic_data.enhanced_recession_risk.indicator_baselines.items() %}
+                                                            <div class="col-md-4 col-lg-3 mb-3">
+                                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if indicator_data.score <= 3 else 'bg-warning bg-opacity-10' if indicator_data.score <= 6 else 'bg-danger bg-opacity-10' }}">
+                                                                    <h6 class="mb-1 small">
+                                                                        {% if indicator_name == 'sahm_rule' %}
+                                                                            Sahm Rule
+                                                                        {% elif indicator_name == 'yield_curve' %}
+                                                                            10Y-3M Spread
+                                                                        {% elif indicator_name == 'labor_market' %}
+                                                                            Labor Market
+                                                                        {% elif indicator_name == 'lei_index' %}
+                                                                            LEI Index
+                                                                        {% elif indicator_name == 'pmi' %}
+                                                                            PMI
+                                                                        {% elif indicator_name == 'gdp_growth' %}
+                                                                            GDP Growth
+                                                                        {% elif indicator_name == 'sp500_ma200' %}
+                                                                            S&P vs MA200
+                                                                        {% elif indicator_name == 'fear_greed' %}
+                                                                            Fear & Greed
+                                                                        {% elif indicator_name == 'vix' %}
+                                                                            VIX Level
+                                                                        {% elif indicator_name == 'credit_spreads' %}
+                                                                            Credit Spreads
+                                                                        {% elif indicator_name == 'core_pce' %}
+                                                                            Core PCE
+                                                                        {% else %}
+                                                                            {{ indicator_name.title().replace('_', ' ') }}
+                                                                        {% endif %}
+                                                                    </h6>
+                                                                    <div class="h5 mb-1 {{ 'text-success' if indicator_data.score <= 3 else 'text-warning' if indicator_data.score <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(indicator_data.score) }}/10
+                                                                    </div>
+                                                                    <div class="small fw-bold">{{ indicator_data.risk_level }}</div>
+                                                                    <div class="small text-muted mt-1">
+                                                                        {% if indicator_name in ['yield_curve', 'gdp_growth', 'sp500_ma200'] %}
+                                                                            {{ "%.1f"|format(indicator_data.value) }}%
+                                                                        {% elif indicator_name in ['sahm_rule', 'lei_index', 'credit_spreads', 'core_pce'] %}
+                                                                            {{ "%.1f"|format(indicator_data.value) }}%
+                                                                        {% elif indicator_name == 'labor_market' %}
+                                                                            {{ "{:,}".format(indicator_data.value|int) }}
+                                                                        {% else %}
+                                                                            {{ "%.1f"|format(indicator_data.value) }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        
+                                                        <div class="mt-3">
+                                                            <div class="alert alert-light">
+                                                                <h6 class="mb-2"><i class="fas fa-info-circle text-primary"></i> Economic Indicator Baseline Scale Guide</h6>
+                                                                <div class="row small">
+                                                                    <div class="col-md-4">
+                                                                        <span class="badge bg-success me-2">0-3</span><strong>Low Risk:</strong> Conditions favorable for growth assets
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <span class="badge bg-warning me-2">4-6</span><strong>Moderate Risk:</strong> Mixed signals requiring caution
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <span class="badge bg-danger me-2">7-10</span><strong>High Risk:</strong> Recession warning signals
+                                                                    </div>
+                                                                </div>
+                                                                <div class="mt-2 small text-muted">
+                                                                    Each indicator is scored based on historical recession probability thresholds.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
 
                                         <!-- Economic Metrics Breakdown -->
                                         <div class="accordion" id="recessionAnalysisAccordion">

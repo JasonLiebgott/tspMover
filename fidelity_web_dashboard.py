@@ -609,6 +609,113 @@ class FidelityDashboard:
         flows_baseline = self._get_investment_flows_baseline_score(investment_flows)
         consumer_baseline = self._get_consumer_baseline_score(consumer_signals)
         
+        # Calculate baseline scores for all economic indicators from TSP engine
+        indicator_baselines = {}
+        
+        # Get TSP engine metric values
+        try:
+            # Sahm Rule
+            sahm_value = getattr(self.economic_engine, 'sahm_rule_current', 0.2)
+            indicator_baselines['sahm_rule'] = {
+                'score': self._get_sahm_baseline_score(sahm_value),
+                'value': sahm_value,
+                'label': self._get_baseline_label(self._get_sahm_baseline_score(sahm_value)),
+                'risk_level': 'High' if self._get_sahm_baseline_score(sahm_value) >= 7 else 'Moderate' if self._get_sahm_baseline_score(sahm_value) >= 4 else 'Low'
+            }
+            
+            # Yield Curve (10Y-3M)
+            yield_spread = getattr(self.economic_engine, 'yield_curve_spread', 0.12)
+            indicator_baselines['yield_curve'] = {
+                'score': self._get_yield_curve_baseline_score(yield_spread),
+                'value': yield_spread,
+                'label': self._get_baseline_label(self._get_yield_curve_baseline_score(yield_spread)),
+                'risk_level': 'High' if self._get_yield_curve_baseline_score(yield_spread) >= 7 else 'Moderate' if self._get_yield_curve_baseline_score(yield_spread) >= 4 else 'Low'
+            }
+            
+            # Enhanced Labor Market
+            enhanced_labor = getattr(self.economic_engine, 'enhanced_labor_market', 349692)
+            indicator_baselines['labor_market'] = {
+                'score': self._get_labor_market_baseline_score(enhanced_labor),
+                'value': enhanced_labor,
+                'label': self._get_baseline_label(self._get_labor_market_baseline_score(enhanced_labor)),
+                'risk_level': 'High' if self._get_labor_market_baseline_score(enhanced_labor) >= 7 else 'Moderate' if self._get_labor_market_baseline_score(enhanced_labor) >= 4 else 'Low'
+            }
+            
+            # LEI (Leading Economic Index)
+            lei_value = getattr(self.economic_engine, 'lei_estimate', -0.3)
+            indicator_baselines['lei_index'] = {
+                'score': self._get_lei_baseline_score(lei_value),
+                'value': lei_value,
+                'label': self._get_baseline_label(self._get_lei_baseline_score(lei_value)),
+                'risk_level': 'High' if self._get_lei_baseline_score(lei_value) >= 7 else 'Moderate' if self._get_lei_baseline_score(lei_value) >= 4 else 'Low'
+            }
+            
+            # PMI (Purchasing Managers Index)
+            pmi_value = getattr(self.economic_engine, 'pmi_estimate', 49.6)
+            indicator_baselines['pmi'] = {
+                'score': self._get_pmi_baseline_score(pmi_value),
+                'value': pmi_value,
+                'label': self._get_baseline_label(self._get_pmi_baseline_score(pmi_value)),
+                'risk_level': 'High' if self._get_pmi_baseline_score(pmi_value) >= 7 else 'Moderate' if self._get_pmi_baseline_score(pmi_value) >= 4 else 'Low'
+            }
+            
+            # GDP Growth
+            gdp_growth = getattr(self.economic_engine, 'gdp_growth_rate', 3.8)
+            indicator_baselines['gdp_growth'] = {
+                'score': self._get_gdp_baseline_score(gdp_growth),
+                'value': gdp_growth,
+                'label': self._get_baseline_label(self._get_gdp_baseline_score(gdp_growth)),
+                'risk_level': 'High' if self._get_gdp_baseline_score(gdp_growth) >= 7 else 'Moderate' if self._get_gdp_baseline_score(gdp_growth) >= 4 else 'Low'
+            }
+            
+            # S&P 500 vs MA200
+            sp500_vs_ma = getattr(self.economic_engine, 'sp500_vs_ma200', 11.4)
+            indicator_baselines['sp500_ma200'] = {
+                'score': self._get_sp500_baseline_score(sp500_vs_ma),
+                'value': sp500_vs_ma,
+                'label': self._get_baseline_label(self._get_sp500_baseline_score(sp500_vs_ma)),
+                'risk_level': 'High' if self._get_sp500_baseline_score(sp500_vs_ma) >= 7 else 'Moderate' if self._get_sp500_baseline_score(sp500_vs_ma) >= 4 else 'Low'
+            }
+            
+            # Fear & Greed Index
+            fear_greed = getattr(self.economic_engine, 'contrarian_fear_greed', 52)
+            indicator_baselines['fear_greed'] = {
+                'score': self._get_fear_greed_baseline_score(fear_greed),
+                'value': fear_greed,
+                'label': self._get_baseline_label(self._get_fear_greed_baseline_score(fear_greed)),
+                'risk_level': 'High' if self._get_fear_greed_baseline_score(fear_greed) >= 7 else 'Moderate' if self._get_fear_greed_baseline_score(fear_greed) >= 4 else 'Low'
+            }
+            
+            # VIX Level
+            vix_level = getattr(self.economic_engine, 'vix_level', 16.4)
+            indicator_baselines['vix'] = {
+                'score': self._get_vix_baseline_score(vix_level),
+                'value': vix_level,
+                'label': self._get_baseline_label(self._get_vix_baseline_score(vix_level)),
+                'risk_level': 'High' if self._get_vix_baseline_score(vix_level) >= 7 else 'Moderate' if self._get_vix_baseline_score(vix_level) >= 4 else 'Low'
+            }
+            
+            # IG Credit Spreads
+            credit_spreads = getattr(self.economic_engine, 'ig_credit_spreads', 0.75)
+            indicator_baselines['credit_spreads'] = {
+                'score': self._get_credit_baseline_score(credit_spreads),
+                'value': credit_spreads,
+                'label': self._get_baseline_label(self._get_credit_baseline_score(credit_spreads)),
+                'risk_level': 'High' if self._get_credit_baseline_score(credit_spreads) >= 7 else 'Moderate' if self._get_credit_baseline_score(credit_spreads) >= 4 else 'Low'
+            }
+            
+            # Core PCE Inflation
+            core_pce = getattr(self.economic_engine, 'core_pce_rate', 2.9)
+            indicator_baselines['core_pce'] = {
+                'score': self._get_pce_baseline_score(core_pce),
+                'value': core_pce,
+                'label': self._get_baseline_label(self._get_pce_baseline_score(core_pce)),
+                'risk_level': 'High' if self._get_pce_baseline_score(core_pce) >= 7 else 'Moderate' if self._get_pce_baseline_score(core_pce) >= 4 else 'Low'
+            }
+            
+        except Exception as e:
+            print(f"Error calculating indicator baselines: {e}")
+        
         return {
             'enhanced_score': enhanced_score,
             'base_score': base_score,
@@ -644,7 +751,9 @@ class FidelityDashboard:
                     'label': self._get_baseline_label(consumer_baseline),
                     'risk_level': 'High' if consumer_baseline >= 7 else 'Moderate' if consumer_baseline >= 4 else 'Low'
                 }
-            }
+            },
+            # All economic indicator baselines (0-10 scale)
+            'indicator_baselines': indicator_baselines
         }
     
     def _convert_to_baseline_scale(self, score_100):
@@ -816,6 +925,158 @@ class FidelityDashboard:
             score += 0.3  # Unknown default
         
         return min(10, score)
+    
+    def _get_sahm_baseline_score(self, sahm_value):
+        """Convert Sahm Rule value to 0-10 baseline score."""
+        if sahm_value >= 0.5:
+            return 10.0  # Recession signal
+        elif sahm_value >= 0.3:
+            return 7.0   # High warning
+        elif sahm_value >= 0.2:
+            return 4.0   # Moderate concern
+        elif sahm_value >= 0.1:
+            return 2.0   # Slight concern
+        else:
+            return 0.0   # Low risk
+    
+    def _get_yield_curve_baseline_score(self, spread_value):
+        """Convert 10Y-3M yield spread to 0-10 baseline score."""
+        if spread_value <= 0.0:
+            return 10.0  # Inverted - high recession risk
+        elif spread_value <= 0.5:
+            return 8.0   # Very flat
+        elif spread_value <= 1.0:
+            return 6.0   # Flat
+        elif spread_value <= 1.5:
+            return 3.0   # Slightly flat
+        else:
+            return 0.0   # Normal/steep
+    
+    def _get_labor_market_baseline_score(self, enhanced_labor_value):
+        """Convert Enhanced Labor Market value to 0-10 baseline score."""
+        # Based on equivalent claims level
+        if enhanced_labor_value >= 450000:
+            return 10.0  # Crisis level
+        elif enhanced_labor_value >= 400000:
+            return 7.0   # High stress
+        elif enhanced_labor_value >= 375000:
+            return 5.0   # Moderate stress
+        elif enhanced_labor_value >= 350000:
+            return 3.0   # Some stress
+        else:
+            return 0.0   # Low stress
+    
+    def _get_lei_baseline_score(self, lei_value):
+        """Convert LEI (Leading Economic Index) to 0-10 baseline score."""
+        if lei_value <= -3.0:
+            return 10.0  # Severe contraction
+        elif lei_value <= -1.0:
+            return 7.0   # Significant decline
+        elif lei_value <= -0.5:
+            return 5.0   # Moderate decline
+        elif lei_value <= 0.0:
+            return 3.0   # Slight decline
+        elif lei_value <= 1.0:
+            return 1.0   # Weak growth
+        else:
+            return 0.0   # Strong growth
+    
+    def _get_pmi_baseline_score(self, pmi_value):
+        """Convert PMI (Purchasing Managers Index) to 0-10 baseline score."""
+        if pmi_value <= 45.0:
+            return 10.0  # Severe contraction
+        elif pmi_value <= 48.0:
+            return 7.0   # Contraction
+        elif pmi_value <= 50.0:
+            return 5.0   # Weak/neutral
+        elif pmi_value <= 52.0:
+            return 2.0   # Modest expansion
+        else:
+            return 0.0   # Strong expansion
+    
+    def _get_gdp_baseline_score(self, gdp_value):
+        """Convert GDP growth to 0-10 baseline score."""
+        if gdp_value <= -1.0:
+            return 10.0  # Recession
+        elif gdp_value <= 0.0:
+            return 7.0   # Contraction
+        elif gdp_value <= 1.0:
+            return 5.0   # Weak growth
+        elif gdp_value <= 2.0:
+            return 3.0   # Below trend
+        elif gdp_value <= 2.5:
+            return 1.0   # Trend growth
+        else:
+            return 0.0   # Strong growth
+    
+    def _get_sp500_baseline_score(self, sp500_vs_ma200):
+        """Convert S&P 500 vs MA200 to 0-10 baseline score."""
+        if sp500_vs_ma200 <= -20.0:
+            return 10.0  # Bear market
+        elif sp500_vs_ma200 <= -10.0:
+            return 7.0   # Significant decline
+        elif sp500_vs_ma200 <= -5.0:
+            return 5.0   # Moderate decline
+        elif sp500_vs_ma200 <= 0.0:
+            return 3.0   # Below trend
+        else:
+            return 0.0   # Above trend
+    
+    def _get_fear_greed_baseline_score(self, fear_greed_value):
+        """Convert Contrarian Fear & Greed to 0-10 baseline score."""
+        if fear_greed_value <= 20:
+            return 0.0   # Extreme fear - contrarian bullish
+        elif fear_greed_value <= 40:
+            return 2.0   # Fear - good for contrarian
+        elif fear_greed_value <= 60:
+            return 5.0   # Neutral - caution
+        elif fear_greed_value <= 80:
+            return 7.0   # Greed - warning
+        else:
+            return 10.0  # Extreme greed - contrarian bearish
+    
+    def _get_vix_baseline_score(self, vix_value):
+        """Convert VIX level to 0-10 baseline score."""
+        if vix_value >= 40.0:
+            return 10.0  # Panic/crisis
+        elif vix_value >= 30.0:
+            return 7.0   # High fear
+        elif vix_value >= 25.0:
+            return 5.0   # Elevated fear
+        elif vix_value >= 20.0:
+            return 3.0   # Moderate concern
+        elif vix_value >= 15.0:
+            return 1.0   # Normal
+        else:
+            return 0.0   # Complacency
+    
+    def _get_credit_baseline_score(self, credit_spread):
+        """Convert IG Credit Spreads to 0-10 baseline score."""
+        if credit_spread >= 3.0:
+            return 10.0  # Credit stress
+        elif credit_spread >= 2.0:
+            return 7.0   # Elevated spreads
+        elif credit_spread >= 1.5:
+            return 5.0   # Moderate spreads
+        elif credit_spread >= 1.0:
+            return 2.0   # Normal spreads
+        else:
+            return 0.0   # Tight spreads
+    
+    def _get_pce_baseline_score(self, pce_value):
+        """Convert Core PCE inflation to 0-10 baseline score."""
+        if pce_value >= 4.0:
+            return 10.0  # High inflation
+        elif pce_value >= 3.0:
+            return 6.0   # Above target
+        elif pce_value >= 2.5:
+            return 3.0   # Slightly above target
+        elif pce_value >= 2.0:
+            return 1.0   # At target
+        elif pce_value >= 1.5:
+            return 0.0   # Below target
+        else:
+            return 2.0   # Too low (deflationary risk)
 
     def calculate_fund_metrics(self):
         """Calculate risk and return metrics for each fund."""
