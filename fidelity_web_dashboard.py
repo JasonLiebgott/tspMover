@@ -189,9 +189,19 @@ class FidelityDashboard:
                 fund.returns = pd.Series()
     
     def analyze_economic_conditions(self):
-        """Analyze current economic conditions using TSP engine."""
+        """Analyze current economic conditions using TSP engine plus enhanced labor market signals."""
         print("Analyzing economic conditions...")
         self.economic_engine.run_analysis()
+        
+        # Enhanced analysis including your key concerns
+        print("Analyzing white-collar employment trends...")
+        employment_signals = self._analyze_employment_trends()
+        
+        print("Analyzing retail investment flows...")
+        investment_flows = self._analyze_investment_flows()
+        
+        print("Analyzing consumer sentiment...")
+        consumer_signals = self._analyze_consumer_sentiment()
         
         self.economic_data = {
             'recession_score': self.economic_engine.recession_score,
@@ -199,7 +209,17 @@ class FidelityDashboard:
             'inflation_risk': self._assess_inflation_risk(),
             'dollar_strength': self._assess_dollar_strength(),
             'yield_curve': self._get_yield_curve_data(),
-            'market_volatility': self._assess_market_volatility()
+            'market_volatility': self._assess_market_volatility(),
+            
+            # Enhanced labor market analysis
+            'employment_trends': employment_signals,
+            'investment_flows': investment_flows,
+            'consumer_sentiment': consumer_signals,
+            
+            # Composite risk score including new factors
+            'enhanced_recession_risk': self._calculate_enhanced_recession_risk(
+                employment_signals, investment_flows, consumer_signals
+            )
         }
         
         return self.economic_data
@@ -278,6 +298,525 @@ class FidelityDashboard:
             pass
         return "Unknown"
     
+    def _analyze_employment_trends(self):
+        """Analyze white-collar employment trends across tech, finance, and media."""
+        employment_signals = {
+            'white_collar_risk': 'Unknown',
+            'layoff_trend': 'Unknown',
+            'tech_sentiment': 'Unknown',
+            'professional_services': 'Unknown',
+            'description': ''
+        }
+        
+        try:
+            # Use professional services employment as proxy for white-collar health
+            prof_services = self._fetch_fred_data('USPBS', 12)  # Professional services employment
+            tech_proxy = self._fetch_fred_data('USINFO', 12)    # Information sector employment
+            
+            risk_factors = []
+            
+            # Professional services trend (includes finance, consulting, etc.)
+            if not prof_services.empty and len(prof_services) >= 6:
+                recent_change = (prof_services.iloc[-1] / prof_services.iloc[-6] - 1) * 100
+                if recent_change < -2:
+                    employment_signals['professional_services'] = 'Declining'
+                    risk_factors.append('Professional services down')
+                elif recent_change < 0:
+                    employment_signals['professional_services'] = 'Weakening'
+                    risk_factors.append('Professional services weak')
+                else:
+                    employment_signals['professional_services'] = 'Stable'
+            
+            # Information sector (includes tech, media, telecom)
+            if not tech_proxy.empty and len(tech_proxy) >= 6:
+                tech_change = (tech_proxy.iloc[-1] / tech_proxy.iloc[-6] - 1) * 100
+                if tech_change < -3:
+                    employment_signals['tech_sentiment'] = 'Poor'
+                    risk_factors.append('Tech sector struggling')
+                elif tech_change < -1:
+                    employment_signals['tech_sentiment'] = 'Weak'
+                    risk_factors.append('Tech sector softening')
+                else:
+                    employment_signals['tech_sentiment'] = 'Stable'
+            
+            # Continuing claims as layoff trend indicator
+            continuing_claims = self._fetch_fred_data('CCSA', 8)  # Continued unemployment claims
+            if not continuing_claims.empty and len(continuing_claims) >= 4:
+                claims_trend = (continuing_claims.iloc[-1] / continuing_claims.iloc[-4] - 1) * 100
+                if claims_trend > 10:
+                    employment_signals['layoff_trend'] = 'Rising'
+                    risk_factors.append('Layoffs increasing')
+                elif claims_trend > 5:
+                    employment_signals['layoff_trend'] = 'Elevated'
+                    risk_factors.append('Layoffs elevated')
+                else:
+                    employment_signals['layoff_trend'] = 'Stable'
+            
+            # Overall white-collar risk assessment
+            if len(risk_factors) >= 2:
+                employment_signals['white_collar_risk'] = 'High'
+            elif len(risk_factors) == 1:
+                employment_signals['white_collar_risk'] = 'Moderate'
+            else:
+                employment_signals['white_collar_risk'] = 'Low'
+            
+            employment_signals['description'] = f"White-collar employment: {'; '.join(risk_factors) if risk_factors else 'No major concerns'}"
+            
+        except Exception as e:
+            employment_signals['description'] = f"Employment analysis error: {e}"
+            print(f"Error in employment analysis: {e}")
+        
+        return employment_signals
+    
+    def _analyze_investment_flows(self):
+        """Analyze 401k/IRA and retail brokerage activity patterns."""
+        flow_signals = {
+            'retirement_flows': 'Unknown',
+            'retail_activity': 'Unknown',
+            'market_stress': 'Unknown',
+            'flight_to_safety': 'Unknown',
+            'description': ''
+        }
+        
+        try:
+            # Use money market fund flows as proxy for 401k/IRA defensive positioning
+            # High MM inflows suggest people moving to safety in retirement accounts
+            money_market_etf = yf.Ticker('VMOT')  # Vanguard Short-Term Bond ETF as proxy
+            mm_data = money_market_etf.history(period='3mo')
+            
+            # Use QQQ and VTI volume as proxy for retail activity
+            qqq = yf.Ticker('QQQ')
+            vti = yf.Ticker('VTI')
+            qqq_data = qqq.history(period='1mo')
+            vti_data = vti.history(period='1mo')
+            
+            signals = []
+            
+            # Analyze VIX for market stress (affects retirement account decisions)
+            vix = yf.Ticker('^VIX')
+            vix_data = vix.history(period='2mo')
+            if not vix_data.empty:
+                avg_vix = vix_data['Close'].mean()
+                if avg_vix > 25:
+                    flow_signals['market_stress'] = 'High'
+                    signals.append('High market stress')
+                elif avg_vix > 20:
+                    flow_signals['market_stress'] = 'Elevated'
+                    signals.append('Elevated market stress')
+                else:
+                    flow_signals['market_stress'] = 'Low'
+            
+            # Analyze bond vs stock performance (flight to safety indicator)
+            try:
+                tlt = yf.Ticker('TLT')  # Long-term Treasury ETF
+                tlt_data = tlt.history(period='1mo')
+                spy_data = yf.Ticker('SPY').history(period='1mo')
+                
+                if not tlt_data.empty and not spy_data.empty:
+                    tlt_return = (tlt_data['Close'].iloc[-1] / tlt_data['Close'].iloc[0] - 1) * 100
+                    spy_return = (spy_data['Close'].iloc[-1] / spy_data['Close'].iloc[0] - 1) * 100
+                    
+                    if tlt_return > spy_return + 2:
+                        flow_signals['flight_to_safety'] = 'Strong'
+                        signals.append('Flight to bonds')
+                    elif tlt_return > spy_return:
+                        flow_signals['flight_to_safety'] = 'Moderate'
+                        signals.append('Bond preference')
+                    else:
+                        flow_signals['flight_to_safety'] = 'Low'
+            except:
+                pass
+            
+            # Retail activity assessment based on tech stock volumes
+            if not qqq_data.empty:
+                avg_volume = qqq_data['Volume'].mean()
+                recent_volume = qqq_data['Volume'].tail(5).mean()
+                volume_ratio = recent_volume / avg_volume
+                
+                if volume_ratio > 1.3:
+                    flow_signals['retail_activity'] = 'High'
+                    signals.append('High retail activity')
+                elif volume_ratio < 0.7:
+                    flow_signals['retail_activity'] = 'Low'
+                    signals.append('Low retail activity')
+                else:
+                    flow_signals['retail_activity'] = 'Normal'
+            
+            # Overall retirement flow assessment
+            stress_factors = sum([1 for signal in [flow_signals['market_stress'], 
+                                                 flow_signals['flight_to_safety']] 
+                                if signal in ['High', 'Strong', 'Elevated']])
+            
+            if stress_factors >= 2:
+                flow_signals['retirement_flows'] = 'Defensive'
+            elif stress_factors == 1:
+                flow_signals['retirement_flows'] = 'Cautious'
+            else:
+                flow_signals['retirement_flows'] = 'Normal'
+            
+            flow_signals['description'] = f"Investment flows: {'; '.join(signals) if signals else 'Normal patterns'}"
+            
+        except Exception as e:
+            flow_signals['description'] = f"Flow analysis error: {e}"
+            print(f"Error in investment flow analysis: {e}")
+        
+        return flow_signals
+    
+    def _analyze_consumer_sentiment(self):
+        """Analyze consumer sentiment and spending patterns."""
+        consumer_signals = {
+            'sentiment_level': 'Unknown',
+            'spending_trend': 'Unknown',
+            'credit_stress': 'Unknown',
+            'retail_health': 'Unknown',
+            'description': ''
+        }
+        
+        try:
+            # Consumer sentiment from University of Michigan
+            consumer_sentiment = self._fetch_fred_data('UMCSENT', 6)
+            
+            # Consumer spending indicators
+            retail_sales = self._fetch_fred_data('RSAFS', 6)  # Retail sales
+            personal_spending = self._fetch_fred_data('PCE', 6)  # Personal consumption
+            
+            concerns = []
+            
+            # Consumer sentiment analysis
+            if not consumer_sentiment.empty and len(consumer_sentiment) >= 3:
+                current_sentiment = consumer_sentiment.iloc[-1]
+                if current_sentiment < 70:
+                    consumer_signals['sentiment_level'] = 'Poor'
+                    concerns.append('Low consumer confidence')
+                elif current_sentiment < 85:
+                    consumer_signals['sentiment_level'] = 'Weak'
+                    concerns.append('Weak consumer confidence')
+                else:
+                    consumer_signals['sentiment_level'] = 'Good'
+            
+            # Retail sales trend
+            if not retail_sales.empty and len(retail_sales) >= 3:
+                sales_change = (retail_sales.iloc[-1] / retail_sales.iloc[-3] - 1) * 100
+                if sales_change < -2:
+                    consumer_signals['spending_trend'] = 'Declining'
+                    concerns.append('Retail sales falling')
+                elif sales_change < 0:
+                    consumer_signals['spending_trend'] = 'Weak'
+                    concerns.append('Retail sales soft')
+                else:
+                    consumer_signals['spending_trend'] = 'Stable'
+            
+            # Credit stress using retail sector performance vs market
+            try:
+                retail_etf = yf.Ticker('XRT')  # Retail ETF
+                spy = yf.Ticker('SPY')
+                retail_data = retail_etf.history(period='3mo')
+                spy_data = spy.history(period='3mo')
+                
+                if not retail_data.empty and not spy_data.empty:
+                    retail_perf = (retail_data['Close'].iloc[-1] / retail_data['Close'].iloc[0] - 1) * 100
+                    spy_perf = (spy_data['Close'].iloc[-1] / spy_data['Close'].iloc[0] - 1) * 100
+                    relative_perf = retail_perf - spy_perf
+                    
+                    if relative_perf < -10:
+                        consumer_signals['credit_stress'] = 'High'
+                        concerns.append('Retail sector underperforming')
+                    elif relative_perf < -5:
+                        consumer_signals['credit_stress'] = 'Moderate'
+                        concerns.append('Retail sector weak')
+                    else:
+                        consumer_signals['credit_stress'] = 'Low'
+            except:
+                pass
+            
+            # Overall retail health assessment
+            if len(concerns) >= 2:
+                consumer_signals['retail_health'] = 'Poor'
+            elif len(concerns) == 1:
+                consumer_signals['retail_health'] = 'Weak'
+            else:
+                consumer_signals['retail_health'] = 'Healthy'
+            
+            consumer_signals['description'] = f"Consumer health: {'; '.join(concerns) if concerns else 'No major concerns'}"
+            
+        except Exception as e:
+            consumer_signals['description'] = f"Consumer analysis error: {e}"
+            print(f"Error in consumer sentiment analysis: {e}")
+        
+        return consumer_signals
+    
+    def _fetch_fred_data(self, series_id, periods=12):
+        """Fetch data from FRED (Federal Reserve Economic Data)."""
+        try:
+            import pandas_datareader.data as pdr
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=periods*30)
+            data = pdr.DataReader(series_id, 'fred', start_date, end_date)
+            return data.dropna().squeeze()  # Convert to Series if single column
+        except Exception as e:
+            print(f"Could not fetch FRED data for {series_id}: {e}")
+            return pd.Series()
+    
+    def _calculate_enhanced_recession_risk(self, employment_signals, investment_flows, consumer_signals):
+        """Calculate enhanced recession risk including new factors."""
+        base_score = self.economic_engine.recession_score
+        
+        # Employment risk adjustment (0-20 points)
+        employment_adjustment = 0
+        if employment_signals['white_collar_risk'] == 'High':
+            employment_adjustment += 15
+        elif employment_signals['white_collar_risk'] == 'Moderate':
+            employment_adjustment += 8
+        
+        if employment_signals['layoff_trend'] == 'Rising':
+            employment_adjustment += 10
+        elif employment_signals['layoff_trend'] == 'Elevated':
+            employment_adjustment += 5
+        
+        # Investment flow risk adjustment (0-15 points)
+        flow_adjustment = 0
+        if investment_flows['retirement_flows'] == 'Defensive':
+            flow_adjustment += 10
+        elif investment_flows['retirement_flows'] == 'Cautious':
+            flow_adjustment += 5
+        
+        if investment_flows['market_stress'] == 'High':
+            flow_adjustment += 8
+        elif investment_flows['market_stress'] == 'Elevated':
+            flow_adjustment += 4
+        
+        # Consumer risk adjustment (0-15 points)
+        consumer_adjustment = 0
+        if consumer_signals['sentiment_level'] == 'Poor':
+            consumer_adjustment += 10
+        elif consumer_signals['sentiment_level'] == 'Weak':
+            consumer_adjustment += 5
+        
+        if consumer_signals['retail_health'] == 'Poor':
+            consumer_adjustment += 8
+        elif consumer_signals['retail_health'] == 'Weak':
+            consumer_adjustment += 4
+        
+        # Calculate enhanced score (cap at 100)
+        enhanced_score = min(100, base_score + employment_adjustment + flow_adjustment + consumer_adjustment)
+        
+        # Convert to 0-10 baseline scale
+        base_scale_10 = self._convert_to_baseline_scale(base_score)
+        enhanced_scale_10 = self._convert_to_baseline_scale(enhanced_score)
+        
+        # Calculate baseline scores for each component
+        employment_baseline = self._get_employment_baseline_score(employment_signals)
+        flows_baseline = self._get_investment_flows_baseline_score(investment_flows)
+        consumer_baseline = self._get_consumer_baseline_score(consumer_signals)
+        
+        return {
+            'enhanced_score': enhanced_score,
+            'base_score': base_score,
+            'additional_risk': enhanced_score - base_score,
+            'employment_adjustment': employment_adjustment,
+            'flow_adjustment': flow_adjustment,
+            'consumer_adjustment': consumer_adjustment,
+            'employment_signals': employment_signals,
+            'investment_flows': investment_flows,
+            'consumer_signals': consumer_signals,
+            'level': self._get_recession_level(enhanced_score),
+            # New 0-10 baseline scale
+            'baseline_scale': {
+                'base_score_10': base_scale_10,
+                'enhanced_score_10': enhanced_scale_10,
+                'base_label': self._get_baseline_label(base_scale_10),
+                'enhanced_label': self._get_baseline_label(enhanced_scale_10)
+            },
+            # Component baseline scores (0-10 scale)
+            'component_baselines': {
+                'employment': {
+                    'score': employment_baseline,
+                    'label': self._get_baseline_label(employment_baseline),
+                    'risk_level': 'High' if employment_baseline >= 7 else 'Moderate' if employment_baseline >= 4 else 'Low'
+                },
+                'investment_flows': {
+                    'score': flows_baseline,
+                    'label': self._get_baseline_label(flows_baseline),
+                    'risk_level': 'High' if flows_baseline >= 7 else 'Moderate' if flows_baseline >= 4 else 'Low'
+                },
+                'consumer_sentiment': {
+                    'score': consumer_baseline,
+                    'label': self._get_baseline_label(consumer_baseline),
+                    'risk_level': 'High' if consumer_baseline >= 7 else 'Moderate' if consumer_baseline >= 4 else 'Low'
+                }
+            }
+        }
+    
+    def _convert_to_baseline_scale(self, score_100):
+        """Convert 0-100 recession score to 0-10 baseline scale.
+        
+        0 = Full Growth Mode (0-10 on 100 scale)
+        10 = 5-Alarm Fire (90-100 on 100 scale)
+        """
+        return min(10, max(0, score_100 / 10))
+    
+    def _get_baseline_label(self, score_10):
+        """Get descriptive label for 0-10 baseline score."""
+        if score_10 <= 1:
+            return "Full Growth (0-1)"
+        elif score_10 <= 2:
+            return "Strong Growth (1-2)"
+        elif score_10 <= 3:
+            return "Moderate Growth (2-3)"
+        elif score_10 <= 4:
+            return "Caution (3-4)"
+        elif score_10 <= 5:
+            return "Elevated Risk (4-5)"
+        elif score_10 <= 6:
+            return "High Risk (5-6)"
+        elif score_10 <= 7:
+            return "Very High Risk (6-7)"
+        elif score_10 <= 8:
+            return "Crisis Warning (7-8)"
+        elif score_10 <= 9:
+            return "Crisis Mode (8-9)"
+        else:
+            return "5-Alarm Fire (9-10)"
+    
+    def _get_employment_baseline_score(self, employment_signals):
+        """Convert employment signals to 0-10 baseline score."""
+        score = 0
+        
+        # White-collar risk (0-5 points)
+        white_collar_risk = employment_signals.get('white_collar_risk', 'Unknown')
+        if white_collar_risk == 'High':
+            score += 5
+        elif white_collar_risk == 'Moderate':
+            score += 3
+        elif white_collar_risk == 'Low':
+            score += 0
+        else:
+            score += 2  # Unknown default
+        
+        # Layoff trend (0-3 points)
+        layoff_trend = employment_signals.get('layoff_trend', 'Unknown')
+        if layoff_trend == 'Rising':
+            score += 3
+        elif layoff_trend == 'Elevated':
+            score += 2
+        elif layoff_trend == 'Stable':
+            score += 0
+        else:
+            score += 1  # Unknown default
+        
+        # Professional services (0-2 points)
+        prof_services = employment_signals.get('professional_services', 'Unknown')
+        if prof_services == 'Declining':
+            score += 2
+        elif prof_services == 'Weakening':
+            score += 1
+        elif prof_services == 'Stable':
+            score += 0
+        else:
+            score += 0.5  # Unknown default
+        
+        return min(10, score)
+    
+    def _get_investment_flows_baseline_score(self, investment_flows):
+        """Convert investment flow signals to 0-10 baseline score."""
+        score = 0
+        
+        # Market stress (0-4 points)
+        market_stress = investment_flows.get('market_stress', 'Unknown')
+        if market_stress == 'High':
+            score += 4
+        elif market_stress == 'Elevated':
+            score += 2.5
+        elif market_stress == 'Low':
+            score += 0
+        else:
+            score += 1.5  # Unknown default
+        
+        # Retirement flows (0-3 points)
+        retirement_flows = investment_flows.get('retirement_flows', 'Unknown')
+        if retirement_flows == 'Defensive':
+            score += 3
+        elif retirement_flows == 'Cautious':
+            score += 1.5
+        elif retirement_flows == 'Normal':
+            score += 0
+        else:
+            score += 1  # Unknown default
+        
+        # Flight to safety (0-2 points)
+        flight_to_safety = investment_flows.get('flight_to_safety', 'Unknown')
+        if flight_to_safety == 'Strong':
+            score += 2
+        elif flight_to_safety == 'Moderate':
+            score += 1
+        elif flight_to_safety == 'Low':
+            score += 0
+        else:
+            score += 0.5  # Unknown default
+        
+        # Retail activity (inverted - high activity is good, 0-1 points)
+        retail_activity = investment_flows.get('retail_activity', 'Unknown')
+        if retail_activity == 'Low':
+            score += 1
+        elif retail_activity == 'Normal':
+            score += 0.3
+        elif retail_activity == 'High':
+            score += 0
+        else:
+            score += 0.5  # Unknown default
+        
+        return min(10, score)
+    
+    def _get_consumer_baseline_score(self, consumer_signals):
+        """Convert consumer sentiment signals to 0-10 baseline score."""
+        score = 0
+        
+        # Sentiment level (0-4 points)
+        sentiment_level = consumer_signals.get('sentiment_level', 'Unknown')
+        if sentiment_level == 'Poor':
+            score += 4
+        elif sentiment_level == 'Weak':
+            score += 2.5
+        elif sentiment_level == 'Good':
+            score += 0
+        else:
+            score += 2  # Unknown default
+        
+        # Spending trend (0-3 points)
+        spending_trend = consumer_signals.get('spending_trend', 'Unknown')
+        if spending_trend == 'Declining':
+            score += 3
+        elif spending_trend == 'Weak':
+            score += 1.5
+        elif spending_trend == 'Stable':
+            score += 0
+        else:
+            score += 1  # Unknown default
+        
+        # Credit stress (0-2 points)
+        credit_stress = consumer_signals.get('credit_stress', 'Unknown')
+        if credit_stress == 'High':
+            score += 2
+        elif credit_stress == 'Moderate':
+            score += 1
+        elif credit_stress == 'Low':
+            score += 0
+        else:
+            score += 0.5  # Unknown default
+        
+        # Retail health (0-1 point)
+        retail_health = consumer_signals.get('retail_health', 'Unknown')
+        if retail_health == 'Poor':
+            score += 1
+        elif retail_health == 'Weak':
+            score += 0.5
+        elif retail_health == 'Healthy':
+            score += 0
+        else:
+            score += 0.3  # Unknown default
+        
+        return min(10, score)
+
     def calculate_fund_metrics(self):
         """Calculate risk and return metrics for each fund."""
         print("Calculating fund metrics...")
@@ -297,10 +836,25 @@ class FidelityDashboard:
             # Volatility vs S&P 500 comparison
             volatility_vs_sp500 = (volatility * 100) - self.sp500_volatility
             
-            # Economic condition adjustments
+            # Economic condition adjustments (enhanced)
             recession_adjustment = self._get_recession_adjustment(fund, self.economic_data['recession_score'])
             inflation_adjustment = self._get_inflation_adjustment(fund, self.economic_data['inflation_risk'])
             dollar_adjustment = self._get_dollar_adjustment(fund, self.economic_data['dollar_strength'])
+            
+            # Enhanced economic adjustments based on your key concerns
+            employment_adjustment = self._get_employment_adjustment(fund, self.economic_data.get('employment_trends', {}))
+            flow_adjustment = self._get_investment_flow_adjustment(fund, self.economic_data.get('investment_flows', {}))
+            consumer_adjustment = self._get_consumer_adjustment(fund, self.economic_data.get('consumer_sentiment', {}))
+            
+            # Use enhanced recession score if available
+            enhanced_risk = self.economic_data.get('enhanced_recession_risk', {})
+            if enhanced_risk:
+                enhanced_recession_adj = self._get_enhanced_recession_adjustment(fund, enhanced_risk['enhanced_score'])
+            else:
+                enhanced_recession_adj = 0
+            
+            total_adjustment = (recession_adjustment + inflation_adjustment + dollar_adjustment + 
+                              employment_adjustment + flow_adjustment + consumer_adjustment + enhanced_recession_adj)
             
             fund.risk_metrics = {
                 'annual_return': annual_return * 100,
@@ -312,7 +866,11 @@ class FidelityDashboard:
                 'recession_adjustment': recession_adjustment,
                 'inflation_adjustment': inflation_adjustment,
                 'dollar_adjustment': dollar_adjustment,
-                'total_adjustment': recession_adjustment + inflation_adjustment + dollar_adjustment
+                'employment_adjustment': employment_adjustment,
+                'flow_adjustment': flow_adjustment,
+                'consumer_adjustment': consumer_adjustment,
+                'enhanced_recession_adj': enhanced_recession_adj,
+                'total_adjustment': total_adjustment
             }
             
             # Calculate overall score
@@ -603,7 +1161,7 @@ class FidelityDashboard:
         return unique_funds
     
     def _create_timeframe_allocation(self, funds, years):
-        """Create portfolio allocation based directly on top-scoring funds with low volatility preference."""
+        """Create portfolio allocation based on top-scoring funds with enhanced recession risk awareness."""
         allocation = {
             'timeframe': years,
             'strategy': '',
@@ -613,36 +1171,79 @@ class FidelityDashboard:
             'description': ''
         }
         
-        # Set strategy descriptions based on timeframe
+        # Get enhanced recession risk for strategy adjustment
+        enhanced_risk = self.economic_data.get('enhanced_recession_risk', {})
+        enhanced_score = enhanced_risk.get('enhanced_score', self.economic_data.get('recession_score', 50))
+        base_score = enhanced_risk.get('base_score', enhanced_score)
+        additional_risk = enhanced_score - base_score
+        
+        # Adjust strategy based on enhanced recession risk
+        risk_adjustment_factor = 0
+        if enhanced_score > 70:  # High enhanced recession risk
+            risk_adjustment_factor = 2  # Much more conservative
+        elif enhanced_score > 55:  # Moderate enhanced recession risk  
+            risk_adjustment_factor = 1  # More conservative
+        elif enhanced_score > 40:  # Elevated enhanced recession risk
+            risk_adjustment_factor = 0.5  # Slightly more conservative
+        
+        # Set strategy descriptions based on timeframe AND enhanced recession risk
         if years == 1:
-            allocation['strategy'] = 'Capital Preservation'
-            allocation['risk_level'] = 'Very Low'
-            allocation['description'] = 'Top current recommendations prioritizing low volatility and stability'
-            max_funds = 5  # Conservative - fewer holdings
-            volatility_penalty_factor = 2.0  # Heavy penalty for volatility
+            base_strategy = 'Capital Preservation'
+            base_risk = 'Very Low'
+            base_description = 'Prioritizing low volatility and stability'
+            max_funds = 5 - min(1, risk_adjustment_factor)  # Conservative - fewer holdings
+            volatility_penalty_factor = 2.0 + risk_adjustment_factor  # Heavy penalty for volatility
             
         elif years == 2:
-            allocation['strategy'] = 'Conservative Growth'
-            allocation['risk_level'] = 'Low'
-            allocation['description'] = 'Top current recommendations with moderate risk tolerance'
-            max_funds = 6
-            volatility_penalty_factor = 1.5
+            base_strategy = 'Conservative Growth'
+            base_risk = 'Low'
+            base_description = 'Moderate risk tolerance with growth focus'
+            max_funds = 6 - min(1, risk_adjustment_factor)
+            volatility_penalty_factor = 1.5 + (risk_adjustment_factor * 0.5)
             
         elif years == 3:
-            allocation['strategy'] = 'Balanced Growth'
-            allocation['risk_level'] = 'Moderate'
-            allocation['description'] = 'Top current recommendations balancing growth and stability'
-            max_funds = 8
-            volatility_penalty_factor = 1.0
+            base_strategy = 'Balanced Growth'
+            base_risk = 'Moderate'
+            base_description = 'Balancing growth and stability'
+            max_funds = 8 - min(2, risk_adjustment_factor)
+            volatility_penalty_factor = 1.0 + (risk_adjustment_factor * 0.3)
             
         elif years == 4:
-            allocation['strategy'] = 'Growth Focused'
-            allocation['risk_level'] = 'Moderate-High'
-            allocation['description'] = 'Top current recommendations focused on growth potential'
-            max_funds = 10
-            volatility_penalty_factor = 0.7
+            base_strategy = 'Growth Focused'
+            base_risk = 'Moderate-High'
+            base_description = 'Focused on growth potential'
+            max_funds = 10 - min(2, risk_adjustment_factor)
+            volatility_penalty_factor = 0.7 + (risk_adjustment_factor * 0.2)
         
-        # Filter funds based on volatility preference for the timeframe
+        # Adjust strategy names and descriptions based on enhanced recession risk
+        if risk_adjustment_factor >= 2:
+            allocation['strategy'] = f"Defensive {base_strategy}"
+            allocation['risk_level'] = f"Very Low (Enhanced Risk: {enhanced_score:.0f})"
+            allocation['description'] = f"ENHANCED RECESSION RISK DETECTED: Much more conservative {base_description.lower()}"
+        elif risk_adjustment_factor >= 1:
+            allocation['strategy'] = f"Cautious {base_strategy}"
+            allocation['risk_level'] = f"Low-Moderate (Enhanced Risk: {enhanced_score:.0f})" 
+            allocation['description'] = f"Enhanced recession signals: More conservative {base_description.lower()}"
+        elif risk_adjustment_factor >= 0.5:
+            allocation['strategy'] = f"Protected {base_strategy}"
+            allocation['risk_level'] = f"{base_risk} (Enhanced Risk: {enhanced_score:.0f})"
+            allocation['description'] = f"Elevated recession signals: Slightly more conservative {base_description.lower()}"
+        else:
+            allocation['strategy'] = base_strategy
+            allocation['risk_level'] = base_risk
+            allocation['description'] = f"Normal conditions: {base_description}"
+            
+        # Add enhanced risk context to description
+        if additional_risk > 15:
+            allocation['description'] += f" (WARNING: +{additional_risk:.0f} points from employment/consumer risks)"
+        elif additional_risk > 8:
+            allocation['description'] += f" (CAUTION: +{additional_risk:.0f} points from your key risk factors)"
+        elif additional_risk > 0:
+            allocation['description'] += f" (Note: +{additional_risk:.0f} points from enhanced analysis)"
+        
+        max_funds = max(3, int(max_funds))  # Ensure minimum of 3 funds
+        
+        # Filter funds based on volatility preference AND enhanced recession risk
         suitable_funds = []
         for fund in funds:
             if hasattr(fund, 'risk_metrics') and fund.risk_metrics:
@@ -652,10 +1253,26 @@ class FidelityDashboard:
                 # Adjust score based on volatility preference for timeframe
                 adjusted_score = score - (volatility * volatility_penalty_factor)
                 
-                # Add minimum diversification requirements
-                # Ensure we don't over-concentrate in high-risk categories
+                # Enhanced recession risk adjustments
+                if risk_adjustment_factor >= 2:  # High enhanced risk - be very defensive
+                    if fund.category in ['Emerging Markets', 'Small Cap', 'Technology', 'Energy', 'Materials']:
+                        adjusted_score -= 15  # Heavy penalty for risky categories
+                    elif fund.category in ['Bond', 'Treasury', 'Healthcare', 'Dividend']:
+                        adjusted_score += 8   # Significant bonus for defensive categories
+                elif risk_adjustment_factor >= 1:  # Moderate enhanced risk - be more defensive
+                    if fund.category in ['Emerging Markets', 'Small Cap', 'Technology']:
+                        adjusted_score -= 10  # Moderate penalty for risky categories
+                    elif fund.category in ['Bond', 'Treasury', 'Dividend', 'Healthcare']:
+                        adjusted_score += 5   # Moderate bonus for defensive categories
+                elif risk_adjustment_factor >= 0.5:  # Slight enhanced risk - be slightly more defensive
+                    if fund.category in ['Emerging Markets', 'Small Cap']:
+                        adjusted_score -= 5   # Light penalty for riskiest categories
+                    elif fund.category in ['Bond', 'Treasury', 'Dividend']:
+                        adjusted_score += 3   # Light bonus for safest categories
+                
+                # Add standard timeframe diversification requirements
                 if years <= 2:
-                    # Short-term: penalize high-risk categories more
+                    # Short-term: penalize high-risk categories more (on top of enhanced risk adjustments)
                     if fund.category in ['Emerging Markets', 'Small Cap', 'Technology']:
                         adjusted_score -= 5
                     elif fund.category in ['Bond', 'Treasury', 'Dividend', 'Large Cap']:
@@ -663,12 +1280,19 @@ class FidelityDashboard:
                 
                 suitable_funds.append((fund, adjusted_score, volatility))
         
-        # Sort by adjusted score (prioritizing low vol + good returns)
+        # Sort by adjusted score (prioritizing low vol + good returns + enhanced risk considerations)
         suitable_funds.sort(key=lambda x: x[1], reverse=True)
         
         print(f"\n  === TOP ADJUSTED FUNDS FOR {years}-YEAR ALLOCATION ===")
+        print(f"  Enhanced Recession Score: {enhanced_score:.1f} (Base: {base_score:.1f}, Additional Risk: +{additional_risk:.1f})")
+        print(f"  Risk Adjustment Factor: {risk_adjustment_factor:.1f} | Strategy: {allocation['strategy']}")
+        print(f"  Max Funds: {max_funds} | Volatility Penalty: {volatility_penalty_factor:.1f}x")
+        print("  " + "="*70)
         for i, (fund, adj_score, vol) in enumerate(suitable_funds[:max_funds*2], 1):
-            print(f"  {i:2d}. {fund.symbol:6s} | Score: {fund.score:5.1f} | Adj: {adj_score:5.1f} | Vol: {vol:4.1f}% | {fund.category}")
+            original_score = fund.score
+            vol_penalty = vol * volatility_penalty_factor
+            risk_adj = adj_score - original_score + vol_penalty  # Calculate risk adjustments
+            print(f"  {i:2d}. {fund.symbol:6s} | Orig: {original_score:5.1f} | Vol-Pen: {vol_penalty:4.1f} | Risk-Adj: {risk_adj:+5.1f} | Final: {adj_score:5.1f} | {fund.category}")
         
         # Create allocation using top funds with diversification
         fund_allocations = []
@@ -820,6 +1444,214 @@ class FidelityDashboard:
             'Materials': 5 * multiplier,
         }
         return adjustments.get(fund.category, 0)
+    
+    def _get_employment_adjustment(self, fund, employment_signals):
+        """Get employment trend adjustment for fund category based on white-collar risks."""
+        if not employment_signals:
+            return 0
+            
+        # Base adjustment factors
+        adjustment = 0
+        
+        # White-collar employment risk impacts tech, finance, professional services most
+        white_collar_risk = employment_signals.get('white_collar_risk', 'Unknown')
+        layoff_trend = employment_signals.get('layoff_trend', 'Unknown')
+        
+        # Category-specific adjustments for employment concerns
+        employment_sensitive_adjustments = {
+            'Technology': -15 if white_collar_risk == 'High' else -8 if white_collar_risk == 'Moderate' else 0,
+            'Financial': -12 if white_collar_risk == 'High' else -6 if white_collar_risk == 'Moderate' else 0,
+            'Communication': -10 if white_collar_risk == 'High' else -5 if white_collar_risk == 'Moderate' else 0,
+            'Large Cap': -5 if white_collar_risk == 'High' else -2 if white_collar_risk == 'Moderate' else 0,
+            'Total Market': -5 if white_collar_risk == 'High' else -2 if white_collar_risk == 'Moderate' else 0,
+            
+            # Defensive categories get small boosts during employment stress
+            'Healthcare': 3 if white_collar_risk == 'High' else 1 if white_collar_risk == 'Moderate' else 0,
+            'Dividend': 5 if white_collar_risk == 'High' else 2 if white_collar_risk == 'Moderate' else 0,
+            'Bond': 8 if white_collar_risk == 'High' else 4 if white_collar_risk == 'Moderate' else 0,
+            'Treasury': 10 if white_collar_risk == 'High' else 5 if white_collar_risk == 'Moderate' else 0,
+        }
+        
+        base_adjustment = employment_sensitive_adjustments.get(fund.category, 0)
+        
+        # Additional layoff trend adjustment
+        if layoff_trend == 'Rising':
+            if fund.category in ['Technology', 'Financial', 'Communication']:
+                base_adjustment -= 8
+            elif fund.category in ['Large Cap', 'Total Market']:
+                base_adjustment -= 3
+            elif fund.category in ['Bond', 'Treasury', 'Dividend']:
+                base_adjustment += 3
+        elif layoff_trend == 'Elevated':
+            if fund.category in ['Technology', 'Financial', 'Communication']:
+                base_adjustment -= 4
+            elif fund.category in ['Bond', 'Treasury', 'Dividend']:
+                base_adjustment += 2
+        
+        return base_adjustment
+    
+    def _get_investment_flow_adjustment(self, fund, investment_flows):
+        """Get investment flow adjustment based on 401k/IRA and retail brokerage patterns."""
+        if not investment_flows:
+            return 0
+            
+        adjustment = 0
+        retirement_flows = investment_flows.get('retirement_flows', 'Unknown')
+        market_stress = investment_flows.get('market_stress', 'Unknown')
+        flight_to_safety = investment_flows.get('flight_to_safety', 'Unknown')
+        
+        # When retirement accounts go defensive, favor stable funds
+        if retirement_flows == 'Defensive':
+            defensive_adjustments = {
+                'Bond': 12,
+                'Treasury': 15,
+                'Dividend': 8,
+                'Large Cap': 5,
+                'Total Market': 3,
+                
+                # Penalize volatile categories
+                'Technology': -10,
+                'Small Cap': -12,
+                'Emerging Markets': -15,
+                'Energy': -8,
+                'Materials': -8
+            }
+            adjustment += defensive_adjustments.get(fund.category, 0)
+            
+        elif retirement_flows == 'Cautious':
+            # Smaller adjustments for cautious sentiment
+            adjustment += {
+                'Bond': 6, 'Treasury': 8, 'Dividend': 4, 'Large Cap': 2,
+                'Technology': -5, 'Small Cap': -6, 'Emerging Markets': -8
+            }.get(fund.category, 0)
+        
+        # Market stress adds to defensive positioning
+        if market_stress == 'High':
+            stress_adjustments = {
+                'Bond': 8, 'Treasury': 10, 'Healthcare': 3, 'Dividend': 5,
+                'Technology': -8, 'Small Cap': -10, 'Emerging Markets': -12
+            }
+            adjustment += stress_adjustments.get(fund.category, 0)
+        elif market_stress == 'Elevated':
+            adjustment += {
+                'Bond': 4, 'Treasury': 5, 'Healthcare': 2,
+                'Technology': -4, 'Small Cap': -5, 'Emerging Markets': -6
+            }.get(fund.category, 0)
+        
+        # Flight to safety specifically benefits bonds
+        if flight_to_safety == 'Strong':
+            if fund.category in ['Bond', 'Treasury']:
+                adjustment += 10
+            elif fund.category in ['Technology', 'Small Cap', 'Emerging Markets']:
+                adjustment -= 8
+        elif flight_to_safety == 'Moderate':
+            if fund.category in ['Bond', 'Treasury']:
+                adjustment += 5
+            elif fund.category in ['Technology', 'Small Cap']:
+                adjustment -= 3
+        
+        return adjustment
+    
+    def _get_consumer_adjustment(self, fund, consumer_signals):
+        """Get consumer sentiment adjustment for fund categories."""
+        if not consumer_signals:
+            return 0
+            
+        adjustment = 0
+        sentiment_level = consumer_signals.get('sentiment_level', 'Unknown')
+        spending_trend = consumer_signals.get('spending_trend', 'Unknown')
+        retail_health = consumer_signals.get('retail_health', 'Unknown')
+        
+        # Poor consumer sentiment hurts consumer-dependent sectors
+        if sentiment_level == 'Poor':
+            consumer_adjustments = {
+                # Consumer-dependent categories get penalized
+                'Technology': -8,  # Discretionary tech spending
+                'Small Cap': -10,  # Often consumer-focused
+                'Communication': -6,  # Media, telecom affected by consumer cuts
+                'Materials': -8,   # Construction, manufacturing demand
+                
+                # Defensive categories benefit
+                'Healthcare': 5,   # Essential services
+                'Dividend': 6,     # Income focus during uncertainty
+                'Bond': 8,         # Flight to safety
+                'Treasury': 10     # Ultimate safety
+            }
+            adjustment += consumer_adjustments.get(fund.category, 0)
+            
+        elif sentiment_level == 'Weak':
+            # Smaller adjustments for weak sentiment
+            adjustment += {
+                'Technology': -4, 'Small Cap': -5, 'Materials': -4,
+                'Healthcare': 2, 'Dividend': 3, 'Bond': 4
+            }.get(fund.category, 0)
+        
+        # Retail spending trends
+        if spending_trend == 'Declining':
+            spending_adjustments = {
+                'Technology': -6,   # Reduced tech purchases
+                'Small Cap': -8,    # Many are retail-dependent
+                'Materials': -6,    # Reduced demand
+                'Energy': -4,       # Reduced travel, consumption
+                
+                'Healthcare': 3,    # Essential services hold up
+                'Bond': 6,          # Safe haven demand
+                'Treasury': 8
+            }
+            adjustment += spending_adjustments.get(fund.category, 0)
+            
+        elif spending_trend == 'Weak':
+            adjustment += {
+                'Technology': -3, 'Small Cap': -4, 'Materials': -3,
+                'Healthcare': 1, 'Bond': 3
+            }.get(fund.category, 0)
+        
+        # Overall retail health assessment
+        if retail_health == 'Poor':
+            # Broad negative impact on growth categories
+            if fund.category in ['Technology', 'Small Cap', 'Materials', 'Energy']:
+                adjustment -= 5
+            elif fund.category in ['Bond', 'Treasury', 'Healthcare']:
+                adjustment += 3
+                
+        elif retail_health == 'Weak':
+            if fund.category in ['Technology', 'Small Cap']:
+                adjustment -= 2
+            elif fund.category in ['Bond', 'Treasury']:
+                adjustment += 1
+        
+        return adjustment
+    
+    def _get_enhanced_recession_adjustment(self, fund, enhanced_score):
+        """Get additional adjustment based on enhanced recession score including your key factors."""
+        base_score = self.economic_data.get('recession_score', 0)
+        additional_risk = enhanced_score - base_score
+        
+        # If enhanced score is significantly higher than base score, add defensive bias
+        if additional_risk > 15:  # Significant additional risk detected
+            enhanced_adjustments = {
+                # Extra defensive positioning
+                'Bond': 8,
+                'Treasury': 10,
+                'Healthcare': 4,
+                'Dividend': 6,
+                
+                # Extra penalties for risky categories
+                'Technology': -10,
+                'Small Cap': -12,
+                'Emerging Markets': -15,
+                'Energy': -8,
+                'Materials': -8
+            }
+            return enhanced_adjustments.get(fund.category, 0)
+            
+        elif additional_risk > 8:  # Moderate additional risk
+            return {
+                'Bond': 4, 'Treasury': 5, 'Healthcare': 2, 'Dividend': 3,
+                'Technology': -5, 'Small Cap': -6, 'Emerging Markets': -8
+            }.get(fund.category, 0)
+        
+        return 0  # No additional adjustment needed
     
     def _calculate_fund_score(self, fund):
         """Calculate overall fund score based on risk-adjusted returns and conditions."""
@@ -1201,11 +2033,14 @@ class FidelityDashboard:
         plt.close()
     
     def generate_economic_conditions_chart(self):
-        """Generate economic conditions overview chart."""
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 10))
+        """Generate enhanced economic conditions overview chart with employment and consumer data."""
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
         
-        # Chart 1: Recession Risk Gauge
-        recession_score = self.economic_data['recession_score']
+        # Chart 1: Enhanced Recession Risk Gauge
+        base_score = self.economic_data['recession_score']
+        enhanced_risk = self.economic_data.get('enhanced_recession_risk', {})
+        enhanced_score = enhanced_risk.get('enhanced_score', base_score)
+        
         colors = ['green', 'yellow', 'red']
         sizes = [33, 33, 34]
         labels = ['Low Risk\n(0-33)', 'Moderate Risk\n(34-66)', 'High Risk\n(67-100)']
@@ -1214,45 +2049,100 @@ class FidelityDashboard:
         wedges, texts = ax1.pie(sizes, labels=labels, colors=colors, 
                                startangle=180, counterclock=False)
         
-        # Add recession score indicator
-        angle = 180 - (recession_score / 100) * 180
+        # Add enhanced recession score indicator
+        angle = 180 - (enhanced_score / 100) * 180
         x = 0.7 * np.cos(np.radians(angle))
         y = 0.7 * np.sin(np.radians(angle))
         ax1.annotate('', xy=(x, y), xytext=(0, 0), 
-                    arrowprops=dict(arrowstyle='->', color='black', lw=3))
-        ax1.text(0, -0.3, f'Score: {recession_score:.1f}', ha='center', fontsize=12, fontweight='bold')
-        ax1.set_title('Recession Risk Gauge', fontweight='bold')
+                    arrowprops=dict(arrowstyle='->', color='red' if enhanced_score > base_score else 'black', lw=3))
         
-        # Chart 2: Economic Indicators Summary
-        indicators = ['Recession Risk', 'Inflation Risk', 'Dollar Strength', 'Market Volatility']
-        values = [recession_score, 
-                 {'Low': 25, 'Moderate': 50, 'High': 75}.get(self.economic_data['inflation_risk'], 50),
-                 {'Weakening': 25, 'Stable': 50, 'Strengthening': 75}.get(self.economic_data['dollar_strength'], 50),
-                 {'Low': 25, 'Moderate': 50, 'High': 75}.get(self.economic_data['market_volatility'], 50)]
+        # Show both scores if different
+        if enhanced_score != base_score:
+            ax1.text(0, -0.3, f'Enhanced: {enhanced_score:.1f}\n(Base: {base_score:.1f})', 
+                    ha='center', fontsize=11, fontweight='bold')
+        else:
+            ax1.text(0, -0.3, f'Score: {enhanced_score:.1f}', ha='center', fontsize=12, fontweight='bold')
+        ax1.set_title('Enhanced Recession Risk Gauge', fontweight='bold')
+        
+        # Chart 2: Enhanced Risk Indicators (including your key concerns)
+        indicators = []
+        values = []
+        
+        # Traditional indicators
+        indicators.extend(['Base Recession', 'Inflation Risk', 'Market Volatility'])
+        values.extend([
+            base_score,
+            {'Low': 25, 'Moderate': 50, 'High': 75}.get(self.economic_data['inflation_risk'], 50),
+            {'Low': 25, 'Moderate': 50, 'High': 75}.get(self.economic_data['market_volatility'], 50)
+        ])
+        
+        # Enhanced indicators from your concerns
+        employment_signals = self.economic_data.get('employment_trends', {})
+        if employment_signals:
+            indicators.append('White-Collar Risk')
+            values.append({'Low': 25, 'Moderate': 50, 'High': 75}.get(employment_signals.get('white_collar_risk'), 50))
+        
+        investment_flows = self.economic_data.get('investment_flows', {})
+        if investment_flows:
+            indicators.append('Market Stress')
+            values.append({'Low': 25, 'Moderate': 50, 'High': 75, 'Elevated': 60}.get(investment_flows.get('market_stress'), 50))
+        
+        consumer_signals = self.economic_data.get('consumer_sentiment', {})
+        if consumer_signals:
+            indicators.append('Consumer Health')
+            sentiment_level = consumer_signals.get('sentiment_level', 'Unknown')
+            values.append({'Good': 25, 'Weak': 60, 'Poor': 85}.get(sentiment_level, 50))
         
         bars = ax2.barh(indicators, values, alpha=0.7)
         for bar, val in zip(bars, values):
             if val < 33:
                 bar.set_color('green')
             elif val < 67:
-                bar.set_color('yellow')
+                bar.set_color('orange')
             else:
                 bar.set_color('red')
         
-        ax2.set_title('Economic Risk Indicators', fontweight='bold')
+        ax2.set_title('Comprehensive Risk Assessment', fontweight='bold')
         ax2.set_xlabel('Risk Level (0-100)')
         ax2.grid(True, alpha=0.3)
         
-        # Chart 3: Current vs Historical Context (placeholder)
-        ax3.text(0.5, 0.5, 'Yield Curve:\n' + self.economic_data['yield_curve'], 
-                ha='center', va='center', fontsize=14, fontweight='bold',
-                bbox=dict(boxstyle="round,pad=0.3", facecolor='lightblue'))
-        ax3.set_title('Yield Curve Status', fontweight='bold')
+        # Chart 3: Employment and Consumer Trends
+        trend_text = "📊 LABOR MARKET SIGNALS:\n"
+        if employment_signals:
+            trend_text += f"• White-collar risk: {employment_signals.get('white_collar_risk', 'Unknown')}\n"
+            trend_text += f"• Layoff trend: {employment_signals.get('layoff_trend', 'Unknown')}\n"
+            trend_text += f"• Tech sentiment: {employment_signals.get('tech_sentiment', 'Unknown')}\n"
+        
+        trend_text += "\n🛒 CONSUMER SIGNALS:\n"
+        if consumer_signals:
+            trend_text += f"• Sentiment: {consumer_signals.get('sentiment_level', 'Unknown')}\n"
+            trend_text += f"• Spending trend: {consumer_signals.get('spending_trend', 'Unknown')}\n"
+            trend_text += f"• Retail health: {consumer_signals.get('retail_health', 'Unknown')}\n"
+        
+        # Color code the background based on overall risk
+        if enhanced_score > 70:
+            bg_color = 'lightcoral'
+        elif enhanced_score > 50:
+            bg_color = 'lightyellow'
+        else:
+            bg_color = 'lightgreen'
+            
+        ax3.text(0.05, 0.95, trend_text, ha='left', va='top', fontsize=10, fontweight='normal',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor=bg_color, alpha=0.7),
+                transform=ax3.transAxes)
+        ax3.set_title('Key Economic Trends', fontweight='bold')
         ax3.set_xlim(0, 1)
         ax3.set_ylim(0, 1)
         ax3.axis('off')
         
-        # Chart 4: FDRXX Money Market vs Fund Opportunities
+        # Chart 4: Investment Flow Analysis
+        flow_text = "💰 INVESTMENT FLOWS:\n"
+        if investment_flows:
+            flow_text += f"• 401k/IRA sentiment: {investment_flows.get('retirement_flows', 'Unknown')}\n"
+            flow_text += f"• Flight to safety: {investment_flows.get('flight_to_safety', 'Unknown')}\n"
+            flow_text += f"• Retail activity: {investment_flows.get('retail_activity', 'Unknown')}\n"
+        
+        flow_text += f"\n📈 MARKET COMPARISON:\n"
         beating_mm = len([f for f in self.funds if hasattr(f, 'risk_metrics') 
                          and f.risk_metrics and 'annual_return' in f.risk_metrics and
                          f.risk_metrics['annual_return'] > self.money_market_rate])
@@ -1260,20 +2150,27 @@ class FidelityDashboard:
                           and f.risk_metrics and 'annual_return' in f.risk_metrics])
         
         if total_funds > 0:
-            labels = ['Beating MM', 'Below MM']
-            sizes = [beating_mm, total_funds - beating_mm]
-            colors = ['green', 'red']
-            
-            ax4.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
-            ax4.set_title(f'Funds vs Money Market\n({self.money_market_rate}%)', fontweight='bold')
+            pct_beating = (beating_mm / total_funds) * 100
+            flow_text += f"• Funds beating FDRXX: {beating_mm}/{total_funds} ({pct_beating:.0f}%)\n"
+            flow_text += f"• FDRXX yield: {self.money_market_rate:.2f}%\n"
+            flow_text += f"• Yield curve: {self.economic_data['yield_curve']}"
+        
+        # Color code based on investment stress
+        retirement_flows = investment_flows.get('retirement_flows', 'Normal') if investment_flows else 'Normal'
+        if retirement_flows == 'Defensive':
+            flow_bg_color = 'lightcoral'
+        elif retirement_flows == 'Cautious':
+            flow_bg_color = 'lightyellow' 
         else:
-            ax4.text(0.5, 0.5, 'No fund data\navailable', ha='center', va='center', 
-                    fontsize=14, bbox=dict(boxstyle="round,pad=0.3", facecolor='lightgray'))
-            ax4.set_title('Funds vs Money Market', fontweight='bold')
-            ax4.set_xlim(0, 1)
-            ax4.set_ylim(0, 1)
-            ax4.axis('off')
-        ax4.set_title(f'Funds vs Money Market\n({self.money_market_rate}%)', fontweight='bold')
+            flow_bg_color = 'lightgreen'
+            
+        ax4.text(0.05, 0.95, flow_text, ha='left', va='top', fontsize=10, fontweight='normal',
+                bbox=dict(boxstyle="round,pad=0.3", facecolor=flow_bg_color, alpha=0.7),
+                transform=ax4.transAxes)
+        ax4.set_title('Investment Flow Analysis', fontweight='bold')
+        ax4.set_xlim(0, 1)
+        ax4.set_ylim(0, 1)
+        ax4.axis('off')
         
         plt.tight_layout()
         

@@ -647,6 +647,303 @@
                             </div>
                         </div>
 
+                        <!-- Enhanced Recession Analysis Section -->
+                        {% if dashboard.economic_data.enhanced_recession_risk %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning bg-opacity-10">
+                                        <h5 class="mb-0 text-warning">
+                                            <i class="fas fa-chart-line"></i> Detailed Recession Risk Analysis
+                                        </h5>
+                                        <small class="text-muted">Economic metrics driving our portfolio allocation strategy</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Risk Score Summary -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.base_score <= 33 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.base_score <= 66 else 'bg-danger bg-opacity-10' }}">
+                                                    <h6 class="mb-1">Base Recession Score</h6>
+                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.base_score <= 33 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.base_score <= 66 else 'text-danger' }}">
+                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.base_score) }}/100
+                                                    </div>
+                                                    <small class="text-muted">Traditional indicators</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.enhanced_score <= 33 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.enhanced_score <= 66 else 'bg-danger bg-opacity-10' }}">
+                                                    <h6 class="mb-1">Enhanced Score</h6>
+                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.enhanced_score <= 33 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.enhanced_score <= 66 else 'text-danger' }}">
+                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.enhanced_score) }}/100
+                                                    </div>
+                                                    <small class="text-muted">With your key concerns</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 5 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 15 else 'bg-danger bg-opacity-10' }}">
+                                                    <h6 class="mb-1">Additional Risk</h6>
+                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 5 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 15 else 'text-danger' }}">
+                                                        +{{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.additional_risk) }}
+                                                    </div>
+                                                    <small class="text-muted">Enhanced analysis</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Baseline 0-10 Scale -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <div class="card border-primary">
+                                                    <div class="card-header bg-primary bg-opacity-10">
+                                                        <h6 class="mb-0 text-primary">
+                                                            <i class="fas fa-tachometer-alt"></i> Baseline Alert Scale (0-10)
+                                                        </h6>
+                                                        <small class="text-muted">0 = Full Growth Mode | 10 = 5-Alarm Fire</small>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="text-center p-3 border rounded">
+                                                                    <h6 class="mb-1">Traditional Risk Level</h6>
+                                                                    <div class="h3 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_score_10 <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_score_10 <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_score_10) }}/10
+                                                                    </div>
+                                                                    <div class="small font-weight-bold">{{ dashboard.economic_data.enhanced_recession_risk.baseline_scale.base_label }}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="text-center p-3 border rounded">
+                                                                    <h6 class="mb-1">Enhanced Risk Level</h6>
+                                                                    <div class="h3 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_score_10 <= 3 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_score_10 <= 6 else 'text-danger' }}">
+                                                                        {{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_score_10) }}/10
+                                                                    </div>
+                                                                    <div class="small font-weight-bold">{{ dashboard.economic_data.enhanced_recession_risk.baseline_scale.enhanced_label }}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-3">
+                                                            <div class="progress" style="height: 25px;">
+                                                                <div class="progress-bar bg-success" role="progressbar" style="width: 30%" aria-label="Growth Zone">
+                                                                    <span class="text-dark font-weight-bold">Growth (0-3)</span>
+                                                                </div>
+                                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 30%" aria-label="Caution Zone">
+                                                                    <span class="text-dark font-weight-bold">Caution (3-6)</span>
+                                                                </div>
+                                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 40%" aria-label="Crisis Zone">
+                                                                    <span class="text-white font-weight-bold">Crisis (6-10)</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 border rounded {{ 'bg-success bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 5 else 'bg-warning bg-opacity-10' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 15 else 'bg-danger bg-opacity-10' }}">
+                                                    <h6 class="mb-1">Additional Risk</h6>
+                                                    <div class="h4 {{ 'text-success' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 5 else 'text-warning' if dashboard.economic_data.enhanced_recession_risk.additional_risk <= 15 else 'text-danger' }}">
+                                                        +{{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.additional_risk) }}
+                                                    </div>
+                                                    <small class="text-muted">Enhanced analysis</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Economic Metrics Breakdown -->
+                                        <div class="accordion" id="recessionAnalysisAccordion">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="headingMetrics">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMetrics" aria-expanded="true" aria-controls="collapseMetrics">
+                                                        <i class="fas fa-chart-bar me-2"></i>
+                                                        <strong>Economic Indicators Breakdown</strong>
+                                                        <span class="ms-auto me-3 text-muted small">Click to expand detailed analysis</span>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapseMetrics" class="accordion-collapse collapse show" aria-labelledby="headingMetrics" data-bs-parent="#recessionAnalysisAccordion">
+                                                    <div class="accordion-body">
+                                                        <div class="row">
+                                                            <!-- Traditional Economic Indicators -->
+                                                            <div class="col-md-6">
+                                                                <h6 class="text-primary mb-3"><i class="fas fa-university"></i> Traditional Economic Indicators</h6>
+                                                                
+                                                                <!-- Yield Curve -->
+                                                                <div class="metric-card mb-3 p-3 border rounded">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>10Y-3M Yield Spread</strong>
+                                                                            <div class="small text-muted">10-Year Treasury minus 3-Month Treasury</div>
+                                                                        </div>
+                                                                        <span class="badge bg-danger">High Risk</span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What it measures:</strong> When short-term rates exceed long-term rates (inverted yield curve), it historically predicts recessions within 6-18 months.</div>
+                                                                        <div class="small mt-1"><strong>Weight in model:</strong> 12.32% - One of our strongest recession predictors</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> Inverted curves push us toward more defensive bonds and away from growth stocks</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Sahm Rule -->
+                                                                <div class="metric-card mb-3 p-3 border rounded">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>Enhanced Sahm Rule</strong>
+                                                                            <div class="small text-muted">Unemployment rate trend analysis</div>
+                                                                        </div>
+                                                                        <span class="badge bg-warning">Moderate</span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What it measures:</strong> When unemployment rises 0.5% above its recent low, a recession has likely begun. We enhance this with job openings and consumer spending data.</div>
+                                                                        <div class="small mt-1"><strong>Weight in model:</strong> 6.14% - Real-time recession confirmation</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> Rising unemployment signals shift to defensive assets and government bonds</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- PMI -->
+                                                                <div class="metric-card mb-3 p-3 border rounded">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>PMI (Purchasing Managers' Index)</strong>
+                                                                            <div class="small text-muted">Manufacturing sector activity</div>
+                                                                        </div>
+                                                                        <span class="badge bg-warning">Below 50</span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What it measures:</strong> Surveys manufacturing purchasing managers. Below 50 = contraction, above 50 = expansion. We estimate using industrial production when direct data unavailable.</div>
+                                                                        <div class="small mt-1"><strong>Weight in model:</strong> 5.34% - Leading indicator of economic activity</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> Manufacturing weakness reduces exposure to industrial and small-cap stocks</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- LEI -->
+                                                                <div class="metric-card mb-3 p-3 border rounded">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>LEI (Leading Economic Index)</strong>
+                                                                            <div class="small text-muted">Composite of forward-looking indicators</div>
+                                                                        </div>
+                                                                        <span class="badge bg-warning">Declining</span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What it measures:</strong> Combines 10 indicators like building permits, stock prices, and interest rate spreads to predict economic direction 3-6 months ahead.</div>
+                                                                        <div class="small mt-1"><strong>Weight in model:</strong> 3.46% - Forward-looking economic health</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> Declining LEI reduces growth stock allocation and increases defensive positioning</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Enhanced Analysis Factors -->
+                                                            <div class="col-md-6">
+                                                                <h6 class="text-success mb-3"><i class="fas fa-chart-line"></i> Enhanced Analysis (Your Key Concerns)</h6>
+                                                                
+                                                                <!-- White-Collar Employment -->
+                                                                <div class="metric-card mb-3 p-3 border rounded bg-light">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>White-Collar Employment Trends</strong>
+                                                                            <div class="small text-muted">Tech, finance, and media sector layoffs</div>
+                                                                        </div>
+                                                                        <span class="badge bg-{{ 'danger' if dashboard.economic_data.enhanced_recession_risk.employment_adjustment >= 15 else 'warning' if dashboard.economic_data.enhanced_recession_risk.employment_adjustment >= 8 else 'success' }}">
+                                                                            +{{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.employment_adjustment) }} pts
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What we monitor:</strong> Layoff announcements in high-paying sectors, JOLTS (Job Openings and Labor Turnover Survey) data showing hiring freezes, and unemployment claims trends.</div>
+                                                                        <div class="small mt-1"><strong>Why it matters:</strong> White-collar workers drive consumer spending. Early layoffs in tech/finance often predict broader economic weakness before it shows in traditional data.</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> High risk reduces technology and growth stock allocation, increases defensive positioning</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Investment Flows -->
+                                                                <div class="metric-card mb-3 p-3 border rounded bg-light">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>401(k)/IRA Investment Flows</strong>
+                                                                            <div class="small text-muted">Retirement account behavior analysis</div>
+                                                                        </div>
+                                                                        <span class="badge bg-{{ 'danger' if dashboard.economic_data.enhanced_recession_risk.flow_adjustment >= 10 else 'warning' if dashboard.economic_data.enhanced_recession_risk.flow_adjustment >= 5 else 'success' }}">
+                                                                            +{{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.flow_adjustment) }} pts
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What we monitor:</strong> Fidelity, Vanguard, and other major providers' flow data showing whether investors are moving toward stocks (risk-on) or bonds/cash (risk-off).</div>
+                                                                        <div class="small mt-1"><strong>Why it matters:</strong> Retirement savers represent long-term smart money. When they get defensive, it often signals deeper economic concerns not yet reflected in prices.</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> Defensive flows trigger reduced equity exposure and increased fixed income allocation</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Consumer Sentiment -->
+                                                                <div class="metric-card mb-3 p-3 border rounded bg-light">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>Retail Brokerage & Consumer Activity</strong>
+                                                                            <div class="small text-muted">Robinhood, Schwab trading patterns & spending</div>
+                                                                        </div>
+                                                                        <span class="badge bg-{{ 'danger' if dashboard.economic_data.enhanced_recession_risk.consumer_adjustment >= 10 else 'warning' if dashboard.economic_data.enhanced_recession_risk.consumer_adjustment >= 5 else 'success' }}">
+                                                                            +{{ "%.1f"|format(dashboard.economic_data.enhanced_recession_risk.consumer_adjustment) }} pts
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What we monitor:</strong> Retail trading volumes, consumer sentiment surveys, credit card spending patterns, and retail brokerage account activity.</div>
+                                                                        <div class="small mt-1"><strong>Why it matters:</strong> Consumer spending is 70% of GDP. When consumers pull back on both spending and investing, it signals economic trouble ahead.</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> Weak consumer activity reduces consumer discretionary and retail exposure, increases defensive sectors</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Market Sentiment Indicators -->
+                                                                <div class="metric-card mb-3 p-3 border rounded">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <strong>VIX & Fear/Greed Index</strong>
+                                                                            <div class="small text-muted">Market volatility and sentiment</div>
+                                                                        </div>
+                                                                        <span class="badge bg-info">Market Timing</span>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <div class="small"><strong>What it measures:</strong> VIX shows market fear (volatility expectations), F&G Index combines 7 market indicators to gauge overall sentiment.</div>
+                                                                        <div class="small mt-1"><strong>Weight in model:</strong> VIX: 0.57%, F&G: 3.61% - Shorter-term market timing</div>
+                                                                        <div class="small mt-1"><strong>Investment impact:</strong> High fear increases defensive positioning, extreme greed may signal market tops</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- How It Affects Your Portfolio -->
+                                                        <div class="alert alert-info mt-4">
+                                                            <h6><i class="fas fa-portfolio"></i> How This Analysis Affects Your Portfolio Strategy</h6>
+                                                            <div class="row">
+                                                                <div class="col-md-4">
+                                                                    <strong>🟢 Low Risk (0-33):</strong> Growth-focused allocation with higher equity exposure, minimal bonds
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <strong>🟡 Moderate Risk (34-66):</strong> Balanced approach with increased defensive positioning and bond allocation
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <strong>🔴 High Risk (67-100):</strong> Defensive strategy emphasizing capital preservation, government bonds, and cash
+                                                                </div>
+                                                            </div>
+                                                            <hr>
+                                                            <div class="small">
+                                                                <strong>Current Strategy Impact:</strong> 
+                                                                {% if dashboard.economic_data.enhanced_recession_risk.additional_risk > 15 %}
+                                                                Your enhanced analysis detected significant additional risk (+{{ "%.0f"|format(dashboard.economic_data.enhanced_recession_risk.additional_risk) }} points), triggering more defensive positioning across all timeframes.
+                                                                {% elif dashboard.economic_data.enhanced_recession_risk.additional_risk > 8 %}
+                                                                Moderate additional risk detected (+{{ "%.0f"|format(dashboard.economic_data.enhanced_recession_risk.additional_risk) }} points), resulting in slightly more conservative allocations.
+                                                                {% else %}
+                                                                Enhanced analysis shows minimal additional risk (+{{ "%.0f"|format(dashboard.economic_data.enhanced_recession_risk.additional_risk) }} points), maintaining standard allocation approach.
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <div class="row">
                             {% for key, allocation in portfolio_allocations.items() %}
                             <div class="col-md-3 mb-4">

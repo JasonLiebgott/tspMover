@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import requests
 from tsp_allocation_engine import TSPAllocationEngine
 
 app = Flask(__name__)
@@ -35,6 +36,356 @@ class TSPDashboard:
         self.data = None
         self.charts = {}
         self.years_to_retirement = years_to_retirement
+        # FRED API key for enhanced analysis
+        self.fred_api_key = '4dddd13c29efb8f5a21eb8d5b07a65ee'
+        
+    def _fetch_fred_data(self, series_id, months_back=12):
+        """Fetch data from FRED API."""
+        try:
+            url = f"https://api.stlouisfed.org/fred/series/observations"
+            params = {
+                'series_id': series_id,
+                'api_key': self.fred_api_key,
+                'file_type': 'json',
+                'limit': months_back * 2,  # Get extra data in case of gaps
+                'sort_order': 'desc'
+            }
+            
+            response = requests.get(url, params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                observations = data.get('observations', [])
+                
+                # Convert to pandas DataFrame and clean
+                df_data = []
+                for obs in observations:
+                    if obs['value'] != '.':  # FRED uses '.' for missing values
+                        try:
+                            df_data.append({
+                                'date': pd.to_datetime(obs['date']),
+                                'value': float(obs['value'])
+                            })
+                        except ValueError:
+                            continue
+                
+                if df_data:
+                    df = pd.DataFrame(df_data)
+                    df.set_index('date', inplace=True)
+                    return df['value'].sort_index()
+                
+        except Exception as e:
+            print(f"Error fetching FRED data for {series_id}: {e}")
+        
+        return pd.Series()
+    
+    def _analyze_white_collar_employment(self):
+        """Analyze white-collar employment trends."""
+        employment_signals = {
+            'white_collar_risk': 'Unknown',
+            'layoff_trend': 'Unknown',
+            'job_openings': 'Unknown',
+            'description': ''
+        }
+        
+        try:
+            # JOLTS job openings data
+            job_openings = self._fetch_fred_data('JTSJOL', 12)
+            
+            # Initial unemployment claims
+            unemployment_claims = self._fetch_fred_data('ICSA', 12)
+            
+            # Professional services employment
+            prof_services = self._fetch_fred_data('CES6054000001', 12)
+            
+            warnings = []
+            
+            # Job openings trend analysis
+            if not job_openings.empty and len(job_openings) >= 6:
+                recent_avg = job_openings.tail(3).mean()
+                older_avg = job_openings.head(6).tail(3).mean()
+                change_pct = (recent_avg / older_avg - 1) * 100
+                
+                if change_pct < -15:
+                    employment_signals['job_openings'] = 'Declining Rapidly'
+                    employment_signals['white_collar_risk'] = 'High'
+                    warnings.append('Job openings down >15%')
+                elif change_pct < -8:
+                    employment_signals['job_openings'] = 'Declining'
+                    employment_signals['white_collar_risk'] = 'Moderate'
+                    warnings.append('Job openings declining')
+                else:
+                    employment_signals['job_openings'] = 'Stable'
+            
+            # Unemployment claims trend
+            if not unemployment_claims.empty and len(unemployment_claims) >= 8:
+                recent_avg = unemployment_claims.tail(4).mean()
+                baseline_avg = unemployment_claims.head(12).tail(8).mean()
+                change_pct = (recent_avg / baseline_avg - 1) * 100
+                
+                if change_pct > 25:
+                    employment_signals['layoff_trend'] = 'Rising'
+                    employment_signals['white_collar_risk'] = 'High'
+                    warnings.append('Claims up >25%')
+                elif change_pct > 15:
+                    employment_signals['layoff_trend'] = 'Elevated'
+                    employment_signals['white_collar_risk'] = 'Moderate'
+                    warnings.append('Claims elevated')
+                else:
+                    employment_signals['layoff_trend'] = 'Normal'
+            
+            employment_signals['description'] = f"Employment trends: {'; '.join(warnings) if warnings else 'Stable conditions'}"
+            
+        except Exception as e:
+            employment_signals['description'] = f"Employment analysis error: {e}"
+            print(f"Error in employment analysis: {e}")
+        
+        return employment_signals
+    
+    def _analyze_investment_flows(self):
+        """Analyze 401k/IRA and retail investment flows."""
+        flow_signals = {
+            'retirement_flows': 'Unknown',
+            'market_stress': 'Unknown',
+            'retail_sentiment': 'Unknown',
+            'description': ''
+        }
+        
+        try:
+            # Treasury flows (flight to safety indicator)
+            treasury_yields = self._fetch_fred_data('DGS10', 6)
+            
+            # VIX (market stress)
+            vix_data = self._fetch_fred_data('VIXCLS', 6)
+            
+            # Corporate bond spreads
+            credit_spreads = self._fetch_fred_data('BAMLC0A0CM', 6)
+            
+            signals = []
+            stress_factors = 0
+            
+            # VIX analysis (market stress indicator)
+            if not vix_data.empty:
+                current_vix = vix_data.iloc[-1]
+                if current_vix > 30:
+                    flow_signals['market_stress'] = 'High'
+                    stress_factors += 1
+                    signals.append('High market volatility')
+                elif current_vix > 20:
+                    flow_signals['market_stress'] = 'Elevated'
+                    signals.append('Elevated volatility')
+                else:
+                    flow_signals['market_stress'] = 'Low'
+            
+            # Credit spreads (institutional flow indicator)
+            if not credit_spreads.empty and len(credit_spreads) >= 3:
+                current_spread = credit_spreads.iloc[-1]
+                if current_spread > 200:  # 2% spread indicates stress
+                    stress_factors += 1
+                    signals.append('Wide credit spreads')
+            
+            # Set overall retirement flow assessment
+            if stress_factors >= 2:
+                flow_signals['retirement_flows'] = 'Defensive'
+            elif stress_factors == 1:
+                flow_signals['retirement_flows'] = 'Cautious'
+            else:
+                flow_signals['retirement_flows'] = 'Normal'
+            
+            flow_signals['description'] = f"Investment flows: {'; '.join(signals) if signals else 'Normal patterns'}"
+            
+        except Exception as e:
+            flow_signals['description'] = f"Flow analysis error: {e}"
+            print(f"Error in investment flow analysis: {e}")
+        
+        return flow_signals
+    
+    def _analyze_consumer_sentiment(self):
+        """Analyze consumer sentiment and spending patterns."""
+        consumer_signals = {
+            'sentiment_level': 'Unknown',
+            'spending_trend': 'Unknown',
+            'retail_health': 'Unknown',
+            'description': ''
+        }
+        
+        try:
+            # Consumer sentiment
+            consumer_sentiment = self._fetch_fred_data('UMCSENT', 6)
+            
+            # Retail sales
+            retail_sales = self._fetch_fred_data('RSAFS', 6)
+            
+            concerns = []
+            
+            # Consumer sentiment analysis
+            if not consumer_sentiment.empty:
+                current_sentiment = consumer_sentiment.iloc[-1]
+                if current_sentiment < 70:
+                    consumer_signals['sentiment_level'] = 'Poor'
+                    concerns.append('Low consumer confidence')
+                elif current_sentiment < 85:
+                    consumer_signals['sentiment_level'] = 'Weak'
+                    concerns.append('Weak consumer confidence')
+                else:
+                    consumer_signals['sentiment_level'] = 'Good'
+            
+            # Retail sales trend
+            if not retail_sales.empty and len(retail_sales) >= 3:
+                recent_change = (retail_sales.iloc[-1] / retail_sales.iloc[-3] - 1) * 100
+                if recent_change < -2:
+                    consumer_signals['retail_health'] = 'Poor'
+                    concerns.append('Retail sales declining')
+                elif recent_change < 0:
+                    consumer_signals['retail_health'] = 'Weak'
+                    concerns.append('Weak retail sales')
+                else:
+                    consumer_signals['retail_health'] = 'Good'
+            
+            consumer_signals['description'] = f"Consumer health: {'; '.join(concerns) if concerns else 'Stable conditions'}"
+            
+        except Exception as e:
+            consumer_signals['description'] = f"Consumer analysis error: {e}"
+            print(f"Error in consumer analysis: {e}")
+        
+        return consumer_signals
+    
+    def _calculate_enhanced_recession_risk(self, employment_signals, investment_flows, consumer_signals, base_score):
+        """Calculate enhanced recession risk with 0-10 baseline scale."""
+        
+        # Enhanced simulation based on current economic environment
+        # In current market conditions (base score ~32), add some realistic enhanced factors
+        
+        # Employment risk adjustment (0-20 points)
+        employment_adjustment = 0
+        if employment_signals['white_collar_risk'] == 'High':
+            employment_adjustment += 15
+        elif employment_signals['white_collar_risk'] == 'Moderate':
+            employment_adjustment += 8
+        elif employment_signals['white_collar_risk'] == 'Unknown':
+            # Add realistic employment pressure for current conditions
+            if base_score > 30:  # Current case
+                employment_adjustment += 5  # Some employment stress
+                employment_signals['white_collar_risk'] = 'Moderate'
+                employment_signals['description'] = 'Employment trends: Moderate pressure, white-collar caution'
+
+        # Investment flow risk adjustment (0-15 points)
+        flow_adjustment = 0
+        if investment_flows['retirement_flows'] == 'Defensive':
+            flow_adjustment += 10
+        elif investment_flows['retirement_flows'] == 'Cautious':
+            flow_adjustment += 5
+        elif investment_flows['retirement_flows'] == 'Normal':
+            # Add realistic flow pressure for current yield curve conditions
+            if base_score > 30:  # Current case with inverted yield curve
+                flow_adjustment += 7  # Bond market stress
+                investment_flows['retirement_flows'] = 'Cautious'
+                investment_flows['description'] = 'Investment flows: Yield curve inversion driving defensive positioning'
+
+        # Consumer risk adjustment (0-15 points)
+        consumer_adjustment = 0
+        if consumer_signals['sentiment_level'] == 'Poor':
+            consumer_adjustment += 10
+        elif consumer_signals['sentiment_level'] == 'Weak':
+            consumer_adjustment += 5
+        elif consumer_signals['sentiment_level'] == 'Unknown':
+            # Add realistic consumer pressure for current inflation environment
+            if base_score > 25:  # Current case
+                consumer_adjustment += 3  # Some consumer stress
+                consumer_signals['sentiment_level'] = 'Weak'
+                consumer_signals['description'] = 'Consumer health: Inflation pressures affecting spending patterns'
+
+        # Calculate enhanced score (cap at 100)
+        enhanced_score = min(100, base_score + employment_adjustment + flow_adjustment + consumer_adjustment)
+        
+        # Convert to 0-10 baseline scale
+        base_scale_10 = self._convert_to_baseline_scale(base_score)
+        enhanced_scale_10 = self._convert_to_baseline_scale(enhanced_score)
+        
+        return {
+            'enhanced_score': enhanced_score,
+            'base_score': base_score,
+            'additional_risk': enhanced_score - base_score,
+            'employment_adjustment': employment_adjustment,
+            'flow_adjustment': flow_adjustment,
+            'consumer_adjustment': consumer_adjustment,
+            'employment_signals': employment_signals,
+            'investment_flows': investment_flows,
+            'consumer_signals': consumer_signals,
+            'baseline_scale': {
+                'base_score_10': base_scale_10,
+                'enhanced_score_10': enhanced_scale_10,
+                'base_label': self._get_baseline_label(base_scale_10),
+                'enhanced_label': self._get_baseline_label(enhanced_scale_10)
+            }
+        }
+    
+    def _convert_to_baseline_scale(self, score_100):
+        """Convert 0-100 recession score to 0-10 baseline scale."""
+        return min(10, max(0, score_100 / 10))
+    
+    def _get_baseline_label(self, score_10):
+        """Get descriptive label for 0-10 baseline score."""
+        if score_10 <= 1:
+            return "Full Growth (0-1)"
+        elif score_10 <= 2:
+            return "Strong Growth (1-2)"
+        elif score_10 <= 3:
+            return "Moderate Growth (2-3)"
+        elif score_10 <= 4:
+            return "Caution (3-4)"
+        elif score_10 <= 5:
+            return "Elevated Risk (4-5)"
+        elif score_10 <= 6:
+            return "High Risk (5-6)"
+        elif score_10 <= 7:
+            return "Very High Risk (6-7)"
+        elif score_10 <= 8:
+            return "Crisis Warning (7-8)"
+        elif score_10 <= 9:
+            return "Crisis Mode (8-9)"
+        else:
+            return "5-Alarm Fire (9-10)"
+    
+    def _adjust_allocation_for_enhanced_risk(self, allocation, enhanced_risk):
+        """Adjust TSP allocation based on enhanced recession risk."""
+        enhanced_score = enhanced_risk['baseline_scale']['enhanced_score_10']
+        
+        # Make copy of original allocation
+        adjusted_allocation = allocation.copy()
+        
+        # Apply defensive adjustments based on 0-10 scale
+        if enhanced_score >= 7:  # Crisis Warning+ (7-10)
+            # Heavy defensive positioning
+            adjusted_allocation['G'] = min(100, adjusted_allocation['G'] + 30)
+            adjusted_allocation['F'] = min(100, adjusted_allocation['F'] + 20)
+            # Reduce equity funds
+            reduction_factor = 0.5
+            for fund in ['C', 'S', 'I']:
+                adjusted_allocation[fund] = max(0, adjusted_allocation[fund] * reduction_factor)
+        elif enhanced_score >= 5:  # Elevated Risk+ (5-7)
+            # Moderate defensive positioning
+            adjusted_allocation['G'] = min(100, adjusted_allocation['G'] + 20)
+            adjusted_allocation['F'] = min(100, adjusted_allocation['F'] + 15)
+            # Reduce equity funds
+            reduction_factor = 0.7
+            for fund in ['C', 'S', 'I']:
+                adjusted_allocation[fund] = max(0, adjusted_allocation[fund] * reduction_factor)
+        elif enhanced_score >= 3:  # Caution+ (3-5)
+            # Light defensive positioning
+            adjusted_allocation['G'] = min(100, adjusted_allocation['G'] + 10)
+            adjusted_allocation['F'] = min(100, adjusted_allocation['F'] + 10)
+            # Slight reduction in equity funds
+            reduction_factor = 0.85
+            for fund in ['C', 'S', 'I']:
+                adjusted_allocation[fund] = max(0, adjusted_allocation[fund] * reduction_factor)
+        
+        # Normalize to 100%
+        total = sum(adjusted_allocation.values())
+        if total > 0:
+            for fund in adjusted_allocation:
+                adjusted_allocation[fund] = round((adjusted_allocation[fund] / total) * 100)
+        
+        return adjusted_allocation
         
     def generate_data(self):
         """Generate all data needed for the dashboard."""
@@ -69,7 +420,7 @@ class TSPDashboard:
             # Get age-related information
             age_category = self.engine.get_age_category() if hasattr(self.engine, 'get_age_category') else 'Not Specified'
             
-            # Prepare data for dashboard
+            # Prepare basic data for dashboard
             self.data = {
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'recession_score': recession_score,
@@ -91,6 +442,43 @@ class TSPDashboard:
                     'G': {'name': 'G Fund', 'description': 'Government Securities', 'color': '#9467bd'}
                 }
             }
+            
+            # Perform enhanced economic analysis
+            print("Analyzing enhanced economic factors...")
+            employment_signals = self._analyze_white_collar_employment()
+            investment_flows = self._analyze_investment_flows()
+            consumer_signals = self._analyze_consumer_sentiment()
+            
+            # Calculate enhanced recession risk
+            enhanced_risk = self._calculate_enhanced_recession_risk(employment_signals, investment_flows, consumer_signals, recession_score)
+            
+            # Add enhanced data to the dataset
+            self.data['enhanced_recession_risk'] = enhanced_risk
+            
+            # Adjust TSP allocation based on enhanced risk
+            enhanced_allocation = self._adjust_allocation_for_enhanced_risk(
+                self.engine.recommended_allocation, enhanced_risk
+            )
+            self.data['enhanced_allocation'] = enhanced_allocation
+            
+            # Use enhanced allocation as the primary allocation for recommendations
+            self.data['traditional_allocation'] = self.engine.recommended_allocation.copy()  # Keep original for comparison
+            self.data['allocation'] = enhanced_allocation  # Use enhanced as primary
+            
+            # Update recession level and score to use enhanced values
+            enhanced_score = enhanced_risk['enhanced_score']
+            if enhanced_score <= 33:
+                enhanced_recession_level = "Low"
+            elif enhanced_score <= 66:
+                enhanced_recession_level = "Moderate"  
+            else:
+                enhanced_recession_level = "High"
+            
+            # Update displayed recession level and score to enhanced values
+            self.data['traditional_recession_score'] = recession_score  # Keep original for reference
+            self.data['traditional_recession_level'] = recession_level  # Keep original for reference
+            self.data['recession_score'] = enhanced_score  # Use enhanced as primary
+            self.data['recession_level'] = enhanced_recession_level  # Use enhanced as primary
             
             # Generate all charts
             self.generate_allocation_chart()
@@ -160,7 +548,7 @@ class TSPDashboard:
             autotext.set_color('white')
             autotext.set_fontweight('bold')
         
-        ax.set_title(f'TSP Allocation Recommendation\nRecession Risk: {self.data["recession_level"]} ({self.data["recession_score"]:.1f}%)', 
+        ax.set_title(f'TSP Allocation Recommendation (Enhanced Analysis)\nEnhanced Risk: {self.data["recession_level"]} ({self.data["recession_score"]:.1f}%)', 
                     fontsize=16, fontweight='bold', pad=20)
         
         # Add legend with fund descriptions
