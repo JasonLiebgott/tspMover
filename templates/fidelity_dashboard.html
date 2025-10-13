@@ -1369,11 +1369,21 @@
             let purchaseHtml = '';
             let runningTotal = 0;
             
+            // Track funds seen to prevent duplicates within the same timeframe
+            const fundsSeenThisTimeframe = new Set();
+            
             fundAllocations.forEach(allocation => {
                 const symbol = allocation.getAttribute('data-symbol');
                 const percentage = parseFloat(allocation.getAttribute('data-allocation'));
                 const category = allocation.getAttribute('data-category');
                 const amount = Math.round(totalAmount * (percentage / 100));
+                
+                // Check for duplicates within the same timeframe
+                if (fundsSeenThisTimeframe.has(symbol)) {
+                    console.warn(`Timeframe ${timeframe}: DUPLICATE FUND DETECTED: ${symbol} - skipping duplicate entry`);
+                    return; // Skip this duplicate entry
+                }
+                fundsSeenThisTimeframe.add(symbol);
                 
                 runningTotal += amount;
                 
@@ -1441,10 +1451,20 @@
             
             let copyText = `${timeframe} Year Portfolio Allocation (${totalAmountSpan.textContent}):\n\n`;
             
+            // Track funds seen to prevent duplicates within the same timeframe
+            const fundsSeenThisTimeframe = new Set();
+            
             fundAllocations.forEach(allocation => {
                 const symbol = allocation.getAttribute('data-symbol');
                 const percentage = parseFloat(allocation.getAttribute('data-allocation'));
                 const amount = Math.round(totalAmount * (percentage / 100));
+                
+                // Check for duplicates within the same timeframe
+                if (fundsSeenThisTimeframe.has(symbol)) {
+                    console.warn(`Copy - Timeframe ${timeframe}: DUPLICATE FUND DETECTED: ${symbol} - skipping duplicate entry`);
+                    return; // Skip this duplicate entry
+                }
+                fundsSeenThisTimeframe.add(symbol);
                 
                 copyText += `${symbol}: $${amount.toLocaleString()} (${percentage.toFixed(0)}%)\n`;
             });
@@ -1479,11 +1499,21 @@
                 console.log(`Year ${year}: Found ${fundAllocations.length} fund allocations`);
                 yearTotals[year] = totalAmountPerYear;
                 
+                // Track funds seen in this year to prevent duplicates within the same year
+                const fundsSeenThisYear = new Set();
+                
                 fundAllocations.forEach(allocation => {
                     const symbol = allocation.getAttribute('data-symbol');
                     const percentage = parseFloat(allocation.getAttribute('data-allocation'));
                     const category = allocation.getAttribute('data-category');
                     const amount = Math.round(totalAmountPerYear * (percentage / 100));
+                    
+                    // Check for duplicates within the same year
+                    if (fundsSeenThisYear.has(symbol)) {
+                        console.warn(`  Year ${year}: DUPLICATE FUND DETECTED: ${symbol} - skipping duplicate entry`);
+                        return; // Skip this duplicate entry
+                    }
+                    fundsSeenThisYear.add(symbol);
                     
                     console.log(`  Year ${year}: ${symbol} - ${percentage}% = $${amount.toLocaleString()}`);
                     
@@ -1494,6 +1524,12 @@
                             yearlyAmounts: {},
                             totalPercentage: 0
                         };
+                    }
+                    
+                    // Check if this fund already has an allocation for this year
+                    if (masterFunds[symbol].yearlyAmounts[year]) {
+                        console.warn(`  Year ${year}: ${symbol} already has allocation for this year: $${masterFunds[symbol].yearlyAmounts[year].toLocaleString()}, adding $${amount.toLocaleString()}`);
+                        masterFunds[symbol].totalAmount -= masterFunds[symbol].yearlyAmounts[year]; // Remove previous amount
                     }
                     
                     masterFunds[symbol].totalAmount += amount;
@@ -1571,11 +1607,21 @@
             for (let year = 1; year <= 4; year++) {
                 const fundAllocations = document.querySelectorAll(`[data-timeframe="${year}"].fund-allocation`);
                 
+                // Track funds seen in this year to prevent duplicates within the same year
+                const fundsSeenThisYear = new Set();
+                
                 fundAllocations.forEach(allocation => {
                     const symbol = allocation.getAttribute('data-symbol');
                     const percentage = parseFloat(allocation.getAttribute('data-allocation'));
                     const category = allocation.getAttribute('data-category');
                     const amount = Math.round(totalAmountPerYear * (percentage / 100));
+                    
+                    // Check for duplicates within the same year
+                    if (fundsSeenThisYear.has(symbol)) {
+                        console.warn(`Copy function - Year ${year}: DUPLICATE FUND DETECTED: ${symbol} - skipping duplicate entry`);
+                        return; // Skip this duplicate entry
+                    }
+                    fundsSeenThisYear.add(symbol);
                     
                     if (!masterFunds[symbol]) {
                         masterFunds[symbol] = {
@@ -1583,6 +1629,12 @@
                             totalAmount: 0,
                             yearlyAmounts: {}
                         };
+                    }
+                    
+                    // Check if this fund already has an allocation for this year
+                    if (masterFunds[symbol].yearlyAmounts[year]) {
+                        console.warn(`Copy function - Year ${year}: ${symbol} already has allocation for this year: $${masterFunds[symbol].yearlyAmounts[year].toLocaleString()}, adding $${amount.toLocaleString()}`);
+                        masterFunds[symbol].totalAmount -= masterFunds[symbol].yearlyAmounts[year]; // Remove previous amount
                     }
                     
                     masterFunds[symbol].totalAmount += amount;

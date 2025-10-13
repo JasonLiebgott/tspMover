@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asymmetric Debasement Protection Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-body {
+            color: #ffffff;
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .score-high { color: #28a745; }
+        .score-medium { color: #ffc107; }
+        .score-low { color: #dc3545; }
+        
+        .category-card {
+            margin-bottom: 20px;
+        }
+        
+        .asset-row {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        .asset-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .debasement-high { 
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            color: white;
+        }
+        
+        .debasement-medium { 
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: #000;
+        }
+        
+        .debasement-low { 
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .top-picks {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #0056b3, #520dc2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        Asymmetric Debasement Protection Dashboard
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">
+                        Identifying assets that protect against USD debasement under continuous monetary expansion
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-primary" onclick="refreshAnalysis()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="container mt-4">
+        <!-- Macro Environment Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Macro Environment & Debasement Pressure
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="macro-metrics">
+                            <div class="col-md-3">
+                                <div class="metric-card">
+                                    <div class="loading-spinner"></div>
+                                    <div class="metric-label">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Recommendations -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card top-picks">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy me-2"></i>
+                            Top Debasement Protection Assets
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Symbol</th>
+                                        <th>Asset Name</th>
+                                        <th>Category</th>
+                                        <th>Protection Score</th>
+                                        <th>Annual Return</th>
+                                        <th>Monthly Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recommendations-table">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="loading-spinner me-2"></div>
+                                            Loading recommendations...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-layer-group me-2"></i>
+                            Asset Category Performance
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="category-performance">
+                            <div class="col-md-12 text-center">
+                                <div class="loading-spinner me-2"></div>
+                                Loading category analysis...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Category Analysis -->
+        <div class="row" id="detailed-categories">
+            <div class="col-12 text-center">
+                <div class="loading-spinner me-2"></div>
+                Loading detailed analysis...
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 text-center opacity-75">
+        <div class="container">
+            <p class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Analysis based on historical data and current market conditions. 
+                Past performance does not guarantee future results.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let analysisData = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnalysis();
+        });
+
+        async function loadAnalysis() {
+            try {
+                showLoading();
+                const response = await fetch('/api/analysis');
+                const data = await response.json();
+                
+                if (data.success) {
+                    analysisData = data;
+                    updateDashboard(data);
+                } else {
+                    showError('Error loading analysis: ' + data.error);
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        function updateDashboard(data) {
+            updateMacroMetrics(data.analysis.macro_environment);
+            updateRecommendations(data.recommendations);
+            updateCategoryPerformance(data.analysis.category_scores);
+            updateDetailedCategories(data.analysis.categories);
+        }
+
+        function updateMacroMetrics(macro) {
+            const macroContainer = document.getElementById('macro-metrics');
+            
+            const debasementClass = macro.debasement_pressure === 'High' ? 'debasement-high' : 
+                                   macro.debasement_pressure === 'Medium' ? 'debasement-medium' : 'debasement-low';
+            
+            macroContainer.innerHTML = `
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">${macro.money_supply_growth}%</div>
+                        <div class="metric-label">Money Supply Growth</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">${macro.inflation_trend}%</div>
+                        <div class="metric-label">Inflation Trend</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">${macro.dollar_strength}%</div>
+                        <div class="metric-label">Dollar Strength</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card ${debasementClass}">
+                        <div class="metric-value">${macro.debasement_pressure}</div>
+                        <div class="metric-label">Debasement Pressure</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateRecommendations(recommendations) {
+            const tableBody = document.getElementById('recommendations-table');
+            
+            if (!recommendations || recommendations.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No recommendations available</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = recommendations.map((asset, index) => {
+                const scoreClass = asset.score >= 70 ? 'score-high' : asset.score >= 40 ? 'score-medium' : 'score-low';
+                const metrics = asset.metrics || {};
+                
+                return `
+                    <tr>
+                        <td><strong>#${index + 1}</strong></td>
+                        <td><code>${asset.symbol}</code></td>
+                        <td>${asset.name}</td>
+                        <td><span class="badge bg-secondary">${asset.category}</span></td>
+                        <td><span class="${scoreClass}"><strong>${asset.score}/100</strong></span></td>
+                        <td>${metrics.annual_return ? metrics.annual_return + '%' : 'N/A'}</td>
+                        <td>${metrics.monthly_change ? (metrics.monthly_change >= 0 ? '+' : '') + metrics.monthly_change + '%' : 'N/A'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateCategoryPerformance(categoryScores) {
+            const container = document.getElementById('category-performance');
+            
+            if (!categoryScores || Object.keys(categoryScores).length === 0) {
+                container.innerHTML = '<div class="col-12 text-center">No category data available</div>';
+                return;
+            }
+
+            const categories = Object.entries(categoryScores)
+                .sort((a, b) => b[1].average_score - a[1].average_score)
+                .map(([category, data]) => {
+                    const scoreClass = data.average_score >= 60 ? 'score-high' : 
+                                      data.average_score >= 40 ? 'score-medium' : 'score-low';
+                    const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    
+                    return `
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card category-card">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">${categoryName}</h6>
+                                    <div class="metric-value ${scoreClass}">${data.average_score}/100</div>
+                                    <small class="opacity-75">Average Protection Score</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            container.innerHTML = categories;
+        }
+
+        function updateDetailedCategories(categories) {
+            const container = document.getElementById('detailed-categories');
+            
+            if (!categories || Object.keys(categories).length === 0) {
+                container.innerHTML = '<div class="col-12 text-center">No detailed data available</div>';
+                return;
+            }
+
+            const categoryHtml = Object.entries(categories).map(([categoryKey, assets]) => {
+                const categoryName = categoryKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                const assetRows = Object.entries(assets).map(([symbol, data]) => {
+                    const scoreClass = data.score >= 60 ? 'score-high' : 
+                                      data.score >= 40 ? 'score-medium' : 'score-low';
+                    const metrics = data.metrics || {};
+                    
+                    return `
+                        <div class="asset-row">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <strong>${symbol}</strong><br>
+                                    <small class="opacity-75">${data.name}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span class="${scoreClass}"><strong>${data.score}/100</strong></span>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    ${metrics.annual_return ? metrics.annual_return + '%' : 'N/A'}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    ${metrics.volatility ? metrics.volatility + '%' : 'N/A'}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    ${metrics.current_price ? '$' + metrics.current_price : 'N/A'}
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    <i class="fas fa-chart-line text-primary" style="cursor: pointer;" 
+                                       title="View detailed analysis"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">${categoryName}</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="row align-items-center p-3 border-bottom">
+                                    <div class="col-md-3"><strong>Asset</strong></div>
+                                    <div class="col-md-2 text-center"><strong>Score</strong></div>
+                                    <div class="col-md-2 text-center"><strong>Return</strong></div>
+                                    <div class="col-md-2 text-center"><strong>Volatility</strong></div>
+                                    <div class="col-md-2 text-center"><strong>Price</strong></div>
+                                    <div class="col-md-1 text-center"><strong>Chart</strong></div>
+                                </div>
+                                ${assetRows}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = categoryHtml;
+        }
+
+        function refreshAnalysis() {
+            loadAnalysis();
+        }
+
+        function showLoading() {
+            // Loading states are already in the HTML
+        }
+
+        function showError(message) {
+            const container = document.querySelector('.container');
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+        }
+    </script>
+</body>
+</html>

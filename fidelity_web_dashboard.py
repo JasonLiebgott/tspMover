@@ -1388,15 +1388,16 @@ class FidelityDashboard:
             group_funds = [symbol_to_fund[symbol] for symbol in symbols 
                           if symbol in symbol_to_fund and symbol not in used_symbols]
             if group_funds:
-                # Prefer Fidelity funds when scores are close (within 5 points)
-                best_fund = group_funds[0]  # Start with first (Fidelity fund if available)
-                for fund in group_funds[1:]:
-                    # Only switch if non-Fidelity fund significantly outperforms Fidelity fund
-                    if fund.score > best_fund.score + 5:
-                        best_fund = fund
-                    elif (fund.score > best_fund.score and 
-                          fund.symbol.startswith(('F', 'FD', 'FX', 'FZ'))):  # Prefer Fidelity if close
-                        best_fund = fund
+                # STRICT Fidelity preference: Always prefer Fidelity funds when available
+                fidelity_funds = [f for f in group_funds if f.symbol.startswith(('F', 'FD', 'FX', 'FZ'))]
+                non_fidelity_funds = [f for f in group_funds if not f.symbol.startswith(('F', 'FD', 'FX', 'FZ'))]
+                
+                if fidelity_funds:
+                    # Always choose the best Fidelity fund if available
+                    best_fund = max(fidelity_funds, key=lambda f: f.score)
+                else:
+                    # Only if no Fidelity funds, choose best non-Fidelity
+                    best_fund = max(non_fidelity_funds, key=lambda f: f.score)
                 
                 unique_funds.append(best_fund)
                 used_symbols.update(symbols)
@@ -1559,11 +1560,17 @@ class FidelityDashboard:
         fund_allocations = []
         allocated_percentage = 0
         used_categories = set()
+        used_symbols = set()  # Track symbols to prevent duplicates
         
         # First pass: Allocate to top funds with category diversification
         for fund, adj_score, volatility in suitable_funds[:max_funds*2]:
             if len(fund_allocations) >= max_funds:
                 break
+                
+            # Prevent duplicate symbols
+            if fund.symbol in used_symbols:
+                print(f"  ⚠️ DUPLICATE SYMBOL DETECTED: {fund.symbol} - skipping duplicate")
+                continue
                 
             # For conservative timeframes, limit concentration in any single category
             if years <= 2:
@@ -1607,6 +1614,7 @@ class FidelityDashboard:
                 })
                 allocated_percentage += actual_allocation
                 used_categories.add(fund.category)
+                used_symbols.add(fund.symbol)  # Track symbols to prevent duplicates
                 
                 print(f"  ✓ ALLOCATED: {fund.symbol} = {actual_allocation:.1f}% (Vol: {volatility:.1f}%, Score: {fund.score:.1f})")
             
@@ -1634,6 +1642,29 @@ class FidelityDashboard:
         
         allocation['funds'] = sorted(fund_allocations, key=lambda x: x['allocation'], reverse=True)
         allocation['total_allocation'] = sum(fa['allocation'] for fa in fund_allocations)
+        
+        # Final validation: Check for duplicate symbols in the allocation
+        symbols_in_allocation = [fa['fund'].symbol for fa in allocation['funds']]
+        unique_symbols = set(symbols_in_allocation)
+        if len(symbols_in_allocation) != len(unique_symbols):
+            print(f"  🚨 ERROR: DUPLICATE SYMBOLS DETECTED in {years}-year allocation!")
+            symbol_counts = {}
+            for symbol in symbols_in_allocation:
+                symbol_counts[symbol] = symbol_counts.get(symbol, 0) + 1
+            for symbol, count in symbol_counts.items():
+                if count > 1:
+                    print(f"    DUPLICATE: {symbol} appears {count} times")
+            # Remove duplicates (keep first occurrence)
+            seen_symbols = set()
+            clean_funds = []
+            for fa in allocation['funds']:
+                if fa['fund'].symbol not in seen_symbols:
+                    clean_funds.append(fa)
+                    seen_symbols.add(fa['fund'].symbol)
+                else:
+                    print(f"    REMOVED DUPLICATE: {fa['fund'].symbol}")
+            allocation['funds'] = clean_funds
+            allocation['total_allocation'] = sum(fa['allocation'] for fa in clean_funds)
         
         return allocation
     
