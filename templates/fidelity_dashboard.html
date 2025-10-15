@@ -816,6 +816,52 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        
+                                                        <!-- Enhanced Explanations -->
+                                                        {% if dashboard.economic_data.enhanced_recession_risk.enhanced_explanations %}
+                                                        <div class="mt-4">
+                                                            <h6 class="text-info mb-3"><i class="fas fa-microscope"></i> Enhanced Indicator Deep Dive</h6>
+                                                            <div class="accordion" id="enhancedExplanationsAccordion">
+                                                                {% for component_name, explanation in dashboard.economic_data.enhanced_recession_risk.enhanced_explanations.items() %}
+                                                                <div class="accordion-item mb-2">
+                                                                    <h2 class="accordion-header" id="headingEnhanced{{ component_name }}">
+                                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnhanced{{ component_name }}" aria-expanded="false" aria-controls="collapseEnhanced{{ component_name }}">
+                                                                            <div class="d-flex align-items-center w-100">
+                                                                                <div class="me-3">
+                                                                                    {% set component_data = dashboard.economic_data.enhanced_recession_risk.component_baselines[component_name] %}
+                                                                                    <span class="badge {{ 'bg-success' if component_data.score <= 3 else 'bg-warning' if component_data.score <= 6 else 'bg-danger' }}">
+                                                                                        {{ "%.1f"|format(component_data.score) }}/10
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="flex-grow-1">
+                                                                                    <strong>
+                                                                                        {% if component_name == 'employment' %}
+                                                                                            Employment Trends Analysis
+                                                                                        {% elif component_name == 'investment_flows' %}
+                                                                                            Investment Flows Analysis
+                                                                                        {% elif component_name == 'consumer_sentiment' %}
+                                                                                            Consumer Sentiment Analysis
+                                                                                        {% else %}
+                                                                                            {{ component_name.title().replace('_', ' ') }}
+                                                                                        {% endif %}
+                                                                                    </strong>
+                                                                                    <div class="small text-muted">{{ component_data.risk_level }} Risk - {{ component_data.label }}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapseEnhanced{{ component_name }}" class="accordion-collapse collapse show" aria-labelledby="headingEnhanced{{ component_name }}" data-bs-parent="#enhancedExplanationsAccordion">
+                                                                        <div class="accordion-body">
+                                                                            <div class="alert alert-light">
+                                                                                <div class="small">{{ explanation }}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -904,6 +950,78 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        
+                                                        <!-- Detailed Indicator Explanations -->
+                                                        {% if dashboard.economic_data.enhanced_recession_risk.indicator_explanations %}
+                                                        <div class="mt-4">
+                                                            <h6 class="text-primary mb-3"><i class="fas fa-info-circle"></i> Detailed Indicator Analysis</h6>
+                                                            <div class="accordion" id="indicatorExplanationsAccordion">
+                                                                {% for indicator_name, explanation in dashboard.economic_data.enhanced_recession_risk.indicator_explanations.items() %}
+                                                                <div class="accordion-item mb-2">
+                                                                    <h2 class="accordion-header" id="heading{{ indicator_name }}">
+                                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ indicator_name }}" aria-expanded="false" aria-controls="collapse{{ indicator_name }}">
+                                                                            <div class="d-flex align-items-center w-100">
+                                                                                <div class="me-3">
+                                                                                    {% set indicator_data = dashboard.economic_data.enhanced_recession_risk.indicator_baselines[indicator_name] %}
+                                                                                    <span class="badge {{ 'bg-success' if indicator_data.score <= 3 else 'bg-warning' if indicator_data.score <= 6 else 'bg-danger' }}">
+                                                                                        {{ "%.1f"|format(indicator_data.score) }}/10
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="flex-grow-1">
+                                                                                    <strong>
+                                                                                        {% if indicator_name == 'sahm_rule' %}
+                                                                                            Sahm Rule
+                                                                                        {% elif indicator_name == 'yield_curve' %}
+                                                                                            10Y-3M Treasury Spread
+                                                                                        {% elif indicator_name == 'labor_market' %}
+                                                                                            Enhanced Labor Market
+                                                                                        {% elif indicator_name == 'lei_index' %}
+                                                                                            Leading Economic Index (LEI)
+                                                                                        {% elif indicator_name == 'pmi' %}
+                                                                                            Purchasing Managers Index (PMI)
+                                                                                        {% elif indicator_name == 'gdp_growth' %}
+                                                                                            GDP Growth Rate
+                                                                                        {% elif indicator_name == 'sp500_ma200' %}
+                                                                                            S&P 500 vs 200-Day MA
+                                                                                        {% elif indicator_name == 'fear_greed' %}
+                                                                                            CNN Fear & Greed Index
+                                                                                        {% elif indicator_name == 'vix' %}
+                                                                                            VIX Volatility Index
+                                                                                        {% elif indicator_name == 'credit_spreads' %}
+                                                                                            Investment Grade Credit Spreads
+                                                                                        {% elif indicator_name == 'core_pce' %}
+                                                                                            Core PCE Inflation
+                                                                                        {% else %}
+                                                                                            {{ indicator_name.title().replace('_', ' ') }}
+                                                                                        {% endif %}
+                                                                                    </strong>
+                                                                                    <div class="small text-muted">{{ indicator_data.risk_level }} Risk - Current Value: 
+                                                                                        {% if indicator_name in ['yield_curve', 'gdp_growth', 'sp500_ma200'] %}
+                                                                                            {{ "%.1f"|format(indicator_data.value) }}%
+                                                                                        {% elif indicator_name in ['sahm_rule', 'lei_index', 'credit_spreads', 'core_pce'] %}
+                                                                                            {{ "%.1f"|format(indicator_data.value) }}%
+                                                                                        {% elif indicator_name == 'labor_market' %}
+                                                                                            {{ "{:,}".format(indicator_data.value|int) }}
+                                                                                        {% else %}
+                                                                                            {{ "%.1f"|format(indicator_data.value) }}
+                                                                                        {% endif %}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapse{{ indicator_name }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ indicator_name }}" data-bs-parent="#indicatorExplanationsAccordion">
+                                                                        <div class="accordion-body">
+                                                                            <div class="alert alert-light">
+                                                                                <div class="small">{{ explanation }}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>

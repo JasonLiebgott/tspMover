@@ -753,7 +753,10 @@ class FidelityDashboard:
                 }
             },
             # All economic indicator baselines (0-10 scale)
-            'indicator_baselines': indicator_baselines
+            'indicator_baselines': indicator_baselines,
+            # Detailed explanations for each indicator
+            'indicator_explanations': self._generate_indicator_explanations(indicator_baselines),
+            'enhanced_explanations': self._generate_enhanced_explanations(employment_signals, investment_flows, consumer_signals)
         }
     
     def _convert_to_baseline_scale(self, score_100):
@@ -1077,6 +1080,132 @@ class FidelityDashboard:
             return 0.0   # Below target
         else:
             return 2.0   # Too low (deflationary risk)
+
+    def _generate_indicator_explanations(self, indicator_baselines):
+        """Generate detailed explanations for each traditional economic indicator."""
+        explanations = {}
+        
+        for indicator_name, indicator_data in indicator_baselines.items():
+            value = indicator_data['value']
+            score = indicator_data['score']
+            risk_level = indicator_data['risk_level']
+            
+            if indicator_name == 'sahm_rule':
+                explanations[indicator_name] = self._explain_sahm_rule(value, score, risk_level)
+            elif indicator_name == 'yield_curve':
+                explanations[indicator_name] = self._explain_yield_curve(value, score, risk_level)
+            elif indicator_name == 'labor_market':
+                explanations[indicator_name] = self._explain_labor_market(value, score, risk_level)
+            elif indicator_name == 'lei_index':
+                explanations[indicator_name] = self._explain_lei_index(value, score, risk_level)
+            elif indicator_name == 'pmi':
+                explanations[indicator_name] = self._explain_pmi(value, score, risk_level)
+            elif indicator_name == 'gdp_growth':
+                explanations[indicator_name] = self._explain_gdp_growth(value, score, risk_level)
+            elif indicator_name == 'sp500_ma200':
+                explanations[indicator_name] = self._explain_sp500_ma200(value, score, risk_level)
+            elif indicator_name == 'fear_greed':
+                explanations[indicator_name] = self._explain_fear_greed(value, score, risk_level)
+            elif indicator_name == 'vix':
+                explanations[indicator_name] = self._explain_vix(value, score, risk_level)
+            elif indicator_name == 'credit_spreads':
+                explanations[indicator_name] = self._explain_credit_spreads(value, score, risk_level)
+            elif indicator_name == 'core_pce':
+                explanations[indicator_name] = self._explain_core_pce(value, score, risk_level)
+        
+        return explanations
+    
+    def _explain_sahm_rule(self, value, score, risk_level):
+        """Explain Sahm Rule current value and categorization."""
+        return f"The Sahm Rule currently shows a value of {value:.2f}. This indicator triggers a recession signal when the 3-month moving average of unemployment rate rises 0.5 percentage points above its 12-month low. Values below 0.1 indicate low recession risk, 0.1-0.2 show slight concern, 0.2-0.3 represent moderate concern, 0.3-0.5 signal high warning, and 0.5+ indicate an active recession. At {value:.2f}, this places the indicator in the '{risk_level}' category with a baseline score of {score:.1f}/10."
+    
+    def _explain_yield_curve(self, value, score, risk_level):
+        """Explain Yield Curve current value and categorization."""
+        return f"The 10-Year to 3-Month Treasury yield spread is currently {value:.2f}%. A normal yield curve shows spreads above 1.5% (indicating healthy economic expectations), while spreads of 1.0-1.5% suggest a flat curve, 0.5-1.0% indicate a very flat curve, and negative values signal inversion (historically preceding recessions). At {value:.2f}%, this yield curve configuration is categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _explain_labor_market(self, value, score, risk_level):
+        """Explain Enhanced Labor Market current value and categorization."""
+        return f"The Enhanced Labor Market indicator shows {value:,.0f} equivalent unemployment claims. This metric combines initial claims, continuing claims, and labor market tightness into a comprehensive measure. Values below 350,000 indicate low stress, 350,000-375,000 show some stress, 375,000-400,000 represent moderate stress, 400,000-450,000 signal high stress, and above 450,000 indicate crisis-level labor market conditions. The current level of {value:,.0f} places this indicator in the '{risk_level}' category with a baseline score of {score:.1f}/10."
+    
+    def _explain_lei_index(self, value, score, risk_level):
+        """Explain Leading Economic Index current value and categorization."""
+        return f"The Leading Economic Index (LEI) shows a {value:.1f}% trend. This composite indicator combines 10 economic variables to forecast economic direction 3-6 months ahead. Values above 1.0% indicate strong growth, 0-1.0% suggest weak growth, 0 to -0.5% show slight decline, -0.5 to -1.0% represent moderate decline, -1.0 to -3.0% signal significant decline, and below -3.0% indicate severe economic contraction. At {value:.1f}%, this places the LEI in the '{risk_level}' category with a baseline score of {score:.1f}/10."
+    
+    def _explain_pmi(self, value, score, risk_level):
+        """Explain PMI current value and categorization."""
+        return f"The Purchasing Managers' Index (PMI) currently reads {value:.1f}. This survey-based indicator measures manufacturing activity, where 50 is the expansion/contraction threshold. Values above 52 indicate strong expansion, 50-52 show modest expansion, 48-50 suggest weak/neutral conditions, 45-48 represent contraction, and below 45 signal severe contraction. At {value:.1f}, this PMI reading is categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _explain_gdp_growth(self, value, score, risk_level):
+        """Explain GDP Growth current value and categorization."""
+        return f"Real GDP growth is currently {value:.1f}% annualized. Economic growth above 2.5% indicates strong expansion, 2.0-2.5% represents trend growth, 1.0-2.0% shows below-trend growth, 0-1.0% suggests weak growth, 0 to -1.0% indicates contraction, and below -1.0% signals recession. The current growth rate of {value:.1f}% places the economy in the '{risk_level}' category with a baseline score of {score:.1f}/10."
+    
+    def _explain_sp500_ma200(self, value, score, risk_level):
+        """Explain S&P 500 vs MA200 current value and categorization."""
+        return f"The S&P 500 is currently {value:.1f}% relative to its 200-day moving average. This technical indicator measures market trend strength. Values above 0% indicate above-trend performance, -5 to 0% suggest below-trend conditions, -10 to -5% represent moderate decline, -20 to -10% signal significant decline, and below -20% indicate bear market territory. At {value:.1f}%, this market positioning is categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _explain_fear_greed(self, value, score, risk_level):
+        """Explain Fear & Greed Index current value and categorization."""
+        return f"The CNN Fear & Greed Index currently reads {value}. This contrarian indicator combines 7 market sentiment measures, where extreme readings often signal turning points. Values 0-20 indicate extreme fear (contrarian bullish), 20-40 show fear (good for contrarians), 40-60 represent neutral conditions, 60-80 suggest greed (warning signal), and 80-100 indicate extreme greed (contrarian bearish). At {value}, this sentiment reading is categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _explain_vix(self, value, score, risk_level):
+        """Explain VIX current value and categorization."""
+        return f"The VIX volatility index currently shows {value:.1f}. This 'fear gauge' measures expected 30-day volatility in the S&P 500. VIX levels below 15 suggest complacency, 15-20 indicate normal conditions, 20-25 show moderate concern, 25-30 represent elevated fear, 30-40 signal high fear, and above 40 indicate panic/crisis conditions. At {value:.1f}, this volatility level is categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _explain_credit_spreads(self, value, score, risk_level):
+        """Explain Credit Spreads current value and categorization."""
+        return f"Investment Grade credit spreads are currently {value:.2f}%. These spreads measure the extra yield investors demand to hold corporate bonds versus Treasuries. Spreads below 1.0% indicate tight conditions, 1.0-1.5% represent normal levels, 1.5-2.0% show moderate widening, 2.0-3.0% suggest elevated spreads, and above 3.0% signal credit stress. At {value:.2f}%, these credit conditions are categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _explain_core_pce(self, value, score, risk_level):
+        """Explain Core PCE current value and categorization."""
+        return f"Core Personal Consumption Expenditures (PCE) inflation is currently {value:.1f}%. This is the Federal Reserve's preferred inflation measure, with a 2.0% target. Values below 1.5% suggest below-target inflation, 1.5-2.0% indicate below target, 2.0-2.5% represent at/slightly above target, 2.5-3.0% show above target, 3.0-4.0% suggest elevated inflation, and above 4.0% indicate high inflation. At {value:.1f}%, this inflation level is categorized as '{risk_level}' risk with a baseline score of {score:.1f}/10."
+    
+    def _generate_enhanced_explanations(self, employment_signals, investment_flows, consumer_signals):
+        """Generate detailed explanations for enhanced economic indicators."""
+        explanations = {}
+        
+        # Employment explanation
+        employment_score = self._get_employment_baseline_score(employment_signals)
+        employment_risk = 'High' if employment_score >= 7 else 'Moderate' if employment_score >= 4 else 'Low'
+        explanations['employment'] = self._explain_employment_trends(employment_signals, employment_score, employment_risk)
+        
+        # Investment flows explanation  
+        flows_score = self._get_investment_flows_baseline_score(investment_flows)
+        flows_risk = 'High' if flows_score >= 7 else 'Moderate' if flows_score >= 4 else 'Low'
+        explanations['investment_flows'] = self._explain_investment_flows(investment_flows, flows_score, flows_risk)
+        
+        # Consumer sentiment explanation
+        consumer_score = self._get_consumer_baseline_score(consumer_signals)
+        consumer_risk = 'High' if consumer_score >= 7 else 'Moderate' if consumer_score >= 4 else 'Low'
+        explanations['consumer_sentiment'] = self._explain_consumer_sentiment(consumer_signals, consumer_score, consumer_risk)
+        
+        return explanations
+    
+    def _explain_employment_trends(self, employment_signals, score, risk_level):
+        """Explain employment trends current values and categorization."""
+        white_collar_risk = employment_signals.get('white_collar_risk', 'Unknown')
+        layoff_trend = employment_signals.get('layoff_trend', 'Unknown') 
+        prof_services = employment_signals.get('professional_services', 'Unknown')
+        tech_sentiment = employment_signals.get('tech_sentiment', 'Unknown')
+        
+        return f"Employment trends analysis shows white-collar risk at '{white_collar_risk}', layoff trends '{layoff_trend}', professional services '{prof_services}', and tech sector sentiment '{tech_sentiment}'. This composite indicator scores 0-5 points for white-collar risk (High=5, Moderate=3, Low=0), 0-3 points for layoff trends (Rising=3, Elevated=2, Stable=0), and 0-2 points for professional services (Declining=2, Weakening=1, Stable=0). The current combination yields a score of {score:.1f}/10, placing employment conditions in the '{risk_level}' risk category. This reflects concerns about white-collar job security, particularly in technology and professional services sectors."
+    
+    def _explain_investment_flows(self, investment_flows, score, risk_level):
+        """Explain investment flows current values and categorization."""
+        market_stress = investment_flows.get('market_stress', 'Unknown')
+        retirement_flows = investment_flows.get('retirement_flows', 'Unknown')
+        flight_to_safety = investment_flows.get('flight_to_safety', 'Unknown')
+        retail_activity = investment_flows.get('retail_activity', 'Unknown')
+        
+        return f"Investment flow analysis shows market stress at '{market_stress}', retirement account positioning '{retirement_flows}', flight-to-safety behavior '{flight_to_safety}', and retail activity '{retail_activity}'. This indicator scores 0-4 points for market stress (High=4, Elevated=2.5, Low=0), 0-3 points for defensive retirement positioning (Defensive=3, Cautious=1.5, Normal=0), 0-2 points for flight-to-safety (Strong=2, Moderate=1, Low=0), and 0-1 point for low retail activity. The current combination yields a score of {score:.1f}/10, categorizing investment flows as '{risk_level}' risk. This reflects how investors are positioning their portfolios in response to market conditions."
+    
+    def _explain_consumer_sentiment(self, consumer_signals, score, risk_level):
+        """Explain consumer sentiment current values and categorization."""
+        sentiment_level = consumer_signals.get('sentiment_level', 'Unknown')
+        spending_trend = consumer_signals.get('spending_trend', 'Unknown')
+        credit_stress = consumer_signals.get('credit_stress', 'Unknown')
+        retail_health = consumer_signals.get('retail_health', 'Unknown')
+        
+        return f"Consumer sentiment analysis shows confidence at '{sentiment_level}', spending trends '{spending_trend}', credit stress '{credit_stress}', and retail sector health '{retail_health}'. This composite scores 0-4 points for sentiment (Poor=4, Weak=2.5, Good=0), 0-3 points for spending trends (Declining=3, Weak=1.5, Stable=0), 0-2 points for credit stress (High=2, Moderate=1, Low=0), and 0-1 point for retail health (Poor=1, Weak=0.5, Healthy=0). The current combination yields a score of {score:.1f}/10, placing consumer conditions in the '{risk_level}' risk category. This reflects the health of consumer spending, which drives approximately 70% of U.S. economic activity."
 
     def calculate_fund_metrics(self):
         """Calculate risk and return metrics for each fund."""
