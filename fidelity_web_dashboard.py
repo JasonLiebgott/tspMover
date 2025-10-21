@@ -1,5 +1,20 @@
 # Fidelity Index Fund Risk-Adjusted Dashboard
 # Flask web application to analyze Fidelity index funds for optimal risk-adjusted returns
+#
+# EXPANDED FUND UNIVERSE (95+ funds):
+# - Fidelity ZERO funds (4 funds) - No expense ratios
+# - Fidelity Core Index funds (7 funds) - Low-cost broad market
+# - Fidelity International funds (5 funds) - Global diversification  
+# - Fidelity Sector funds (11 funds) - All major sectors covered
+# - Fidelity Bond funds (7 funds) - Fixed income varieties
+# - Fidelity Factor funds (6 funds) - Value, growth, momentum, quality
+# - Fidelity Target Date funds (8 funds) - Lifecycle investing
+# - Fidelity Active funds (6 funds) - Actively managed options
+# - Vanguard comparison funds (25 funds) - Industry benchmark
+# - Other popular ETFs (12 funds) - Market alternatives
+#
+# Total: ~95 funds providing comprehensive coverage across:
+# Asset classes, geographies, sectors, factors, and management styles
 
 from flask import Flask, render_template, jsonify, request
 import json
@@ -58,60 +73,248 @@ class FidelityDashboard:
         self.recommendations = {'good': [], 'neutral': [], 'bad': []}
         
     def _initialize_funds(self):
-        """Initialize the list of Fidelity and Vanguard funds to analyze."""
+        """Initialize the comprehensive list of Fidelity and popular funds to analyze."""
         funds = [
+            # === FIDELITY ZERO FUNDS (No Expense Ratio) ===
+            FidelityFund('FZROX', 'Fidelity ZERO Total Market Index', 'Total Market', 0.0, 'Zero-fee total US market fund'),
+            FidelityFund('FZILX', 'Fidelity ZERO International Index', 'International', 0.0, 'Zero-fee international developed markets'),
+            FidelityFund('FNILX', 'Fidelity ZERO Large Cap Index', 'Large Cap', 0.0, 'Zero-fee large-cap US stocks'),
+            FidelityFund('FZIPX', 'Fidelity ZERO Extended Market Index', 'Small/Mid Cap', 0.0, 'Zero-fee small and mid-cap stocks'),
+            
             # === FIDELITY CORE INDEX FUNDS ===
-            FidelityFund('FZROX', 'Fidelity ZERO Total Market Index', 'Total Market', 0.0, 'Zero-fee total market fund'),
             FidelityFund('FXAIX', 'Fidelity 500 Index', 'Large Cap', 0.015, 'S&P 500 tracking fund'),
-            FidelityFund('FZILX', 'Fidelity ZERO International Index', 'International', 0.0, 'Zero-fee international fund'),
             FidelityFund('FTIHX', 'Fidelity Total International Index', 'International', 0.06, 'Broad international exposure'),
+            FidelityFund('FSMDX', 'Fidelity Mid Cap Index', 'Mid Cap', 0.025, 'Mid-cap stock index'),
+            FidelityFund('FSSNX', 'Fidelity Small Cap Index', 'Small Cap', 0.025, 'Small-cap stock index'),
+            FidelityFund('FSPSX', 'Fidelity Small Cap Stock', 'Small Cap', 0.52, 'Actively managed small-cap fund'),
+            FidelityFund('FSKAX', 'Fidelity Total Market Index', 'Total Market', 0.015, 'Total US stock market index'),
+            FidelityFund('FTBFX', 'Fidelity Total Bond Index', 'Bond', 0.025, 'Broad bond market exposure'),
             
-            # === VANGUARD CORE INDEX FUNDS ===
-            FidelityFund('VTI', 'Vanguard Total Stock Market ETF', 'Total Market', 0.03, 'Broad US market exposure'),
-            FidelityFund('VOO', 'Vanguard S&P 500 ETF', 'Large Cap', 0.03, 'S&P 500 tracking fund'),
-            FidelityFund('VEA', 'Vanguard FTSE Developed Markets ETF', 'Developed Intl', 0.05, 'Developed international markets'),
-            FidelityFund('VWO', 'Vanguard FTSE Emerging Markets ETF', 'Emerging Markets', 0.08, 'Emerging markets exposure'),
-            FidelityFund('VXF', 'Vanguard Extended Market ETF', 'Small Cap', 0.06, 'Small and mid-cap stocks'),
-            FidelityFund('VBR', 'Vanguard Small-Cap Value ETF', 'Small Cap', 0.07, 'Small-cap value stocks'),
-            FidelityFund('VUG', 'Vanguard Growth ETF', 'Large Cap', 0.04, 'Large-cap growth stocks'),
-            FidelityFund('VTV', 'Vanguard Value ETF', 'Large Cap', 0.04, 'Large-cap value stocks'),
+            # === FIDELITY INTERNATIONAL FUNDS ===
+            FidelityFund('FDVLX', 'Fidelity Developed Markets ex-US Index', 'Developed Intl', 0.035, 'Developed international markets'),
+            FidelityFund('FPADX', 'Fidelity Pacific Basin', 'Pacific', 0.85, 'Asia-Pacific region focus'),
+            FidelityFund('FEURX', 'Fidelity Europe', 'Europe', 0.89, 'European markets focus'),
+            FidelityFund('FEMKX', 'Fidelity Emerging Markets', 'Emerging Markets', 0.79, 'Emerging markets exposure'),
+            FidelityFund('FIEUX', 'Fidelity MSCI Emerging Markets Index ETF', 'Emerging Markets', 0.12, 'Low-cost emerging markets ETF'),
             
-            # === FIXED INCOME ===
-            FidelityFund('FXNAX', 'Fidelity Total Bond Index', 'Bond', 0.025, 'Broad bond market exposure'),
-            FidelityFund('FUMBX', 'Fidelity Short-Term Treasury Index', 'Treasury', 0.025, 'Short-term Treasury bonds'),
-            FidelityFund('BND', 'Vanguard Total Bond Market ETF', 'Bond', 0.03, 'Broad bond market exposure'),
-            FidelityFund('VGSH', 'Vanguard Short-Term Treasury ETF', 'Treasury', 0.04, 'Short-term Treasury bonds'),
-            FidelityFund('VTEB', 'Vanguard Tax-Exempt Bond ETF', 'Municipal', 0.05, 'Tax-exempt municipal bonds'),
-            
-            # === SECTOR/THEME FUNDS ===
-            # Fidelity Sectors
+            # === FIDELITY SECTOR FUNDS ===
             FidelityFund('FHLC', 'Fidelity MSCI Health Care Index ETF', 'Healthcare', 0.084, 'Healthcare sector exposure'),
             FidelityFund('FTEC', 'Fidelity MSCI Information Technology Index ETF', 'Technology', 0.084, 'Technology sector exposure'),
             FidelityFund('FENY', 'Fidelity MSCI Energy Index ETF', 'Energy', 0.084, 'Energy sector exposure'),
             FidelityFund('FMAT', 'Fidelity MSCI Materials Index ETF', 'Materials', 0.084, 'Materials sector exposure'),
+            FidelityFund('FNCL', 'Fidelity MSCI Financials Index ETF', 'Financial', 0.084, 'Financial sector exposure'),
+            FidelityFund('FSTA', 'Fidelity MSCI Consumer Staples Index ETF', 'Consumer Staples', 0.084, 'Consumer staples sector'),
+            FidelityFund('FDIS', 'Fidelity MSCI Consumer Discretionary Index ETF', 'Consumer Disc', 0.084, 'Consumer discretionary sector'),
+            FidelityFund('FIDU', 'Fidelity MSCI Industrials Index ETF', 'Industrial', 0.084, 'Industrial sector exposure'),
+            FidelityFund('FUTY', 'Fidelity MSCI Utilities Index ETF', 'Utilities', 0.084, 'Utilities sector exposure'),
+            FidelityFund('FCOM', 'Fidelity MSCI Communication Services Index ETF', 'Communication', 0.084, 'Communication services sector'),
+            FidelityFund('FREL', 'Fidelity MSCI Real Estate Index ETF', 'REIT', 0.084, 'Real estate investment trusts'),
             
-            # Vanguard Sectors
+            # === FIDELITY BOND FUNDS ===
+            FidelityFund('FXNAX', 'Fidelity US Bond Index', 'Bond', 0.025, 'US aggregate bond index'),
+            FidelityFund('FUMBX', 'Fidelity Short-Term Treasury Index', 'Treasury', 0.025, 'Short-term Treasury bonds'),
+            FidelityFund('FGBFX', 'Fidelity Government Bond Index', 'Government', 0.025, 'Government bond index'),
+            FidelityFund('FCOR', 'Fidelity Corporate Bond ETF', 'Corporate', 0.36, 'Investment grade corporate bonds'),
+            FidelityFund('FDRR', 'Fidelity Floating Rate High Income', 'High Yield', 0.68, 'Floating rate debt securities'),
+            FidelityFund('FHYG', 'Fidelity High Yield Factor ETF', 'High Yield', 0.45, 'High yield corporate bonds'),
+            FidelityFund('FLTB', 'Fidelity Limited Term Government', 'Government', 0.25, 'Limited maturity government bonds'),
+            
+            # === FIDELITY DIVIDEND & VALUE FUNDS ===
+            FidelityFund('FDVV', 'Fidelity High Dividend ETF', 'Dividend', 0.29, 'High dividend yield stocks'),
+            FidelityFund('FVAL', 'Fidelity Value Factor ETF', 'Value', 0.29, 'US value factor exposure'),
+            FidelityFund('FGRO', 'Fidelity Growth Factor ETF', 'Growth', 0.29, 'US growth factor exposure'),
+            FidelityFund('FMOM', 'Fidelity Momentum Factor ETF', 'Momentum', 0.29, 'US momentum factor exposure'),
+            FidelityFund('FQAL', 'Fidelity Quality Factor ETF', 'Quality', 0.29, 'US quality factor exposure'),
+            FidelityFund('FSIZE', 'Fidelity Size Factor ETF', 'Small Cap', 0.29, 'Size factor (small-cap premium)'),
+            FidelityFund('FMIL', 'Fidelity New Millennium', 'Technology', 0.67, 'Technology and innovation focus'),
+            
+            # === FIDELITY TARGET DATE FUNDS (Sample) ===
+            FidelityFund('FDKLX', 'Fidelity Freedom 2065', 'Target Date', 0.12, '2065 target retirement date'),
+            FidelityFund('FXIFX', 'Fidelity Freedom 2060', 'Target Date', 0.12, '2060 target retirement date'),
+            FidelityFund('FDEWX', 'Fidelity Freedom 2055', 'Target Date', 0.12, '2055 target retirement date'),
+            FidelityFund('FDENX', 'Fidelity Freedom 2050', 'Target Date', 0.12, '2050 target retirement date'),
+            FidelityFund('FDESX', 'Fidelity Freedom 2045', 'Target Date', 0.12, '2045 target retirement date'),
+            FidelityFund('FFFEX', 'Fidelity Freedom 2040', 'Target Date', 0.12, '2040 target retirement date'),
+            FidelityFund('FFFDX', 'Fidelity Freedom 2035', 'Target Date', 0.12, '2035 target retirement date'),
+            FidelityFund('FFTHX', 'Fidelity Freedom 2030', 'Target Date', 0.12, '2030 target retirement date'),
+            
+            # === FIDELITY ACTIVE MANAGEMENT FUNDS ===
+            FidelityFund('FBGRX', 'Fidelity Blue Chip Growth', 'Large Cap Growth', 0.79, 'Large-cap growth companies'),
+            FidelityFund('FCNTX', 'Fidelity Contrafund', 'Large Cap Growth', 0.85, 'Large company growth fund'),
+            FidelityFund('FMAGX', 'Fidelity Magellan', 'Large Cap', 0.52, 'Large-cap domestic equity fund'),
+            FidelityFund('FDGRX', 'Fidelity Growth Company', 'Growth', 0.84, 'Companies with above-average growth'),
+            FidelityFund('FBALX', 'Fidelity Balanced', 'Balanced', 0.52, 'Balanced stock and bond fund'),
+            FidelityFund('FPURX', 'Fidelity Puritan', 'Balanced', 0.57, 'Conservative balanced fund'),
+            
+            # === VANGUARD CORE INDEX FUNDS (For Comparison) ===
+            FidelityFund('VTI', 'Vanguard Total Stock Market ETF', 'Total Market', 0.03, 'Broad US market exposure'),
+            FidelityFund('VOO', 'Vanguard S&P 500 ETF', 'Large Cap', 0.03, 'S&P 500 tracking fund'),
+            FidelityFund('VEA', 'Vanguard FTSE Developed Markets ETF', 'Developed Intl', 0.05, 'Developed international markets'),
+            FidelityFund('VWO', 'Vanguard FTSE Emerging Markets ETF', 'Emerging Markets', 0.08, 'Emerging markets exposure'),
+            FidelityFund('VXF', 'Vanguard Extended Market ETF', 'Small/Mid Cap', 0.06, 'Small and mid-cap stocks'),
+            FidelityFund('VBR', 'Vanguard Small-Cap Value ETF', 'Small Cap Value', 0.07, 'Small-cap value stocks'),
+            FidelityFund('VUG', 'Vanguard Growth ETF', 'Large Cap Growth', 0.04, 'Large-cap growth stocks'),
+            FidelityFund('VTV', 'Vanguard Value ETF', 'Large Cap Value', 0.04, 'Large-cap value stocks'),
+            FidelityFund('VXUS', 'Vanguard Total International Stock ETF', 'International', 0.08, 'Total international stock market'),
+            
+            # === VANGUARD BOND FUNDS (For Comparison) ===
+            FidelityFund('BND', 'Vanguard Total Bond Market ETF', 'Bond', 0.03, 'Broad bond market exposure'),
+            FidelityFund('VGSH', 'Vanguard Short-Term Treasury ETF', 'Treasury', 0.04, 'Short-term Treasury bonds'),
+            FidelityFund('VGIT', 'Vanguard Intermediate-Term Treasury ETF', 'Treasury', 0.04, 'Intermediate-term Treasuries'),
+            FidelityFund('VGLT', 'Vanguard Long-Term Treasury ETF', 'Treasury', 0.04, 'Long-term Treasury bonds'),
+            FidelityFund('VTEB', 'Vanguard Tax-Exempt Bond ETF', 'Municipal', 0.05, 'Tax-exempt municipal bonds'),
+            FidelityFund('VCIT', 'Vanguard Intermediate-Term Corporate Bond ETF', 'Corporate', 0.04, 'Investment grade corporate bonds'),
+            FidelityFund('VGIB', 'Vanguard Intermediate-Term Government Bond ETF', 'Government', 0.04, 'Intermediate-term government bonds'),
+            
+            # === VANGUARD SECTORS (For Comparison) ===
             FidelityFund('VGT', 'Vanguard Information Technology ETF', 'Technology', 0.10, 'Technology sector exposure'),
             FidelityFund('VHT', 'Vanguard Health Care ETF', 'Healthcare', 0.10, 'Healthcare sector exposure'),
             FidelityFund('VFH', 'Vanguard Financials ETF', 'Financial', 0.10, 'Financial sector exposure'),
             FidelityFund('VDE', 'Vanguard Energy ETF', 'Energy', 0.10, 'Energy sector exposure'),
             FidelityFund('VAW', 'Vanguard Materials ETF', 'Materials', 0.10, 'Materials sector exposure'),
-            
-            # === REAL ESTATE & ALTERNATIVES ===
-            FidelityFund('FREL', 'Fidelity MSCI Real Estate Index ETF', 'REIT', 0.08, 'Real estate investment trusts'),
+            FidelityFund('VIS', 'Vanguard Industrials ETF', 'Industrial', 0.10, 'Industrial sector exposure'),
+            FidelityFund('VCR', 'Vanguard Consumer Discretionary ETF', 'Consumer Disc', 0.10, 'Consumer discretionary sector'),
+            FidelityFund('VDC', 'Vanguard Consumer Staples ETF', 'Consumer Staples', 0.10, 'Consumer staples sector'),
+            FidelityFund('VPU', 'Vanguard Utilities ETF', 'Utilities', 0.10, 'Utilities sector exposure'),
+            FidelityFund('VOX', 'Vanguard Communication Services ETF', 'Communication', 0.10, 'Communication services sector'),
             FidelityFund('VNQ', 'Vanguard Real Estate ETF', 'REIT', 0.12, 'Real estate investment trusts'),
             
-            # === DIVIDEND FUNDS ===
-            FidelityFund('FDVV', 'Fidelity High Dividend ETF', 'Dividend', 0.29, 'High dividend yield stocks'),
+            # === VANGUARD DIVIDEND FUNDS (For Comparison) ===
             FidelityFund('VYM', 'Vanguard High Dividend Yield ETF', 'Dividend', 0.06, 'High dividend yield stocks'),
-            FidelityFund('VIG', 'Vanguard Dividend Appreciation ETF', 'Dividend', 0.06, 'Dividend growth stocks'),
+            FidelityFund('VIG', 'Vanguard Dividend Appreciation ETF', 'Dividend Growth', 0.06, 'Dividend growth stocks'),
+            FidelityFund('VYMI', 'Vanguard International High Dividend Yield ETF', 'Intl Dividend', 0.22, 'International high dividend yield'),
             
-            # === OTHER POPULAR FUNDS ===
+            # === OTHER POPULAR ETFS (For Comparison) ===
             FidelityFund('SPY', 'SPDR S&P 500 ETF', 'Large Cap', 0.095, 'S&P 500 ETF alternative'),
             FidelityFund('QQQ', 'Invesco QQQ Trust', 'Technology', 0.20, 'NASDAQ-100 technology focus'),
+            FidelityFund('IWM', 'iShares Russell 2000 ETF', 'Small Cap', 0.19, 'Small-cap stocks'),
+            FidelityFund('EFA', 'iShares MSCI EAFE ETF', 'International', 0.32, 'Developed international markets'),
+            FidelityFund('EEM', 'iShares MSCI Emerging Markets ETF', 'Emerging Markets', 0.68, 'Emerging markets'),
+            FidelityFund('AGG', 'iShares Core US Aggregate Bond ETF', 'Bond', 0.03, 'US aggregate bonds'),
+            FidelityFund('TLT', 'iShares 20+ Year Treasury Bond ETF', 'Treasury', 0.15, 'Long-term Treasury bonds'),
+            FidelityFund('HYG', 'iShares iBoxx High Yield Corporate Bond ETF', 'High Yield', 0.49, 'High yield corporate bonds'),
             FidelityFund('GLD', 'SPDR Gold Shares', 'Commodity', 0.40, 'Gold commodity exposure'),
+            FidelityFund('SLV', 'iShares Silver Trust', 'Commodity', 0.50, 'Silver commodity exposure'),
+            FidelityFund('ARKK', 'ARK Innovation ETF', 'Innovation', 0.75, 'Disruptive innovation companies'),
         ]
         return funds
+    
+    def get_fund_statistics(self):
+        """Get comprehensive statistics about the fund universe."""
+        categories = {}
+        providers = {}
+        total_funds = len(self.funds)
+        zero_fee_count = 0
+        
+        for fund in self.funds:
+            # Count by category
+            category = fund.category
+            if category not in categories:
+                categories[category] = 0
+            categories[category] += 1
+            
+            # Count by provider (based on symbol prefix)
+            if fund.symbol.startswith('F') or fund.symbol.startswith('FD') or fund.symbol.startswith('FZ'):
+                provider = 'Fidelity'
+            elif fund.symbol.startswith('V'):
+                provider = 'Vanguard'
+            elif fund.symbol in ['SPY', 'QQQ', 'IWM', 'EFA', 'EEM', 'AGG', 'TLT', 'HYG', 'GLD', 'SLV', 'ARKK']:
+                provider = 'Other ETFs'
+            else:
+                provider = 'Other'
+            
+            if provider not in providers:
+                providers[provider] = 0
+            providers[provider] += 1
+            
+            # Count zero-fee funds
+            if fund.expense_ratio == 0.0:
+                zero_fee_count += 1
+        
+        # Calculate expense ratio statistics
+        expense_ratios = [fund.expense_ratio for fund in self.funds if fund.expense_ratio > 0]
+        avg_expense_ratio = np.mean(expense_ratios) if expense_ratios else 0
+        min_expense_ratio = min(expense_ratios) if expense_ratios else 0
+        max_expense_ratio = max(expense_ratios) if expense_ratios else 0
+        
+        return {
+            'total_funds': total_funds,
+            'categories': dict(sorted(categories.items())),
+            'providers': dict(sorted(providers.items(), key=lambda x: x[1], reverse=True)),
+            'zero_fee_funds': zero_fee_count,
+            'expense_ratio_stats': {
+                'average': avg_expense_ratio,
+                'minimum': min_expense_ratio,
+                'maximum': max_expense_ratio,
+                'zero_fee_count': zero_fee_count
+            }
+        }
+    
+    def get_funds_by_category(self, category=None):
+        """Get funds filtered by category for focused analysis."""
+        if category is None:
+            return self.funds
+        
+        category_funds = [fund for fund in self.funds if fund.category.lower() == category.lower()]
+        return sorted(category_funds, key=lambda x: x.expense_ratio)
+    
+    def get_top_funds_by_provider(self, provider='Fidelity', limit=10):
+        """Get top funds by provider, sorted by expense ratio."""
+        if provider.lower() == 'fidelity':
+            provider_funds = [fund for fund in self.funds if 
+                            fund.symbol.startswith(('F', 'FD', 'FZ', 'FN', 'FS', 'FT', 'FU', 'FC', 'FB', 'FP'))]
+        elif provider.lower() == 'vanguard':
+            provider_funds = [fund for fund in self.funds if fund.symbol.startswith('V')]
+        else:
+            provider_funds = self.funds
+        
+        # Sort by expense ratio (prioritize zero-fee funds)
+        sorted_funds = sorted(provider_funds, key=lambda x: (x.expense_ratio, x.symbol))
+        return sorted_funds[:limit] if limit else sorted_funds
+    
+    def get_zero_fee_funds(self):
+        """Get all zero-fee funds for cost-conscious investors."""
+        zero_fee_funds = [fund for fund in self.funds if fund.expense_ratio == 0.0]
+        return sorted(zero_fee_funds, key=lambda x: x.symbol)
+    
+    def get_core_portfolio_recommendations(self):
+        """Get recommended core portfolio funds by asset class."""
+        recommendations = {
+            'us_total_market': [],
+            'us_large_cap': [],
+            'international': [],
+            'bonds': [],
+            'zero_fee_options': []
+        }
+        
+        for fund in self.funds:
+            # US Total Market
+            if fund.category == 'Total Market':
+                recommendations['us_total_market'].append(fund)
+            
+            # US Large Cap
+            elif fund.category == 'Large Cap' and not any(intl in fund.name.lower() 
+                                                        for intl in ['international', 'global', 'world']):
+                recommendations['us_large_cap'].append(fund)
+            
+            # International
+            elif fund.category in ['International', 'Developed Intl', 'Emerging Markets']:
+                recommendations['international'].append(fund)
+            
+            # Bonds
+            elif fund.category in ['Bond', 'Treasury', 'Government', 'Corporate']:
+                recommendations['bonds'].append(fund)
+            
+            # Zero fee options
+            if fund.expense_ratio == 0.0:
+                recommendations['zero_fee_options'].append(fund)
+        
+        # Sort each category by expense ratio
+        for category in recommendations:
+            recommendations[category] = sorted(recommendations[category], 
+                                             key=lambda x: (x.expense_ratio, x.symbol))[:5]  # Top 5 per category
+        
+        return recommendations
     
     def _get_fdrxx_yield(self):
         """Get current yield from FDRXX money market fund."""
@@ -183,6 +386,8 @@ class FidelityDashboard:
                     print(f"+ {fund.symbol}: {len(fund.data)} days")
                 else:
                     print(f"✗ {fund.symbol}: No data")
+                    fund.data = pd.DataFrame()
+                    fund.returns = pd.Series()
             except Exception as e:
                 print(f"✗ {fund.symbol}: Error - {e}")
                 fund.data = pd.DataFrame()
@@ -1212,7 +1417,8 @@ class FidelityDashboard:
         print("Calculating fund metrics...")
         
         for fund in self.funds:
-            if fund.returns.empty:
+            # Safety check: ensure returns is properly initialized and not empty
+            if fund.returns is None or fund.returns.empty:
                 continue
                 
             # Basic return metrics
@@ -1637,7 +1843,8 @@ class FidelityDashboard:
         # Filter funds based on volatility preference AND enhanced recession risk
         suitable_funds = []
         for fund in funds:
-            if hasattr(fund, 'risk_metrics') and fund.risk_metrics:
+            if (hasattr(fund, 'risk_metrics') and fund.risk_metrics and 
+                'volatility' in fund.risk_metrics):
                 volatility = fund.risk_metrics['volatility']
                 score = fund.score
                 
@@ -2329,7 +2536,9 @@ class FidelityDashboard:
         category_colors = dict(zip(categories, colors))
         
         for fund in self.funds:
-            if hasattr(fund, 'risk_metrics'):
+            if (hasattr(fund, 'risk_metrics') and fund.risk_metrics and 
+                'volatility' in fund.risk_metrics and 'annual_return' in fund.risk_metrics):
+                
                 metrics = fund.risk_metrics
                 color = category_colors[fund.category]
                 
@@ -2369,10 +2578,13 @@ class FidelityDashboard:
         """Generate category-wise analysis chart."""
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
         
-        # Group funds by category
+        # Group funds by category (only include funds with complete risk metrics)
         category_data = {}
         for fund in self.funds:
-            if hasattr(fund, 'risk_metrics'):
+            if (hasattr(fund, 'risk_metrics') and fund.risk_metrics and 
+                'annual_return' in fund.risk_metrics and 'volatility' in fund.risk_metrics and
+                'sharpe_ratio' in fund.risk_metrics and 'total_adjustment' in fund.risk_metrics):
+                
                 if fund.category not in category_data:
                     category_data[fund.category] = []
                 category_data[fund.category].append(fund)
@@ -2607,8 +2819,11 @@ class FidelityDashboard:
         """Generate recommendations summary chart."""
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 12))
         
-        # Chart 1: Top Recommendations
-        good_funds = self.recommendations['good'][:8]  # Top 8
+        # Chart 1: Top Recommendations (filter for funds with valid risk metrics)
+        good_funds = [fund for fund in self.recommendations['good'][:8] 
+                     if hasattr(fund, 'risk_metrics') and fund.risk_metrics and 
+                     'excess_return' in fund.risk_metrics]
+        
         if good_funds:
             fund_names = [f"{fund.symbol}\n({fund.category})" for fund in good_funds]
             scores = [fund.score for fund in good_funds]
