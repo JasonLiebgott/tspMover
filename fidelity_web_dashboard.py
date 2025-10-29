@@ -376,11 +376,14 @@ class FidelityDashboard:
             print(f"! S&P 500: Error - {e}, using default volatility 15.0%")
             self.sp500_volatility = 15.0
         
-        # Fetch fund data
-        for fund in self.funds:
+        # Fetch fund data with basic error handling
+        for i, fund in enumerate(self.funds):
             try:
+                print(f"Fetching {i+1}/{len(self.funds)}: {fund.symbol}")
+                
                 ticker = yf.Ticker(fund.symbol)
                 fund.data = ticker.history(start=start_date, end=end_date)
+                
                 if not fund.data.empty:
                     fund.returns = fund.data['Close'].pct_change().dropna()
                     print(f"+ {fund.symbol}: {len(fund.data)} days")
@@ -388,25 +391,49 @@ class FidelityDashboard:
                     print(f"✗ {fund.symbol}: No data")
                     fund.data = pd.DataFrame()
                     fund.returns = pd.Series()
+                    
             except Exception as e:
                 print(f"✗ {fund.symbol}: Error - {e}")
                 fund.data = pd.DataFrame()
                 fund.returns = pd.Series()
+                
+            # Print progress every 10 funds
+            if (i + 1) % 10 == 0:
+                print(f"Progress: {i+1}/{len(self.funds)} funds processed")
     
     def analyze_economic_conditions(self):
         """Analyze current economic conditions using TSP engine plus enhanced labor market signals."""
         print("Analyzing economic conditions...")
-        self.economic_engine.run_analysis()
+        try:
+            self.economic_engine.run_analysis()
+            print("✓ TSP engine analysis complete")
+        except Exception as e:
+            print(f"✗ TSP engine analysis failed: {e}")
         
         # Enhanced analysis including your key concerns
         print("Analyzing white-collar employment trends...")
-        employment_signals = self._analyze_employment_trends()
+        try:
+            employment_signals = self._analyze_employment_trends()
+            print("✓ Employment trends analysis complete")
+        except Exception as e:
+            print(f"✗ Employment trends analysis failed: {e}")
+            employment_signals = {}
         
         print("Analyzing retail investment flows...")
-        investment_flows = self._analyze_investment_flows()
+        try:
+            investment_flows = self._analyze_investment_flows()
+            print("✓ Investment flows analysis complete")
+        except Exception as e:
+            print(f"✗ Investment flows analysis failed: {e}")
+            investment_flows = {}
         
         print("Analyzing consumer sentiment...")
-        consumer_signals = self._analyze_consumer_sentiment()
+        try:
+            consumer_signals = self._analyze_consumer_sentiment()
+            print("✓ Consumer sentiment analysis complete")
+        except Exception as e:
+            print(f"✗ Consumer sentiment analysis failed: {e}")
+            consumer_signals = {}
         
         self.economic_data = {
             'recession_score': self.economic_engine.recession_score,
@@ -2881,8 +2908,10 @@ class FidelityDashboard:
             print("FIDELITY FUND ANALYSIS DASHBOARD")
             print("=" * 50)
             
-            # Step 1: Fetch fund data
-            self.fetch_fund_data()
+            # Step 1: Fetch fund data based on timeframe
+            lookback_days = max(252, self.timeframe_years * 252)  # At least 1 year, up to timeframe years
+            print(f"Using {self.timeframe_years}-year timeframe ({lookback_days} days)")
+            self.fetch_fund_data(lookback_days)
             
             # Debug: Check GLD specifically after data fetch
             gld_fund = next((f for f in self.funds if f.symbol == 'GLD'), None)
@@ -2930,21 +2959,46 @@ def index():
     
     # Get timeframe from query parameter (default to 3 years)
     timeframe = request.args.get('timeframe', 3, type=int)
+    test_mode = request.args.get('test', False, type=bool)
+    print(f"Dashboard request: timeframe={timeframe}, test_mode={test_mode}")
     
-    # Create new dashboard instance with timeframe
-    dashboard = FidelityDashboard(timeframe_years=timeframe)
+    try:
+        # Create new dashboard instance with timeframe
+        print(f"Creating dashboard with {timeframe}-year timeframe...")
+        dashboard = FidelityDashboard(timeframe_years=timeframe)
+        
+        print("Generating dashboard data...")
+        if test_mode:
+            # Simplified test mode - just return timeframe info
+            return f"""
+            <h1>Timeframe Test Mode</h1>
+            <p>Requested timeframe: {timeframe} years</p>
+            <p>Dashboard timeframe: {dashboard.timeframe_years} years</p>
+            <p>Strategy: {dashboard.get_timeframe_strategy()['title']}</p>
+            <p>Fund count: {len(dashboard.funds)}</p>
+            <p><a href="/?timeframe=1">1 Year</a> | <a href="/?timeframe=2">2 Years</a> | <a href="/?timeframe=3">3 Years</a> | <a href="/?timeframe=5">5 Years</a> | <a href="/?timeframe=10">10 Years</a></p>
+            """
+        
+        success = dashboard.generate_data()
+        if not success:
+            print("ERROR: Failed to generate dashboard data")
+            return "Error generating dashboard data", 500
+        
+        print("Generating portfolio allocations...")
+        # Generate portfolio allocations for multiple timeframes
+        portfolio_allocations = dashboard.generate_portfolio_allocations()
+        
+        print("Rendering template...")
+        return render_template('fidelity_dashboard.html', 
+                             dashboard=dashboard,
+                             timeframe_strategy=dashboard.get_timeframe_strategy(),
+                             portfolio_allocations=portfolio_allocations)
     
-    success = dashboard.generate_data()
-    if not success:
-        return "Error generating dashboard data", 500
-    
-    # Generate portfolio allocations for multiple timeframes
-    portfolio_allocations = dashboard.generate_portfolio_allocations()
-    
-    return render_template('fidelity_dashboard.html', 
-                         dashboard=dashboard,
-                         timeframe_strategy=dashboard.get_timeframe_strategy(),
-                         portfolio_allocations=portfolio_allocations)
+    except Exception as e:
+        print(f"ERROR in dashboard route: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Error: {str(e)}", 500
 
 @app.route('/fund/<symbol>')
 def fund_detail(symbol):
