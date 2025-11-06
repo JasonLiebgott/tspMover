@@ -1,0 +1,220 @@
+================================================================================
+SIMPLIFIED MOMENTUM STRATEGY - 7 CORE UNCORRELATED ASSETS
+================================================================================
+Generated: 2025-11-04 10:31:03
+Investment Amount: $10,000.00
+Universe: SPY, QQQ, EFA, TLT, GLD, VNQ, DBC
+Strategy: 6-month momentum + 200-day MA filter + Top 2-3 equal weight
+
+STRATEGY OVERVIEW
+----------------------------------------
+This simplified momentum strategy focuses on maximum diversification across
+uncorrelated asset classes rather than the number of positions. Based on
+academic research showing momentum persistence, but simplified for robustness.
+
+Core Principles:
+• 7 uncorrelated asset classes for maximum diversification
+• 6-month momentum lookback (optimal period from research)
+• 200-day moving average trend filter
+• Top 2-3 qualifying positions, equally weighted
+• Monthly or quarterly rebalancing
+• Simple rules for consistency and discipline
+
+CURRENT ASSET CLASS ANALYSIS
+================================================================================
+
+FXAIX: Fidelity 500 Index Fund
+   Asset Class: US_Large_Cap_Equity
+   6-Month Momentum: 22.0%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.01%
+   Annual Return: 28.9%
+   Annual Volatility: 15.9%
+
+FTEC: Fidelity MSCI Information Technology ETF
+   Asset Class: US_Tech_Growth
+   6-Month Momentum: 40.1%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.08%
+   Annual Return: 40.2%
+   Annual Volatility: 24.9%
+
+FZILX: Fidelity ZERO International Index Fund
+   Asset Class: International_Developed_Equity
+   6-Month Momentum: 16.5%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.00%
+   Annual Return: 23.6%
+   Annual Volatility: 13.7%
+
+FXNAX: Fidelity US Bond Index Fund
+   Asset Class: Long_Term_Government_Bonds
+   6-Month Momentum: 4.0%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.03%
+   Annual Return: 7.4%
+   Annual Volatility: 5.4%
+
+GLD: SPDR Gold Shares
+   Asset Class: Precious_Metals
+   6-Month Momentum: 15.5%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.40%
+   Annual Return: 43.5%
+   Annual Volatility: 17.3%
+
+FREL: Fidelity MSCI Real Estate Index ETF
+   Asset Class: Real_Estate_Investment_Trusts
+   6-Month Momentum: 2.1%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.08%
+   Annual Return: 14.1%
+   Annual Volatility: 17.4%
+
+DBC: Invesco DB Commodity Index Tracking Fund
+   Asset Class: Broad_Commodities
+   6-Month Momentum: 9.5%
+   Above 200-day MA: Yes
+   Status: QUALIFIED
+   Expense Ratio: 0.87%
+   Annual Return: 2.3%
+   Annual Volatility: 15.0%
+
+================================================================================
+RECOMMENDED PORTFOLIO ALLOCATION
+================================================================================
+
+FTEC: Fidelity MSCI Information Technology ETF
+   Allocation: 33.3% ($3,333)
+   Asset Class: US_Tech_Growth
+   6-Month Momentum: 40.1%
+   Expense Ratio: 0.08%
+   Annual Return: 40.2%
+   Annual Volatility: 24.9%
+
+FXAIX: Fidelity 500 Index Fund
+   Allocation: 33.3% ($3,333)
+   Asset Class: US_Large_Cap_Equity
+   6-Month Momentum: 22.0%
+   Expense Ratio: 0.01%
+   Annual Return: 28.9%
+   Annual Volatility: 15.9%
+
+FZILX: Fidelity ZERO International Index Fund
+   Allocation: 33.3% ($3,333)
+   Asset Class: International_Developed_Equity
+   6-Month Momentum: 16.5%
+   Expense Ratio: 0.00%
+   Annual Return: 23.6%
+   Annual Volatility: 13.7%
+
+TOTAL PORTFOLIO: 100.0% ($10,000)
+
+Diversification: 3 uncorrelated asset classes
+Position Count: 3 equal-weighted holdings
+
+================================================================================
+IMPLEMENTATION RULES
+================================================================================
+Selection Criteria:
+1. Calculate 6-month rate of change for each of 7 core ETFs
+2. Filter: Keep only ETFs with price above 200-day moving average
+3. Filter: Keep only ETFs with positive 6-month momentum
+4. Rank: Sort qualifying ETFs by 6-month momentum (highest first)
+5. Select: Choose top 2-3 qualifying ETFs
+6. Weight: Equal weight allocation across selected ETFs
+
+Rebalancing Schedule:
+• Monthly evaluation: First trading day of each month
+• Recalculate 6-month momentum for all 7 ETFs
+• Apply filters (200-day MA + positive momentum)
+• Compare new top 2-3 vs. current holdings
+• Execute trades only if holdings change
+• Rebalance to equal weights quarterly
+
+Position Management:
+• Maximum positions: 3
+• Minimum positions: 2 (if 2+ qualify)
+• Equal weighting: Each position gets 1/N allocation
+• No position sizing based on momentum strength
+• No stop losses (momentum filter handles exits)
+
+ACADEMIC RESEARCH FOUNDATION
+----------------------------------------
+This simplified approach is based on key findings from momentum research:
+
+Jegadeesh & Titman (1993) - 'Returns to Buying Winners and Selling Losers':
+• 3-12 month momentum persistence in equity markets
+• 6-month lookback near optimal for momentum strategies
+• Trend-following filters improve risk-adjusted returns
+
+Moskowitz, Ooi & Pedersen (2012) - 'Time Series Momentum':
+• Momentum works across ALL asset classes
+• Cross-asset diversification more important than within-asset
+• Simple rules often outperform complex optimizations
+
+Key Academic Insights for This Strategy:
+• Diversification across uncorrelated assets > number of positions
+• 6-month lookback balances signal strength with noise
+• 200-day MA filter reduces whipsaws and drawdowns
+• Equal weighting avoids over-concentration risk
+• Monthly rebalancing captures momentum shifts without over-trading
+
+RISK MANAGEMENT
+----------------------------------------
+Built-in Risk Controls:
+• Diversification: Maximum 7 uncorrelated asset classes
+• Trend Filter: 200-day MA prevents buying into downtrends
+• Momentum Filter: Positive 6-month return requirement
+• Equal Weighting: Prevents over-concentration in single asset
+• Regular Rebalancing: Captures momentum regime changes
+
+Scenario Planning:
+• Bull Market: Strategy captures uptrending assets
+• Bear Market: Filters force cash/defensive positioning
+• Sideways Market: Frequent rotations, lower returns
+• Crisis: Momentum reversal risk, but diversification helps
+
+Risk Warnings:
+• Momentum can reverse suddenly during market stress
+• Strategy may go to cash if no assets qualify
+• Performance poor in choppy, trendless markets
+• Monthly trading generates tax implications
+• Past performance does not guarantee future results
+
+MONTHLY IMPLEMENTATION CHECKLIST
+----------------------------------------
+First Trading Day of Month:
+1. Download 6+ months of price data for all 7 ETFs
+2. Calculate 6-month rate of change: (Current - 6M Ago) / 6M Ago
+3. Calculate 200-day moving average for each ETF
+4. Filter 1: Keep only ETFs above 200-day MA
+5. Filter 2: Keep only ETFs with positive 6-month momentum
+6. Rank qualifying ETFs by 6-month momentum (high to low)
+7. Select top 2-3 qualifying ETFs
+8. Compare to current holdings
+9. Execute trades if holdings change
+10. Equal weight remaining allocation
+
+If No ETFs Qualify:
+• Move to 100% cash/money market
+• Continue monthly evaluation
+• Wait for momentum and trend signals to align
+• Do not force trades or lower standards
+
+================================================================================
+IMPORTANT DISCLAIMER
+================================================================================
+This analysis is for educational purposes only and does not constitute
+financial advice. Momentum strategies involve significant risks including
+sudden reversals, high volatility, and periods of underperformance.
+Past academic research and historical backtests do not guarantee future
+results. All investments carry risk of loss. Consult with a qualified
+financial advisor before implementing any strategy. Consider your risk
+tolerance, investment timeline, and tax situation before proceeding.

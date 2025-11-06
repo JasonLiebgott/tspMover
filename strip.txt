@@ -1,0 +1,528 @@
+This is Max from UNFR for the Midas
+Touch Network. You know, words like
+unprecedented and uncharted get thrown
+around a lot when you cover the Trump
+administration. And it almost feels a
+little hack and a little clickbay to
+keep using it, especially as the
+socioeconomics guide. Not the most
+exciting topic, right? So, I'm not
+trying to compete with all of the
+absolutely insane things that are going
+on right now. So, please forgive the
+framing of this one, but we are indeed
+in uncharted territory with
+unprecedented activity in the financial
+markets. In the last week of October,
+the plumbing of the financial system
+broke and it's still leaking as of the
+start of November. And if it gets worse,
+we might be headed for an epic economic
+meltdown. So, I'm going to break it all
+down to compare it with past crises and
+put it in context of the government
+shutdown, the degrading economic data,
+and the mounting US debt. This is the
+ultimate peak under the hood that the
+people who run this economy don't want
+you to see. So, let's go.
+[Music]
+It's been a while since we've run
+through macroeconomic numbers together.
+So, let's start big picture before we
+dig into the pipes that burst in the
+financial markets to really explain the
+severity of the situation. See, there's
+a staggering disconnect between the
+stock market and how the mainstream
+media talks about the economy and what's
+really going on behind the scenes at our
+major financial institutions and below
+the surface of the real economy. So big
+picture, even though some data have been
+delayed due to the government shutdown,
+there are alternative data sources and
+private releases that give us an idea of
+where things stand at the moment. And
+again, as we've said many times, the
+stock market is not the economy. So it's
+important to look past what's happening
+with equities. For example, we know from
+the Challenger Gray and Christmas
+reporting that hiring for this holiday
+season is expected to be at 2009 levels,
+the literal peak of the global financial
+crisis. We've seen mass layoff
+announcements from IBM, Target, Amazon,
+UPS, Meta, Google, Skyance, Paramount,
+Intel. Baby boomers continue to exit the
+job market at a rate of 10,000 per day.
+So despite the lack of data at the
+moment, the administration is able to
+claim that the unemployment rate isn't
+problematic, but it ignores how
+entry-level jobs have been decimated by
+our zero immigration and mass
+deportation policy and baby boomers
+leaving the workforce. So under these
+circumstances, wages should be
+increasing steadily due to decreasing
+supply. Instead, wage growth among those
+currently employed is stagnating or
+declining. So, wage growth continues to
+trend in the wrong direction, while
+inflation, as you can see here, is still
+above 3%, which is above the Fed's 2%
+target. And this has many analysts
+beginning to wonder if 3% is the new
+normal. And maybe the Fed should just
+adjust its mandate accordingly. And yet,
+this has been celebrated by the Trump
+administration because tariff inflation
+hasn't shown up in the retail sector as
+substantially as some thought it might,
+but it did show up. Well, we should be
+worried. The goods economy, uh, certain
+portions of the goods economy are
+collapsing right now. So, year-over-year
+trucking volumes, this is really
+predominance of freight that moves
+across the United States is down 17%.
+But when you look at the industrial
+sectors, the folks are the the freight
+that moves over the long haul, this is
+energy, automotive, housing, and
+manufacturing, we're down 30%
+year-over-year, which is very great
+financial crisis uh levels of concern.
+It's really, if you think about where
+we've seen inflation related to tariffs,
+a lot of the tariff cost has been in
+wholesale prices and wholesale goods and
+and and so it's not showing up
+necessarily in consumer prices, but it
+is showing up in those wholesale prices.
+And so those imports that companies are
+getting in raw materials is really
+taking a pretty, you know, a pretty big
+hit. So that's where the tariff
+inflation has been hiding in the raw
+materials and the industrial sectors.
+It's not making its way into goods,
+which is actually a worse sign than we
+originally anticipated. See, the
+relative cost from tariffs isn't being
+passed on to the consumers because they
+can't afford to pass it along. They'd be
+trying to get blood from a stone. In the
+same way that crude oil can't push past
+resistance levels right now. I mean, we
+literally bombed Iran this year. We
+sanctioned Russia and anyone selling oil
+to them, and we're threatening to invade
+Venezuela. These are all major pro
+states. In any other climate, oil would
+be through the roof under these
+exogenous threats. Instead, nothing. Oil
+is $60 and it can't break that range.
+Translation is the consumer is dead.
+So, how does this administration
+reconcile this fact? by saying that the
+whole point of their economic plan is
+some temporary pain to move past a
+consumer economy and toward a
+manufacturing economy, essentially back
+to the future. But manufacturing has
+contracted since Trump took office.
+Manufacturing jobs have declined and the
+broad-based investments into renewable
+energy and infrastructure under the
+Biden administration have been shifted
+to data centers to traditional fuels and
+AI infrastructure designed to support a
+new high-tech AI and datadriven economy,
+not manufacturing. Oh, and by the way,
+Wall Street and our government both
+acknowledge that this will reduce the
+demand for labor in the coming years.
+Okay, so if we're supposed to be talking
+about the plumbing of the financial
+system, why start off with this
+macroeconomic view? It's because the
+economy is like a giant equation. It's
+all about inputs and outputs. And
+typically, we gauge the health of the
+economy by business cycles and judging
+the flows of these inputs and outputs.
+And the biggest input is money. After
+the global financial crisis and after
+COVID, we sent trillions of dollars into
+the system. Trillions. And some of it
+went to work in the real economy, but
+most of it went to cover for losses.
+That was especially the case after the
+GFC. But after COVID, the money went
+everywhere fast. And that's the other
+part of the equation. It's not just
+about the money. It's about the velocity
+of money. See, when money is flowing,
+you can easily track the business
+cycles. It's water flowing through the
+pipes. So, when money stops flowing,
+it's like sludge in the plumbing. And
+eventually it backs up and it builds
+pressure in the pipes and that's when
+leaks occur. And if left unattended,
+that's when leaks turn to bursts.
+There's a very important market that's
+overseen by the Federal Reserve called
+the repo market. Now repo just stands
+for repurchase and there are two sides
+of it, the repo and the reverse repo,
+which basically just indicates whether
+financial firms are buying from it or
+selling into it. Now, the names here can
+cause a little bit of confusion, but
+here's the best way to think about it.
+Every night, trades settle out from the
+day between buyers and sellers. And most
+of the major financial institutions,
+banking and non-bank firms, settle
+through clearing houses, which means
+it's a triparty transaction or directly
+with one another, which is a bilateral
+transaction. Now, sometimes there's so
+much money changing hands that the
+counterparty or the clearing house
+that's putting up the cash will borrow
+money to make sure that there's enough
+to go around cuz remember these
+investments and trades are highly highly
+leveraged and every night there are
+trillions of trillions of dollars worth
+of transactions that are settling out.
+So in order to create a buffer after the
+global financial crisis, the Federal
+Reserve created a new standing facility
+called the standing repo facility.
+Essentially a rainy day fund with
+billions to sometimes hundreds of
+billions of dollars in it at a set rate
+of interest so that financial
+institutions kind of have a safe haven
+to access money. And as you can see in
+this chart, this facility was filled
+during the inflation crisis postcoid as
+institutions were working out their
+balance sheet issues and their
+settlements. Today, the facility is
+empty. In a moment, I'm going to show
+you where it's all gone and where the
+money is invested. But this is the first
+important signal that we need to be
+aware of. The rainy day fund is bone
+dry. Now, let's talk about rates for a
+minute because there are some
+misconceptions about rates in the
+marketplace and who sets them because
+the narrative is always that the Fed
+rate is a singular rate. It's the only
+one that matters. And is the Fed going
+to raise rates at the next meeting or
+cut them? Did the market already price
+that cut in? Did anyone descent? How did
+the markets respond? What does it mean
+for borrowers? And then the conversation
+just kind of stops only to be revisited
+the next time the FOMC gets together.
+But rates tell a continuous and
+relentless story about the nature of the
+economy. For example, Treasury rates
+tell us how other countries feel about
+the way that we handle our business. So
+you can see here that the Fed has been
+cutting rates, right? That's the
+horizontal blue line to where the high
+end of the federal funds rate today is
+4%.
+Treasury rates, these are the
+instruments that we use to finance our
+debt, typically track pretty closely
+with the federal funds rate. And what
+we've seen in the past few weeks, is a
+separation in the movement of yields.
+Despite the Fed lowering the federal
+funds rate, the yields on treasuries
+have split across the board and moved
+higher. In other words, the Fed and the
+Treasury are officially on totally
+different pages. The global marketplace
+is hedging against the US and doesn't
+believe that lowering rates will have a
+stimulating effect on economic activity.
+So, that's the really big picture on
+rates. Now, there's other rates all
+throughout the market. For example, at
+the consumer level, uh credit cards and
+auto loan rates tell us how the
+capitalist markets think the consumer is
+doing. Mortgage rates are a reflection
+of consumer credit, health, and income.
+But who sets these in reality?
+There are two competing narratives here.
+They're totally at odds with one another
+when it comes to who controls the rates.
+Because sometimes the government likes
+to pretend that it's completely in
+control of rates. At other times, it
+doesn't take any credit. It backs away
+and says, "Oh, that's the invisible hand
+of the marketplace." Now, the truth is
+somewhere in between this. The federal
+funds rate, the one that everyone talks
+about, is, believe it or not, more of a
+suggestion than a fixed rate. Now, it
+serves as a guide for sure, or more
+precisely, a range. See, when the Fed
+sets the federal funds rate, it's not a
+fixed rate of borrowing. It's a range, a
+very small range of a quarter of a
+percent. This range, it's set for
+overnight lending between banks. That's
+it. It has nothing to do with you, with
+your auto loan, your student debt
+borrowing rate, or your mortgage. But
+the theory holds that the baseline cost
+of capital is set by this rate, right?
+It's a benchmark for the market to set
+expectations against. Now, let's get
+even more specific about rates because
+with this under your belt, you'll be
+able to more easily spot where the leak
+is sprung. So every day, banks, non-bank
+financial institutions, and investors
+track rate movements across a spectrum.
+The federal funds rate that we just
+talked about is only one of them, and it
+doesn't move, but for the FOMC meetings.
+But there's also something called the
+secured overnight financing rate or
+sofur, which is really important to the
+story today. We've also got the reverse
+repo award rate or RRP, interest on
+reserve balances, the discount rate,
+prime rate. So there are others but
+these are really the big ones. Now the
+federal funds rate is important. I don't
+want to suggest that it's not. It's a
+guide for the market. The prime rate is
+based on the federal funds rate for
+example. And this is extremely important
+in commercial real estate and for
+certain business lines of credit. So in
+this way it's important in both
+practical terms and for optics. And when
+the actual rates in the banking system
+fall within this range, that's when the
+Fed comes in to say that it has complete
+control of the market.
+So now let's talk about sofur. And if
+you grew up on Long Island like me, this
+might be a little confusing because
+that's how we pronounce this. Now for
+normal people everywhere but Long
+Island, sofur is the secured overnight
+financing rate and it's the first sign
+of leaky pipes. SOFUR is a composite of
+market rates. It's not set by anyone.
+It's where rates land, all of them kind
+of put together during the overnight
+trading. So when the sofur rate exceeds
+the federal funds rate, it's sometimes
+interpreted as a sign of stress in the
+market, meaning that liquidity is tight.
+So funding sources, the people that are
+putting money into the system, are
+looking for a premium. So if you're the
+party that's lending money to others and
+let's say you're not comfortable with
+their collateralization, you'll ask for
+a higher rate. That's just like real
+life, right? So when this happens, large
+financial firms that are eligible to
+transact with the Federal Reserve look
+to borrow from the Fed instead. So let's
+look at Sofur this year. Sofur is almost
+always within the Fed funds range. Now
+remember that the Fed has lowered the
+range twice in the past couple of
+months. So the green line here is
+showing the upper limit of that range. 4
+and a/4% in September and 4% as of
+October. These are the rate cuts that
+you hear so much about. Now the yellow
+line is that composite of market rates,
+the sofur rate. So you can see on the
+eve of the first rate cut, sofur briefly
+exceeded the upper limit and then again
+in midocctober and since the last week
+of October and in the beginning of
+November, it hasn't come back down. So
+that means that the market is
+consistently looking for a premium. And
+here's where you can see the money being
+supplied by the Fed as a backs stop.
+Those tall blue lines represent the repo
+agreements from the Fed. In other words,
+certain lenders weren't happy with the
+rates offered by the market. So they
+sold securities, either mortgage back
+securities or US Treasury notes to the
+Fed in return for cash. It's another
+thing that we'll touch on in a minute.
+And I have to stress the point that this
+is highly highly unusual. It happened
+once in 2019 and set off a global panic
+in bond and equity markets alike until
+the Fed stepped in and pumped in tens of
+billions of dollars into the system
+overnight. So this means one of two
+things. Financial institutions think
+that their counterparties might not be
+as healthy as they're saying or they
+don't have it. So, this has led some to
+note that the Fed has quote lost control
+of interest rates in the market and that
+we might be on the verge of a massive
+liquidity crisis. Now, the real story
+probably lies somewhere in between. But
+the bottom line is that this facility
+isn't supposed to be used this way and
+it's rarely if ever used outside of
+quarter end periods when banks are
+looking to shore up their reserve
+requirements ahead of reporting. So, if
+money is leaking out of the system,
+where's it all going? Well,
+unfortunately, the United States
+contracted with discount plumbers down
+the block instead of calling up
+professionals. Larry, Mo, and Curley
+here are driving the policy bus at the
+moment. So, we've got the Donald, Scott
+Bessant, and Steven Myron. So, Donald
+Trump decided to blow out our deficits
+by maintaining spending levels while
+cutting taxes on the wealthy and
+corporations. So Scott Bessant, you
+know, the guy who ran a hedge fund that
+lost 90% of its value while the S&P
+gained 167% over the same period. And
+yes, I'm going to tell that story every
+single time I mention his name because
+he's such an arrogant ass who's in so
+far over his head. That guy, Scott
+Bessant, has to fund the government
+through Treasury auctions, but he needs
+to keep those rates as low as possible.
+Which is why Steven Meerin, the other
+guy in that photo, is on leave from the
+White House and over at the Fed now
+pushing the FOMC to lower rates because
+they think they're still in control of
+the market. But as we've shown, they
+lost control of rates and that's why
+they're going higher and higher. And by
+the way, if you want to know who Steven
+Myin is and why he's so dangerous, I
+just did a whole expose on him on UNFR.
+So check that out when you get a chance
+because dollars to donuts, that guy is
+going to be the next Fed chair. You
+heard it here. But I digress. Here's
+where the money is going. The yellow
+line is that reverse repo market that we
+talked about, that rainy day fund
+plotted here against bank reserves in
+red and the TGA or the Treasury General
+Account in green. The TGA is the
+government's checking account. That's
+where we pay our bills out of. Bank
+reserves are declining and the rainy day
+fund is dry because the Fed and the
+banks are being forced nicely to buy our
+own treasuries to fill the country's
+checking account. So, couple of fun
+facts before I bring this home. When
+Janet Yelen was the Fed chair, Scott
+Besson, the guy who lost 90% of his
+value in his hedge fund, criticized her
+for rolling over long-term debt into
+short-term instruments because they had
+a lower interest rate. And now he's
+doing the exact same thing to the
+extreme. The other fun fact is that the
+Federal Reserve quietly announced in the
+footnotes of its last memorandum that
+it's going to stop purchasing mortgage
+back securities and only purchase
+treasuries with the money that it has on
+hand because they want to keep demand
+for treasuries high and suppress the
+yields. That's yield curve control. We
+did it in the 50s and 60s and it was a
+disaster. Now, if you made it this far,
+you get a gold star because this is
+confusing and also depressing. So, let
+me briefly recap what's going on without
+the charts and the graphs and the
+jargon. All right, so let's go big
+picture. Recently, a Harvard economist
+named Jason Ferman estimated that if you
+took out all of the spending into data
+centers that fueled growth in the first
+half of the year, that actual US GDP
+would have only been.1%.
+Yeah. Now, that money didn't go into
+your pocket. Didn't even go to the
+government. It just went to Wall Street.
+That's what's pumping up equities. Wage
+growth has been declining and
+unemployment figures have only remained
+stable because of a zero immigration and
+mass deportation policy. Subprime
+defaults are rising. So are
+bankruptcies. High-profile private
+credit bankruptcies revealed shaky
+lending practices among all of those
+counterparties in the financial markets
+that we can't see. And that's led the
+banks that we can see to increase rates
+that they're charging these firms
+despite the Fed's attempt to lower
+interest rates by cutting the federal
+funds rate. This is why people are
+saying that the Fed has lost control of
+rates. Inflation is stuck above 3%
+despite slowing demand and slumping
+consumer confidence to the point that
+retailers have announced holiday hiring
+will barely meet 2009 levels. In other
+words, we're broke. The country is broke
+and so are consumers. And the people who
+have all the money are starting to hoard
+it. The banks that have money are
+investing in treasuries because the
+deficits are increasing more than
+projected. And the Treasury is retiring
+old long-term debt with short-term debt
+that's a little bit cheaper. But even
+the short-term rates are starting to
+rise and creep as well because people
+are losing faith in us. So this is all
+the equivalent of like rolling your
+credit card debt to a zero interest
+card. The debt doesn't go away. Tariffs
+have brought the industrial economy to a
+standstill. All to protect tax cuts for
+corporations and the wealthy. 

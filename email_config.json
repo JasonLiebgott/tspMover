@@ -1,0 +1,19 @@
+{
+  "email": {
+    "enabled": true,
+    "from_email": "tradclimber@gmail.com",
+    "app_password": "agos xwek huvw nleo",
+    "to_email": "tradclimber@gmail.com",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587
+  },
+  "alerts": {
+    "enabled": true,
+    "min_interval_minutes": 30,
+    "threat_levels": [
+      "dangerous",
+      "severe",
+      "extreme"
+    ]
+  }
+}
