@@ -1,0 +1,67 @@
+# WINDOWS TASK SCHEDULER SETUP FOR CRISIS MONITORING
+
+## Benefits:
+- Runs even if you log out
+- Survives system sleep/wake cycles  
+- More reliable than continuous Python scripts
+- Automatic startup after reboots
+- Built-in Windows service
+
+## Setup Steps:
+
+### 1. Create Task Scheduler Entry
+1. Press Win+R, type "taskschd.msc", press Enter
+2. Click "Create Basic Task" in right panel
+3. Name: "Financial Crisis Monitor"
+4. Description: "Automated threat assessment monitoring"
+
+### 2. Configure Trigger
+- Select "Daily" 
+- Set start time (e.g., 9:00 AM)
+- Recur every: 1 day
+- Check "Repeat task every: 15 minutes"
+- Duration: Indefinitely
+
+### 3. Configure Action  
+- Action: "Start a program"
+- Program: C:\tspMover\.venv\Scripts\python.exe
+- Arguments: C:\tspMover\advanced_threat_assessment.py --email-only
+- Start in: C:\tspMover
+
+### 4. Configure Conditions
+- Uncheck "Start task only if computer is on AC power"
+- Check "Wake the computer to run this task"
+- Uncheck "Stop if computer switches to battery power"
+
+### 5. Configure Settings
+- Check "Allow task to be run on demand"
+- Check "Run task as soon as possible after scheduled start is missed"
+- If running task fails, restart every: 1 minute
+- Attempt to restart up to: 3 times
+
+## PowerShell Command to Create Task:
+```powershell
+# Run this in PowerShell as Administrator
+$action = New-ScheduledTaskAction -Execute "C:\tspMover\.venv\Scripts\python.exe" -Argument "C:\tspMover\advanced_threat_assessment.py --email-only" -WorkingDirectory "C:\tspMover"
+
+$trigger = New-ScheduledTaskTrigger -Daily -At 9:00AM -RepetitionInterval (New-TimeSpan -Minutes 15) -RepetitionDuration (New-TimeSpan -Days 9999)
+
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -WakeToRun -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+
+Register-ScheduledTask -TaskName "Financial Crisis Monitor" -Action $action -Trigger $trigger -Settings $settings -Description "Automated financial threat assessment" -User $env:USERNAME
+```
+
+## Manual Task Creation Commands:
+```cmd
+# Create the task (run as Administrator)
+schtasks /create /tn "Financial Crisis Monitor" /tr "C:\tspMover\.venv\Scripts\python.exe C:\tspMover\advanced_threat_assessment.py --email-only" /sc minute /mo 15 /st 09:00 /sd 01/01/2024 /ed 12/31/2030
+
+# Test the task
+schtasks /run /tn "Financial Crisis Monitor"
+
+# View task status  
+schtasks /query /tn "Financial Crisis Monitor" /fo list /v
+
+# Delete the task (if needed)
+schtasks /delete /tn "Financial Crisis Monitor" /f
+```

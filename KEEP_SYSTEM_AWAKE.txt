@@ -1,0 +1,30 @@
+# KEEP SYSTEM AWAKE FOR CONTINUOUS MONITORING
+
+## Windows PowerShell Commands (Run as Administrator):
+
+# Prevent system from sleeping when plugged in
+powercfg -change -standby-timeout-ac 0
+
+# Prevent system from sleeping when on battery (optional)
+powercfg -change -standby-timeout-dc 0
+
+# Keep display on when plugged in (optional)
+powercfg -change -monitor-timeout-ac 0
+
+# Verify current power settings
+powercfg -query
+
+## Alternative: Use Windows "High Performance" Power Plan
+# 1. Control Panel → Power Options
+# 2. Select "High Performance" 
+# 3. Click "Change plan settings"
+# 4. Set both to "Never"
+
+## For Laptops: Keep Running When Lid Closed
+# 1. Control Panel → Power Options
+# 2. Click "Choose what closing the lid does"
+# 3. Set to "Do nothing" when plugged in
+
+## Restore Normal Sleep Settings Later:
+# powercfg -change -standby-timeout-ac 30  # 30 minutes
+# powercfg -change -monitor-timeout-ac 10  # 10 minutes

@@ -1,0 +1,31 @@
+# Manual Task Removal Commands
+# Copy and paste these into PowerShell running as Administrator
+
+# Remove old tasks one by one
+Write-Host "Removing old crisis monitor tasks..." -ForegroundColor Yellow
+
+# Remove original task
+try {
+    Unregister-ScheduledTask -TaskName "Financial Crisis Monitor" -Confirm:$false
+    Write-Host "Removed: Financial Crisis Monitor" -ForegroundColor Green
+} catch {
+    Write-Host "Financial Crisis Monitor not found" -ForegroundColor Yellow
+}
+
+# Remove enhanced v2 task  
+try {
+    Unregister-ScheduledTask -TaskName "Enhanced Crisis Monitor v2" -Confirm:$false
+    Write-Host "Removed: Enhanced Crisis Monitor v2" -ForegroundColor Green
+} catch {
+    Write-Host "Enhanced Crisis Monitor v2 not found" -ForegroundColor Yellow
+}
+
+# Show remaining tasks
+Write-Host ""
+Write-Host "Remaining crisis/finance tasks:" -ForegroundColor Cyan
+Get-ScheduledTask | Where-Object {$_.TaskName -like "*Crisis*" -or $_.TaskName -like "*Finance*"}
+
+Write-Host ""
+Write-Host "Cleanup complete! You should now have only:" -ForegroundColor Green
+Write-Host "- Dual Email Crisis Monitor (every 15 minutes)" -ForegroundColor White  
+Write-Host "- Daily Finance Report (9:00 AM daily)" -ForegroundColor White

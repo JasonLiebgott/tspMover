@@ -29,6 +29,19 @@ class EmailAlerter:
             print(f"❌ Error loading email config: {e}")
             return None
     
+    def safe_format(self, value, format_spec):
+        """Safely format a value, handling None and non-numeric values"""
+        if value is None:
+            return 'N/A'
+        try:
+            if isinstance(value, (int, float)):
+                return format(value, format_spec)
+            else:
+                # Try to convert string to float
+                return format(float(value), format_spec)
+        except (ValueError, TypeError):
+            return str(value) if value is not None else 'N/A'
+    
     def send_crisis_alert(self, threat_level, condition_score, dangerous_metrics, market_data):
         """Send crisis alert via email"""
         if not self.config or not self.config.get('email', {}).get('enabled', False):
@@ -89,7 +102,7 @@ class EmailAlerter:
                     <h2 style="color: {color}; margin-top: 0;">Threat Level: {threat_level}</h2>
                     <p><strong>Condition Score:</strong> {condition_score:.1f}/7.0</p>
                     <p><strong>Time:</strong> {timestamp}</p>
-                    <p><strong>S&P 500 Level:</strong> {market_data.get('sp500_level', 'N/A'):,.0f}</p>
+                    <p><strong>S&P 500 Level:</strong> {self.safe_format(market_data.get('sp500_level'), ',.0f')}</p>
                 </div>
                 
                 <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;">
@@ -107,13 +120,13 @@ class EmailAlerter:
                 <div style="background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0;">
                     <h3 style="color: #0c5460; margin-top: 0;">📊 Current Market Readings:</h3>
                     <ul style="color: #0c5460; font-family: monospace; font-size: 14px;">
-                        <li>VIX (Fear): {market_data.get('vix', 'N/A'):.1f}</li>
-                        <li>10-Year Treasury: {market_data.get('treasury_10yr', 'N/A'):.2f}%</li>
-                        <li>Yield Curve: {market_data.get('treasury_2yr_10yr_spread', 'N/A'):+.2f}%</li>
-                        <li>S&P 500 Weekly: {market_data.get('sp500_weekly_change', 'N/A'):+.1f}%</li>
-                        <li>Dollar Index: {market_data.get('dollar_index', 'N/A'):.1f}</li>
-                        <li>Oil Price: ${market_data.get('oil_price', 'N/A'):.2f}</li>
-                        <li>Credit Spread: {market_data.get('corporate_credit_spread', 'N/A'):.2f}%</li>
+                        <li>VIX (Fear): {self.safe_format(market_data.get('vix'), '.1f')}</li>
+                        <li>10-Year Treasury: {self.safe_format(market_data.get('treasury_10yr'), '.2f')}%</li>
+                        <li>Yield Curve: {self.safe_format(market_data.get('treasury_2yr_10yr_spread'), '+.2f')}%</li>
+                        <li>S&P 500 Weekly: {self.safe_format(market_data.get('sp500_weekly_change'), '+.1f')}%</li>
+                        <li>Dollar Index: {self.safe_format(market_data.get('dollar_index'), '.1f')}</li>
+                        <li>Oil Price: ${self.safe_format(market_data.get('oil_price'), '.2f')}</li>
+                        <li>Credit Spread: {self.safe_format(market_data.get('corporate_credit_spread'), '.2f')}%</li>
                     </ul>
                 </div>
                 
@@ -149,7 +162,7 @@ class EmailAlerter:
 THREAT LEVEL: {threat_level}
 Condition Score: {condition_score:.1f}/7.0
 Time: {timestamp}
-S&P 500 Level: {market_data.get('sp500_level', 'N/A'):,.0f}
+S&P 500 Level: {self.safe_format(market_data.get('sp500_level'), ',.0f')}
 
 🚨 CRISIS CONDITIONS DETECTED:
 """
@@ -158,13 +171,13 @@ S&P 500 Level: {market_data.get('sp500_level', 'N/A'):,.0f}
         
         text += f"""
 📊 CURRENT MARKET READINGS:
-• VIX (Fear): {market_data.get('vix', 'N/A'):.1f}
-• 10-Year Treasury: {market_data.get('treasury_10yr', 'N/A'):.2f}%
-• Yield Curve: {market_data.get('treasury_2yr_10yr_spread', 'N/A'):+.2f}%
-• S&P 500 Weekly: {market_data.get('sp500_weekly_change', 'N/A'):+.1f}%
-• Dollar Index: {market_data.get('dollar_index', 'N/A'):.1f}
-• Oil Price: ${market_data.get('oil_price', 'N/A'):.2f}
-• Credit Spread: {market_data.get('corporate_credit_spread', 'N/A'):.2f}%
+• VIX (Fear): {self.safe_format(market_data.get('vix'), '.1f')}
+• 10-Year Treasury: {self.safe_format(market_data.get('treasury_10yr'), '.2f')}%
+• Yield Curve: {self.safe_format(market_data.get('treasury_2yr_10yr_spread'), '+.2f')}%
+• S&P 500 Weekly: {self.safe_format(market_data.get('sp500_weekly_change'), '+.1f')}%
+• Dollar Index: {self.safe_format(market_data.get('dollar_index'), '.1f')}
+• Oil Price: ${self.safe_format(market_data.get('oil_price'), '.2f')}
+• Credit Spread: {self.safe_format(market_data.get('corporate_credit_spread'), '.2f')}%
 
 ⚡ RECOMMENDED ACTIONS:
 1. Review portfolio allocation immediately
