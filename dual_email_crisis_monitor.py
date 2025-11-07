@@ -37,6 +37,8 @@ class DualEmailCrisisMonitor(EnhancedThreatAssessmentV2):
             'credit_stress': 4.5,  # High-yield credit severe stress
             'vix_extreme': 5.0  # VIX reaching crisis levels
         }
+        # State file for tracking threat level changes
+        self.state_file = 'threat_level_state.json'
     
     def should_send_alert_email(self, composite_score, scores, data):
         """Determine if an immediate action alert should be sent"""
@@ -67,6 +69,66 @@ class DualEmailCrisisMonitor(EnhancedThreatAssessmentV2):
             alert_triggers.append("Market volatility reaching crisis levels")
         
         return alert_triggers
+    
+    def load_previous_threat_state(self):
+        """Load previous threat level from state file"""
+        try:
+            import json
+            import os
+            if os.path.exists(self.state_file):
+                with open(self.state_file, 'r') as f:
+                    state = json.load(f)
+                    return state.get('composite_score', 0.0), state.get('threat_level', 'EXCELLENT')
+            return 0.0, 'EXCELLENT'  # Default to lowest threat if no previous state
+        except Exception as e:
+            print(f"Warning: Could not load previous threat state: {e}")
+            return 0.0, 'EXCELLENT'
+    
+    def save_current_threat_state(self, composite_score, threat_level):
+        """Save current threat level to state file"""
+        try:
+            import json
+            from datetime import datetime
+            state = {
+                'composite_score': composite_score,
+                'threat_level': threat_level,
+                'timestamp': datetime.now().isoformat(),
+                'last_updated': datetime.now().strftime('%B %d, %Y at %I:%M %p')
+            }
+            with open(self.state_file, 'w') as f:
+                json.dump(state, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Could not save threat state: {e}")
+    
+    def should_send_escalation_alert(self, current_score, current_level, alert_triggers):
+        """Determine if alert should be sent based on threat level escalation"""
+        if not alert_triggers:
+            return False, "No alert triggers met"
+        
+        # Load previous state
+        previous_score, previous_level = self.load_previous_threat_state()
+        
+        # Define threat level hierarchy for comparison
+        threat_hierarchy = {
+            'EXCELLENT': 0,
+            'GOOD': 1, 
+            'FAIR': 2,
+            'CONCERNING': 3,
+            'DANGEROUS': 4,
+            'SEVERE': 5,
+            'EXTREME': 6
+        }
+        
+        current_level_num = threat_hierarchy.get(current_level, 0)
+        previous_level_num = threat_hierarchy.get(previous_level, 0)
+        
+        # Only send alert if threat level is increasing or if score increased significantly
+        if current_level_num > previous_level_num:
+            return True, f"Threat level escalated from {previous_level} to {current_level}"
+        elif current_level_num == previous_level_num and current_score > previous_score + 0.5:
+            return True, f"Threat score increased significantly: {previous_score:.2f} → {current_score:.2f}"
+        else:
+            return False, f"Threat stable/decreasing: {previous_level} ({previous_score:.2f}) → {current_level} ({current_score:.2f})"
     
     def get_detailed_concerning_metrics(self, scores):
         """Get detailed explanations of concerning metrics in plain English"""
@@ -985,6 +1047,12 @@ An even-handed interpretation:
                 # Check if we should send an immediate action alert
                 alert_triggers = self.should_send_alert_email(composite_score, scores, data)
                 
+                # Check if threat level is escalating (only send alert if increasing)
+                should_alert, escalation_reason = self.should_send_escalation_alert(composite_score, threat_level, alert_triggers)
+                
+                # Save current state for next comparison
+                self.save_current_threat_state(composite_score, threat_level)
+                
                 # Send daily report (only if explicitly requested)
                 if daily_report:
                     date_str = datetime.now().strftime('%m/%d/%Y')
@@ -1015,8 +1083,8 @@ Full analysis available in HTML version of this email.
                     else:
                         print(f"❌ Failed to send daily report")
                 
-                # Send immediate action alert if triggers are met
-                if alert_triggers:
+                # Send immediate action alert if triggers are met AND threat is escalating
+                if should_alert:
                     alert_subject = "Finance Alert: Immediate Action"
                     alert_html = self.create_alert_email_html(alert_triggers, data, composite_score, threat_level, scores)
                     
@@ -1058,11 +1126,16 @@ VIX: {vix_value}
                     
                     success = alerter.send_email(alert_subject, alert_html, alert_text)
                     if success:
-                        print(f"🚨 IMMEDIATE ACTION ALERT SENT - {len(alert_triggers)} triggers")
+                        print(f"🚨 IMMEDIATE ACTION ALERT SENT - {escalation_reason}")
+                        print(f"   Triggers: {len(alert_triggers)} metrics concerning")
                         for trigger in alert_triggers:
                             print(f"   🔴 {trigger}")
                     else:
                         print(f"❌ Failed to send action alert")
+                
+                # Log escalation status
+                elif alert_triggers and not should_alert:
+                    print(f"📊 Alert triggers present but not escalating: {escalation_reason}")
                 
                 # If no alerts and not daily report, just log current status
                 if not alert_triggers and not daily_report:
