@@ -243,6 +243,408 @@ class DualEmailCrisisMonitor(EnhancedThreatAssessmentV2):
         
         return summaries.get(metric_name, {}).get(level, f'{metric_name} is at {level} level')
     
+    def get_friendly_metric_title(self, metric_name, metric_data):
+        """Convert technical metric names to user-friendly titles"""
+        value = metric_data.get('value', 0)
+        level = metric_data.get('level', 'UNKNOWN')
+        
+        friendly_titles = {
+            'sp500_weekly_change': f'S&P 500 Weekly Performance: {self.safe_format(value, "+.1f")}% ({level})',
+            'nasdaq_weekly_change': f'NASDAQ Weekly Performance: {self.safe_format(value, "+.1f")}% ({level})',
+            'dow_weekly_change': f'Dow Jones Weekly Performance: {self.safe_format(value, "+.1f")}% ({level})',
+            'vix': f'Market Fear Index (VIX): {self.safe_format(value, ".1f")} ({level})',
+            'yield_spread_10y3m': f'NY Fed Recession Indicator (10Y-3M): {self.safe_format(value, "+.2f")}% ({level})',
+            'yield_spread_10y2y': f'Traditional Yield Curve (10Y-2Y): {self.safe_format(value, "+.2f")}% ({level})',
+            'credit_spread_hy': f'High-Yield Credit Spreads: {self.safe_format(value, ".1f")}% ({level})',
+            'credit_spread_ig': f'Investment Grade Credit Spreads: {self.safe_format(value, ".1f")}% ({level})',
+            'sector_divergence': f'Sector Rotation Analysis: {self.safe_format(value, ".1f")} ({level})',
+            'treasury_10yr': f'10-Year Treasury Yield: {self.safe_format(value, ".2f")}% ({level})',
+            'dollar_index': f'US Dollar Index: {self.safe_format(value, ".1f")} ({level})',
+            'oil_price': f'Oil Price (WTI): ${self.safe_format(value, ".2f")} ({level})'
+        }
+        
+        return friendly_titles.get(metric_name, f'{metric_name.replace("_", " ").title()}: {self.safe_format(value, ".2f")} ({level})')
+    
+    def markdown_to_html(self, markdown_text):
+        """Convert basic Markdown formatting to HTML"""
+        if not markdown_text:
+            return ""
+        
+        import re
+        
+        # Clean up the text first
+        text = markdown_text.strip()
+        
+        # Convert **bold** to <strong> first
+        text = re.sub(r'\*\*([^*]+)\*\*', r'<strong style="color: #c0392b; font-weight: bold;">\1</strong>', text)
+        
+        # Split into lines for processing
+        lines = text.split('\n')
+        result_lines = []
+        in_list = False
+        
+        for line in lines:
+            stripped = line.strip()
+            
+            # Handle headers
+            if stripped.startswith('### '):
+                if in_list:
+                    result_lines.append('</ul>')
+                    in_list = False
+                header_text = stripped[4:].strip()
+                result_lines.append(f'<h3 style="color: #2c3e50; margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 8px; font-size: 18px;">{header_text}</h3>')
+            
+            # Handle bullet points
+            elif stripped.startswith('* ') or stripped.startswith('- '):
+                if not in_list:
+                    result_lines.append('<ul style="margin: 15px 0; padding-left: 25px;">')
+                    in_list = True
+                content = stripped[2:].strip()
+                result_lines.append(f'<li style="margin: 8px 0; line-height: 1.6; color: #333;">{content}</li>')
+            
+            # Handle regular paragraphs
+            elif stripped:
+                if in_list:
+                    result_lines.append('</ul>')
+                    in_list = False
+                result_lines.append(f'<p style="margin: 12px 0; line-height: 1.6; color: #333;">{stripped}</p>')
+            
+            # Handle empty lines
+            else:
+                if not in_list:  # Don't add breaks inside lists
+                    result_lines.append('')
+        
+        # Close any open list
+        if in_list:
+            result_lines.append('</ul>')
+        
+        return '\n'.join(result_lines)
+    
+    def get_comprehensive_trigger_breakdown(self, metric_name, metric_data, data):
+        """Get comprehensive analytical breakdown of trigger conditions"""
+        value = metric_data['value']
+        level = metric_data['level']
+        score = metric_data['filtered_score']
+        
+        breakdowns = {
+            'sector_divergence': {
+                'title': f'Sector Rotation Analysis: {self.safe_format(value, ".1f")} ({level})',
+                'condition': f'**a very unusual market condition**',
+                'what_it_measures': """
+### ⚙️ What the Metric Measures
+
+Sector rotation indicators compare the **relative performance between cyclical (e.g., Industrials, Financials)** and **growth-oriented sectors (e.g., Technology, Communications)**.
+
+* Under normal conditions, these sectors move somewhat together—rotating leadership as economic expectations shift.
+* When the divergence becomes extreme (like Tech surging while Industrials stagnate or fall), it implies **a breakdown in normal capital flow patterns**.
+                """,
+                'interpretation': f"""
+### 📈 Interpretation of "{score:.1f} ({level} 7.0/7.0)"
+
+If the model's scale runs 0–7, a **{score:.1f}+** likely means:
+
+* Tech and Industrials are moving **in opposite directions** to an exceptional degree.
+* This divergence is stronger than 90%+ of historical instances.
+* The system labels this as a **"crisis-level breakdown"** because similar conditions have historically preceded or occurred during:
+
+  * The 2000 dot-com crash
+  * The 2008 financial crisis
+  * The 2020 pandemic dislocation
+
+However, "breakdown" doesn't necessarily mean "imminent crash." It indicates that **market structure and sector relationships are distorted**, usually due to macro uncertainty or extreme liquidity concentration (e.g., AI hype, narrow leadership, flight to perceived safety in megacap tech).
+                """,
+                'assessment': f"""
+### ⚖️ Even-Handed Assessment
+
+**Strengths of the Signal:**
+
+* Captures **breadth deterioration** — when only a few sectors or stocks are carrying the market.
+* Useful as an **early warning** of imbalance between growth and cyclical areas.
+* Can help identify **rotation points** — e.g., when leadership may shift away from overheated tech.
+
+**Limitations / Cautions:**
+
+* It can **stay extreme for months** in momentum-driven markets (e.g., 2023–2025 AI rally).
+* The model likely uses **relative performance**, not absolute fundamentals — so it flags divergence, not valuation or macro fundamentals directly.
+* "Crisis-level" language can be **alarmist** — it describes correlation breakdowns, not guaranteed crashes.
+* Context matters: central bank policy, liquidity conditions, and earnings trends might justify such divergence temporarily.
+                """,
+                'practical_view': f"""
+### 🧭 Practical View
+
+An even-handed interpretation:
+
+> The {score:.1f}/7.0 reading reflects an **unusually narrow and unbalanced market**, dominated by technology while cyclical sectors lag.
+> It **warrants caution**, but not panic — similar patterns have sometimes resolved through **rotation and normalization**, not collapse.
+> Use it as a **signal to diversify, reassess risk exposure**, and monitor whether industrial and cyclical sectors begin to stabilize or recover.
+                """
+            },
+            'sp500_weekly_change': {
+                'title': f'S&P 500 Weekly Performance: {self.safe_format(value, "+.1f")}% ({level})',
+                'condition': f'**significant equity market weakness**',
+                'what_it_measures': f"""
+### ⚙️ What the Metric Measures
+
+The S&P 500 weekly performance tracks **broad U.S. equity market momentum** over a rolling 7-day period:
+
+* The S&P 500 represents ~80% of total U.S. stock market value and includes the 500 largest companies.
+* Weekly performance captures **short-term market sentiment** and investor confidence shifts.
+* Significant weekly declines often **precede broader market corrections** or indicate underlying economic concerns.
+* This metric reflects **real-time capital flows** - institutional and retail investors voting with their money.
+                """,
+                'interpretation': f"""
+### 📈 Interpretation of "{self.safe_format(value, '+.1f')}% ({level})"
+
+Current weekly decline of **{self.safe_format(value, '+.1f')}%** indicates:
+
+* **{'Moderate' if value > -3 else 'Significant' if value > -5 else 'Severe'}** selling pressure across broad U.S. equities.
+* Investor sentiment is **{'cautious' if value > -3 else 'negative' if value > -5 else 'fearful'}** - money is moving to safer assets.
+* **Historical context:** Weekly declines of this magnitude often occur during {'market corrections' if value > -3 else 'bear market conditions' if value > -5 else 'crisis periods'}.
+* **Momentum concern:** Sustained weekly declines can cascade into **longer-term bear markets**.
+                """,
+                'assessment': f"""
+### ⚖️ Even-Handed Assessment
+
+**Strengths of the Signal:**
+
+* **Broad market representation** - captures sentiment across entire large-cap universe.
+* **Real money flows** - reflects actual buying/selling decisions, not just surveys or sentiment.
+* **Leading indicator** - equity markets often decline before economic problems become visible.
+* **Institutional relevance** - tracks the primary benchmark for most investment portfolios.
+
+**Limitations / Cautions:**
+
+* **Short-term noise** - weekly moves can be driven by technical factors, not fundamentals.
+* **Volatility is normal** - markets regularly have -2% to -4% weeks without major consequences.
+* **Policy sensitivity** - Fed communications or geopolitical events can cause temporary selloffs.
+* **Seasonal patterns** - certain times of year (October, September) tend to be more volatile.
+                """,
+                'practical_view': f"""
+### 🧭 Practical View
+
+An even-handed interpretation:
+
+> The {self.safe_format(value, '+.1f')}% weekly decline reflects **{'normal market volatility' if value > -2 else 'elevated selling pressure' if value > -4 else 'significant market stress'}**.
+> This suggests investors are **{'taking some profits' if value > -2 else 'becoming more cautious' if value > -4 else 'moving to defensive positions'}**.
+> Use this as a **signal to {'monitor closely' if value > -2 else 'review risk exposure' if value > -4 else 'consider defensive positioning'}** and watch for continuation or reversal patterns.
+> **{'Stay alert but do not panic' if value > -3 else 'Take action if this weakness continues' if value > -5 else 'Serious warning - prepare for volatility'}** - single week moves rarely define long-term trends.
+                """
+            },
+            'yield_spread_10y3m': {
+                'title': f'NY Fed Recession Indicator: {self.safe_format(value, "+.2f")}% ({level})',
+                'condition': f'**the most reliable recession predictor in modern history**',
+                'what_it_measures': f"""
+### ⚙️ What the Metric Measures
+
+The 10-Year vs 3-Month Treasury yield spread is **the Federal Reserve Bank of New York's primary recession indicator**:
+
+* Normally, longer-term bonds (10-year) pay higher interest than short-term (3-month) bonds.
+* When this relationship "inverts" (short rates higher than long rates), it signals investors expect the Fed to cut rates due to economic weakness.
+* This indicator has **correctly predicted every U.S. recession since 1969** with only 2 false signals.
+                """,
+                'interpretation': f"""
+### 📈 Interpretation of "{value:+.2f}% ({level})"
+
+Current reading of **{value:+.2f}%** indicates:
+
+* {'The yield curve is inverted' if value < 0 else 'The yield curve is approaching inversion'} - a classic recession warning.
+* Historical data shows recessions typically occur **6-18 months** after sustained inversion.
+* The NY Fed model gives this a **{((abs(value) * 20) + 10):.0f}%** recession probability for the next 12 months.
+* Similar levels have preceded: 2001 dot-com recession, 2008 financial crisis, and 1990s recessions.
+                """,
+                'assessment': f"""
+### ⚖️ Even-Handed Assessment
+
+**Strengths of the Signal:**
+
+* **Highest historical accuracy** of any single recession indicator (96% success rate).
+* Based on **real money flows** - institutional investors voting with trillions in capital.
+* Reflects **genuine economic expectations**, not just sentiment or technical analysis.
+* **Forward-looking** - captures what bond markets expect 6-18 months ahead.
+
+**Limitations / Cautions:**
+
+* Can give **early warnings** - recessions may not start for 6-18 months.
+* **Two false signals** in 60+ years (mid-1960s, late 1990s briefly).
+* Fed policy changes could theoretically alter the relationship (though this hasn't happened yet).
+* **Timing varies** - the lag between inversion and recession can range from 6 months to 2+ years.
+                """,
+                'practical_view': f"""
+### 🧭 Practical View
+
+An even-handed interpretation:
+
+> The {value:+.2f}% reading represents **serious economic warning** from the bond market's collective intelligence.
+> While not a guarantee, the **96% historical accuracy** demands attention and preparation.
+> Use this as a **signal to reduce risk exposure, build cash reserves**, and prepare for potential economic slowdown in the next 6-18 months.
+> **Don't panic**, but do take this warning seriously - it's the most reliable economic indicator we have.
+                """
+            },
+            'credit_spread_hy': {
+                'title': f'High-Yield Credit Spreads: {self.safe_format(value, ".1f")}% ({level})',
+                'condition': f'**credit market stress that often precedes broader economic problems**',
+                'what_it_measures': f"""
+### ⚙️ What the Metric Measures
+
+High-yield credit spreads measure the **extra interest risky companies must pay** compared to safe government bonds:
+
+* When spreads are low (2-4%), credit is flowing easily and investors are confident.
+* When spreads widen (6%+), investors demand much higher returns to lend to risky companies.
+* This reflects **real-time assessment** of corporate default risk and economic health.
+* Credit markets often **lead stock markets** in detecting problems.
+                """,
+                'interpretation': f"""
+### 📈 Interpretation of "{value:.1f}% ({level})"
+
+Current spread of **{value:.1f}%** indicates:
+
+* Investors are demanding {value:.1f}% **extra yield** to lend to junk-rated companies vs. Treasuries.
+* This level historically occurs during: {'economic stress periods' if value > 5 else 'normal market conditions'}.
+* **Default expectations** are {'elevated' if value > 6 else 'moderate'} - markets expect more bankruptcies.
+* Credit availability for **small businesses and risky ventures** is {'severely restricted' if value > 8 else 'tightening'}.
+                """,
+                'assessment': f"""
+### ⚖️ Even-Handed Assessment
+
+**Strengths of the Signal:**
+
+* **Real money at risk** - reflects actual lending decisions, not just sentiment.
+* **Leading indicator** - credit problems often appear before stock market crashes.
+* Captures **economic fundamentals** - companies' ability to service debt and survive.
+* **Affects real economy** - tight credit reduces business investment and hiring.
+
+**Limitations / Cautions:**
+
+* Can be affected by **technical factors** - fund flows, regulation changes, market structure.
+* **Fed policy** can artificially suppress spreads through bond buying programs.
+* **Sector-specific** issues (like energy in 2015) can skew the overall measure.
+* High spreads can **persist for months** without triggering immediate recession.
+                """,
+                'practical_view': f"""
+### 🧭 Practical View
+
+An even-handed interpretation:
+
+> The {value:.1f}% spread level indicates **{'significant' if value > 6 else 'moderate'}** credit market stress.
+> This suggests tighter lending conditions and **increased business funding challenges** ahead.
+> Use this as a **signal to favor financially strong companies**, reduce exposure to highly leveraged investments, and prepare for potential economic slowdown.
+> **Monitor closely** - if spreads continue widening above 8-10%, recession risk increases substantially.
+                """
+            },
+            'vix': {
+                'title': f'VIX Fear Index: {self.safe_format(value, ".1f")} ({level})',
+                'condition': f'**elevated market fear and uncertainty**',
+                'what_it_measures': f"""
+### ⚙️ What the Metric Measures
+
+The VIX measures **implied volatility** from S&P 500 options - essentially how much investors are paying for "crash insurance":
+
+* Normal VIX: 12-20 (calm markets, steady trends)
+* Elevated VIX: 20-30 (uncertainty, increased daily swings)
+* Crisis VIX: 30+ (fear, potential for large sudden moves)
+* The VIX spikes during crashes but can stay elevated during uncertainty periods.
+                """,
+                'interpretation': f"""
+### 📈 Interpretation of "{value:.1f} ({level})"
+
+Current VIX of **{value:.1f}** indicates:
+
+* Markets are pricing in **{('low' if value < 20 else 'moderate' if value < 30 else 'high')} volatility** over the next 30 days.
+* Investors are {'nervous and buying protection' if value > 25 else 'relatively calm but cautious'}.
+* Historical context: This level occurred during {'normal market periods' if value < 25 else 'periods of uncertainty and stress'}.
+* **Daily price swings** of {'1-2%' if value < 20 else '2-4%' if value < 30 else '3-6%+'} are likely.
+                """,
+                'assessment': f"""
+### ⚖️ Even-Handed Assessment
+
+**Strengths of the Signal:**
+
+* **Real-time fear gauge** - shows what investors are actually paying for protection.
+* **Forward-looking** - reflects expected volatility, not just past performance.
+* **Correlates with crashes** - VIX above 30 often coincides with major market declines.
+* **Contrarian indicator** - extreme VIX readings often mark market bottoms.
+
+**Limitations / Cautions:**
+
+* **Can stay elevated** for extended periods during uncertainty (like 2008, 2020).
+* **Doesn't predict direction** - high VIX can occur during both crashes and recoveries.
+* **Options market quirks** - technical factors can artificially inflate or suppress VIX.
+* **Backward-looking bias** - spikes after problems are already visible.
+                """,
+                'practical_view': f"""
+### 🧭 Practical View
+
+An even-handed interpretation:
+
+> The {value:.1f} VIX level suggests **{'normal market conditions' if value < 20 else 'elevated uncertainty' if value < 30 else 'high stress conditions'}**.
+> This indicates expect **larger daily price movements** and more emotional trading decisions.
+> Use this as a **signal to {'maintain normal positioning' if value < 25 else 'reduce position sizes, avoid leverage'} and prepare for increased volatility.
+> **{'Consider defensive positioning' if value > 30 else 'Stay alert but do not panic'}** - extreme VIX readings sometimes mark buying opportunities.
+                """
+            },
+            'credit_spread_ig': {
+                'title': f'Investment Grade Corporate Credit Spreads: {self.safe_format(value, ".1f")}% ({level})',
+                'condition': f'**credit market stress affecting even the safest corporate borrowers**',
+                'what_it_measures': f"""
+### ⚙️ What the Metric Measures
+
+Investment Grade (IG) Corporate Credit Spreads measure the **extra interest rate premium that high-quality companies must pay** above risk-free U.S. Treasury bonds:
+
+* **Investment Grade** means companies rated BBB- or higher by credit agencies - these are **"safe" companies** like Apple, Microsoft, Johnson & Johnson with strong balance sheets.
+* **Credit Spread** is the difference between what these safe companies pay for loans versus what the U.S. government pays (Treasuries are considered "risk-free").
+* When spreads widen, it means **lenders are demanding higher compensation** even from safe companies, indicating growing concern about corporate defaults.
+* This metric captures **broad credit market health** - if even safe companies face higher borrowing costs, it signals systemic tightening that affects the entire economy.
+                """,
+                'interpretation': f"""
+### 📈 Interpretation of "{self.safe_format(value, '.1f')}% ({level})"
+
+Current IG spread of **{self.safe_format(value, '.1f')}%** indicates:
+
+* Safe companies are paying {self.safe_format(value, '.1f')}% **more than the government** to borrow money.
+* **Historical context:** Normal IG spreads are 1-2%; current level suggests **{'moderate' if value < 2.5 else 'elevated' if value < 4 else 'severe'}** credit stress.
+* **Economic impact:** Higher borrowing costs for safe companies means **even safer businesses** will reduce investment, hiring, and expansion.
+* **Lending cascade:** If banks won't lend cheaply to **AAA-rated companies**, smaller businesses face much tighter credit conditions.
+* **Recession signal:** IG spreads above 3-4% historically coincide with **economic slowdowns or recessions**.
+                """,
+                'assessment': f"""
+### ⚖️ Even-Handed Assessment
+
+**Strengths of the Signal:**
+
+* **High-quality borrowers** - focuses on companies least likely to default, so spread widening is meaningful.
+* **Real lending decisions** - reflects actual cost of corporate financing, not just sentiment.
+* **Economic transmission** - corporate investment depends heavily on borrowing costs for safe companies.
+* **Leading indicator** - credit markets often tighten before economic problems become visible in employment/GDP.
+
+**Limitations / Cautions:**
+
+* **Policy sensitivity** - Federal Reserve actions can artificially compress or expand spreads.
+* **Technical factors** - supply/demand imbalances in corporate bond markets can distort spreads temporarily.
+* **Global influences** - European or emerging market stress can affect U.S. corporate credit spreads.
+* **Sector effects** - problems in specific industries (like energy) can push up the overall IG index.
+                """,
+                'practical_view': f"""
+### 🧭 Practical View
+
+An even-handed interpretation:
+
+> The {self.safe_format(value, '.1f')}% IG spread level indicates **{'normal credit conditions' if value < 2 else 'moderate tightening' if value < 3 else 'significant credit stress' if value < 4 else 'severe credit crisis'}**.
+> This means even **high-quality companies face {'standard' if value < 2 else 'elevated' if value < 3 else 'substantially higher' if value < 4 else 'crisis-level'}** borrowing costs.
+> Use this as a **signal for {'normal corporate health' if value < 2 else 'caution on corporate bonds' if value < 3 else 'defensive positioning' if value < 4 else 'crisis preparation'}** and monitor for business investment impacts.
+> **{'Healthy credit market' if value < 2 else 'Watch for economic slowdown' if value < 3 else 'Expect reduced business activity' if value < 4 else 'Major recession risk'}** - IG spreads directly affect corporate investment and hiring decisions.
+                """
+            }
+        }
+        
+        return breakdowns.get(metric_name, {
+            'title': self.get_friendly_metric_title(metric_name, metric_data),
+            'condition': 'a concerning market condition',
+            'what_it_measures': f'### ⚙️ What the Metric Measures\n\nThis metric indicates {metric_name.replace("_", " ").title()} is at {level} levels.',
+            'interpretation': f'### 📈 Interpretation\n\nCurrent reading suggests elevated concern in this area.',
+            'assessment': f'### ⚖️ Assessment\n\nThis indicator warrants attention and monitoring.',
+            'practical_view': f'### 🧭 Practical View\n\nConsider adjusting risk exposure based on this signal.'
+        })
+    
     def create_daily_report_html(self, data, composite_score, threat_level, scores):
         """Create comprehensive daily report HTML"""
         timestamp = datetime.now().strftime('%B %d, %Y at %I:%M %p')
@@ -456,19 +858,44 @@ class DualEmailCrisisMonitor(EnhancedThreatAssessmentV2):
                         <p><strong>Summary:</strong> {len(concerning_metrics)} financial indicators are now at concerning levels that historically signal increased recession risk.</p>
         """
         
-        # Add detailed metric explanations
-        for metric in concerning_metrics:
-            html += f"""
-                        <div class="metric-detail">
-                            <div class="metric-summary">
-                                📊 {metric['name']}: {metric['current_value']} ({metric['level']} - {metric['score']})
+        # Add comprehensive trigger breakdowns
+        for metric_name, metric_data in scores.items():
+            if metric_data['filtered_score'] >= 4.0:  # Only for concerning metrics
+                breakdown = self.get_comprehensive_trigger_breakdown(metric_name, metric_data, data)
+                
+                html += f"""
+                        </div>
+                        
+                        <div style="background: #f8f9fa; border: 2px solid #dee2e6; padding: 25px; margin: 25px 0; border-radius: 12px;">
+                            <h2 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">
+                                � TRIGGER ANALYSIS: {breakdown['title']}
+                            </h2>
+                            
+                            <div style="background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid #ffc107;">
+                                <p style="font-size: 18px; margin: 0;"><strong>This metric is signaling {breakdown['condition']} — but let's unpack what it really means and how much weight to give it.</strong></p>
                             </div>
-                            <div class="metric-explanation">
-                                <strong>What this means:</strong> {metric['simple_summary']}<br><br>
-                                <strong>Details:</strong> {metric['explanation']}
+                            
+                            <hr style="border: 1px solid #dee2e6; margin: 20px 0;">
+                            
+                            <div style="line-height: 1.6; color: #333;">
+                                {self.markdown_to_html(breakdown['what_it_measures'])}
+                                
+                                <hr style="border: 1px solid #dee2e6; margin: 20px 0;">
+                                
+                                {self.markdown_to_html(breakdown['interpretation'])}
+                                
+                                <hr style="border: 1px solid #dee2e6; margin: 20px 0;">
+                                
+                                {self.markdown_to_html(breakdown['assessment'])}
+                                
+                                <hr style="border: 1px solid #dee2e6; margin: 20px 0;">
+                                
+                                {self.markdown_to_html(breakdown['practical_view'])}
                             </div>
                         </div>
-            """
+                        
+                        <div class="urgent-box">
+                """
         
         html += """
                     </div>
@@ -476,12 +903,17 @@ class DualEmailCrisisMonitor(EnhancedThreatAssessmentV2):
                     <div class="action-box">
                         <h3>⚡ IMMEDIATE ACTIONS REQUIRED:</h3>
                         <ol>
-                            <li><strong>REVIEW PORTFOLIO ALLOCATION NOW</strong></li>
-                            <li><strong>Consider defensive positioning (bonds, cash, defensive stocks)</strong></li>
-                            <li><strong>Monitor Fed communications and market news closely</strong></li>
-                            <li><strong>Prepare for increased volatility - review stop losses</strong></li>
-                            <li><strong>Consider hedging strategies if appropriate</strong></li>
+                            <li><strong>REVIEW PORTFOLIO ALLOCATION NOW</strong> - Assess your risk exposure based on the above analysis</li>
+                            <li><strong>Consider defensive positioning</strong> - Increase cash, bonds, or defensive stocks if appropriate</li>
+                            <li><strong>Monitor Fed communications closely</strong> - Watch for policy changes that could affect these indicators</li>
+                            <li><strong>Prepare for increased volatility</strong> - Review stop losses and position sizing</li>
+                            <li><strong>Don't panic, but do take action</strong> - These are warning signals, not guaranteed crashes</li>
                         </ol>
+                        
+                        <p style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <strong>📊 Remember:</strong> These indicators have high historical accuracy but don't guarantee immediate market crashes. 
+                            Use them as <strong>early warning signals</strong> to adjust your risk profile appropriately, not as reasons to panic.
+                        </p>
                     </div>
                     
                     <h3>📊 Key Market Levels:</h3>
