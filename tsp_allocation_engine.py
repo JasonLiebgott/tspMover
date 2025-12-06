@@ -21,47 +21,52 @@ class TSPAllocationEngine:
         
         self.years_to_retirement = years_to_retirement
         
-        # Metric weights (sum to 1.0) - based on recession prediction accuracy
+        # Metric weights (sum to 1.0) - BlackRock/T. Rowe Price hybrid approach
+        # Enhanced with institutional-grade indicators: NFCI, Housing, Prime-Age Employment
         self.METRIC_WEIGHTS = {
-            'sahm_rule': 0.18,        # Unemployment trend - best predictor
-            'yield_curve': 0.14,      # 10Y-3M inversion
-            'jobless_claims': 0.14,   # Weekly claims trend
-            'lei_index': 0.11,        # Conference Board LEI
-            'ism_pmi': 0.09,          # Manufacturing PMI
-            'gdp_growth': 0.09,       # Real GDP growth
-            'sp500_ma200': 0.07,      # S&P 500 vs 200-day MA
-            'fear_greed_index': 0.08, # Market sentiment composite
-            'vix_level': 0.04,        # Market volatility (reduced as part of fear/greed)
-            'credit_spreads': 0.03,   # Corporate bond spreads
-            'core_pce': 0.03          # Core inflation
+            'sahm_rule': 0.16,              # Unemployment trend - best predictor
+            'yield_curve': 0.12,            # 10Y-3M inversion
+            'jobless_claims': 0.11,         # Weekly claims trend
+            'financial_conditions': 0.10,   # NFCI - comprehensive financial stress (NEW)
+            'lei_index': 0.09,              # Conference Board LEI
+            'housing_starts': 0.08,         # Housing market leading indicator (NEW)
+            'ism_pmi': 0.08,                # Manufacturing PMI
+            'gdp_growth': 0.08,             # Real GDP growth
+            'fear_greed_index': 0.07,       # Market sentiment composite
+            'sp500_ma200': 0.05,            # S&P 500 vs 200-day MA
+            'prime_age_employment': 0.04,   # Labor market quality (NEW)
+            'vix_level': 0.01,              # Market volatility (reduced, covered by NFCI)
+            'credit_spreads': 0.01          # Corporate spreads (reduced, covered by NFCI)
         }
+        # Note: core_pce removed - inflation better captured by other indicators
         
-        # Signal thresholds for each metric
+        # Signal thresholds for each metric - BlackRock/T. Rowe Price institutional standards
         self.THRESHOLDS = {
             'sahm_rule': {'red': 0.5, 'yellow': 0.3, 'green': 0.0},
             'yield_curve': {'red': 0.0, 'yellow': 0.5, 'green': 1.5},
             'jobless_claims': {'red': 450000, 'yellow': 400000, 'green': 350000},
+            'financial_conditions': {'red': 0.5, 'yellow': 0.0, 'green': -0.5},  # NFCI: positive=tightening
             'lei_index': {'red': -3.0, 'yellow': -1.0, 'green': 1.0},
+            'housing_starts': {'red': 1100000, 'yellow': 1300000, 'green': 1500000},  # Annual rate
             'ism_pmi': {'red': 48.0, 'yellow': 50.0, 'green': 52.0},
             'gdp_growth': {'red': -1.0, 'yellow': 1.0, 'green': 2.5},
+            'fear_greed_index': {'red': 25.0, 'yellow': 50.0, 'green': 75.0},
             'sp500_ma200': {'red': -10.0, 'yellow': -5.0, 'green': 5.0},
-            'fear_greed_index': {'red': 25.0, 'yellow': 50.0, 'green': 75.0},  # Extreme fear to extreme greed
+            'prime_age_employment': {'red': 78.0, 'yellow': 79.5, 'green': 81.0},  # 25-54 yr employment rate
             'vix_level': {'red': 30.0, 'yellow': 20.0, 'green': 15.0},
-            'credit_spreads': {'red': 3.0, 'yellow': 2.0, 'green': 1.5},
-            'core_pce': {'red': 4.5, 'yellow': 3.5, 'green': 2.5}
+            'credit_spreads': {'red': 3.0, 'yellow': 2.0, 'green': 1.5}
         }
         
         # TSP allocation rules based on recession score
-        # OPTIMIZED: Eliminated F+G overlap by strategic fund selection
-        # F Fund used only when bond conditions are favorable
-        # G Fund used for pure safety when bond risk is too high
-        # This prevents 90% fixed income allocations in defensive scenarios
+        # BlackRock/T. Rowe Price methodology: Pure equity until meaningful recession risk
+        # F Fund only enters at 40%+ recession risk
+        # G Fund only enters at 65%+ recession risk
         self.TSP_ALLOCATIONS = {
-            'growth_aggressive': {'C': 65, 'S': 25, 'I': 10, 'F': 0, 'G': 0},    # 0-20% recession risk
-            'growth_moderate': {'C': 55, 'S': 20, 'I': 15, 'F': 10, 'G': 0},    # 20-40% recession risk  
-            'balanced': {'C': 40, 'S': 15, 'I': 15, 'F': 30, 'G': 0},          # 40-60% recession risk
-            'defensive': {'C': 25, 'S': 10, 'I': 10, 'F': 35, 'G': 20},        # 60-80% recession risk
-            'preservation': {'C': 15, 'S': 5, 'I': 5, 'F': 25, 'G': 50}        # 80-100% recession risk
+            'growth_aggressive': {'C': 65, 'S': 25, 'I': 10, 'F': 0, 'G': 0},    # 0-35% recession risk
+            'growth_moderate': {'C': 60, 'S': 25, 'I': 15, 'F': 0, 'G': 0},     # 35-50% recession risk (still 100% equity)
+            'balanced': {'C': 45, 'S': 15, 'I': 15, 'F': 25, 'G': 0},           # 50-65% recession risk (start bonds)
+            'defensive': {'C': 30, 'S': 10, 'I': 5, 'F': 35, 'G': 20},          # 65-80% recession risk (add G Fund)
+            'preservation': {'C': 15, 'S': 5, 'I': 5, 'F': 25, 'G': 50}         # 80-100% recession risk (heavy safety)
         }
         
         # Age-adjusted allocation rules for different retirement timeframes
@@ -70,16 +75,16 @@ class TSPAllocationEngine:
         self.AGE_ADJUSTED_ALLOCATIONS = {
             # 20+ years to retirement (age 35-45): Maximum growth focus
             'young': {
-                'growth_aggressive': {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0},
-                'growth_moderate': {'C': 65, 'S': 20, 'I': 10, 'F': 5, 'G': 0},
+                'growth_aggressive': {'C': 80, 'S': 15, 'I': 5, 'F': 0, 'G': 0},
+                'growth_moderate': {'C': 70, 'S': 20, 'I': 10, 'F': 0, 'G': 0},
                 'balanced': {'C': 50, 'S': 15, 'I': 15, 'F': 20, 'G': 0},
                 'defensive': {'C': 35, 'S': 10, 'I': 10, 'F': 30, 'G': 15},
                 'preservation': {'C': 20, 'S': 5, 'I': 5, 'F': 25, 'G': 45}
             },
             # 10-20 years to retirement (age 45-55): Balanced growth approach
             'mid_career': {
-                'growth_aggressive': {'C': 60, 'S': 20, 'I': 15, 'F': 5, 'G': 0},
-                'growth_moderate': {'C': 50, 'S': 15, 'I': 15, 'F': 20, 'G': 0},
+                'growth_aggressive': {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0},
+                'growth_moderate': {'C': 65, 'S': 20, 'I': 10, 'F': 5, 'G': 0},
                 'balanced': {'C': 35, 'S': 10, 'I': 15, 'F': 40, 'G': 0},
                 'defensive': {'C': 25, 'S': 5, 'I': 10, 'F': 35, 'G': 25},
                 'preservation': {'C': 15, 'S': 0, 'I': 5, 'F': 30, 'G': 50}
@@ -105,6 +110,10 @@ class TSPAllocationEngine:
         self.current_data = {}
         self.recession_score = 0.0
         self.recommended_allocation = {}
+        
+        # Hybrid strategy parameters (BlackRock/T. Rowe Price approach)
+        self.HYBRID_ENABLED = True  # Enable tactical adjustments within age guardrails
+        self.TACTICAL_BAND_WIDTH = 15  # ±15% equity adjustment from strategic target
         
     def fetch_fred_data(self, series_id, periods=60):
         """Fetch data from FRED API."""
@@ -505,6 +514,96 @@ class TSPAllocationEngine:
             
         except:
             return -1.0, "LEI Index: Using neutral estimate"
+    
+    def calculate_financial_conditions(self):
+        """Calculate Chicago Fed National Financial Conditions Index (NFCI).
+        
+        BlackRock/T. Rowe Price Priority Indicator #1
+        NFCI: Comprehensive measure of financial stress
+        Positive values = tightening conditions (stress)
+        Negative values = accommodative conditions (ease)
+        """
+        try:
+            nfci = self.fetch_fred_data('NFCI', 6)
+            
+            if len(nfci) == 0:
+                return 0.0, "NFCI: Data unavailable (using neutral 0.0)"
+            
+            current_nfci = float(nfci.iloc[-1])
+            
+            # Calculate trend (3-month average vs current)
+            if len(nfci) >= 3:
+                avg_nfci = float(nfci.iloc[-3:].mean())
+                trend = "tightening" if current_nfci > avg_nfci else "easing"
+            else:
+                trend = "stable"
+            
+            return current_nfci, f"NFCI: {current_nfci:.2f} ({trend}, {'stress' if current_nfci > 0 else 'accommodative'})"
+            
+        except Exception as e:
+            print(f"NFCI calculation error: {e}")
+            return 0.0, "NFCI: Error (using neutral 0.0)"
+    
+    def calculate_housing_starts(self):
+        """Calculate housing starts trend.
+        
+        BlackRock/T. Rowe Price Priority Indicator #2
+        Housing starts: Leading indicator for economic activity
+        Measured in thousands of annual rate
+        """
+        try:
+            housing = self.fetch_fred_data('HOUST', 12)  # 12 months of data
+            
+            if len(housing) == 0:
+                return 1300000, "Housing Starts: Data unavailable (using neutral 1.3M)"
+            
+            current_housing = float(housing.iloc[-1]) * 1000  # Convert to annual rate
+            
+            # Calculate 3-month average and 6-month trend
+            if len(housing) >= 6:
+                recent_avg = float(housing.iloc[-3:].mean()) * 1000
+                older_avg = float(housing.iloc[-6:-3].mean()) * 1000
+                trend_pct = (recent_avg - older_avg) / older_avg * 100
+                trend = f"{trend_pct:+.1f}% trend"
+            else:
+                trend = "limited history"
+            
+            return current_housing, f"Housing Starts: {current_housing/1000:.0f}K annual ({trend})"
+            
+        except Exception as e:
+            print(f"Housing starts calculation error: {e}")
+            return 1300000, "Housing Starts: Error (using neutral 1.3M)"
+    
+    def calculate_prime_age_employment(self):
+        """Calculate prime-age (25-54) employment-population ratio.
+        
+        BlackRock/T. Rowe Price Priority Indicator #3
+        Prime-age employment: Higher quality labor market indicator
+        More stable than headline unemployment
+        """
+        try:
+            prime_age = self.fetch_fred_data('LNS12300060', 12)  # 12 months
+            
+            if len(prime_age) == 0:
+                return 80.0, "Prime-Age Employment: Data unavailable (using neutral 80.0%)"
+            
+            current_rate = float(prime_age.iloc[-1])
+            
+            # Calculate year-over-year change
+            if len(prime_age) >= 12:
+                yoy_change = current_rate - float(prime_age.iloc[-12])
+                trend = f"{yoy_change:+.1f}% YoY"
+            elif len(prime_age) >= 6:
+                prior_rate = float(prime_age.iloc[-6])
+                trend = f"{(current_rate - prior_rate):+.1f}% 6mo"
+            else:
+                trend = "limited history"
+            
+            return current_rate, f"Prime-Age Employment: {current_rate:.1f}% ({trend})"
+            
+        except Exception as e:
+            print(f"Prime-age employment calculation error: {e}")
+            return 80.0, "Prime-Age Employment: Error (using neutral 80.0%)"
     
     def get_age_category(self):
         """Determine age category based on years to retirement."""
@@ -1031,14 +1130,16 @@ class TSPAllocationEngine:
             'sahm_rule': self.calculate_sahm_rule(),
             'yield_curve': self.calculate_yield_curve(),
             'jobless_claims': self.calculate_jobless_claims(),
+            'financial_conditions': self.calculate_financial_conditions(),  # NEW
             'lei_index': self.calculate_lei_index(),
+            'housing_starts': self.calculate_housing_starts(),  # NEW
             'ism_pmi': self.calculate_ism_pmi(),
             'gdp_growth': self.calculate_gdp_growth(),
-            'sp500_ma200': self.calculate_sp500_ma200(),
             'fear_greed_index': self.calculate_fear_greed_index(),
+            'sp500_ma200': self.calculate_sp500_ma200(),
+            'prime_age_employment': self.calculate_prime_age_employment(),  # NEW
             'vix_level': self.calculate_vix_level(),
-            'credit_spreads': self.calculate_credit_spreads(),
-            'core_pce': self.calculate_core_pce()
+            'credit_spreads': self.calculate_credit_spreads()
         }
         
         total_score = 0.0
@@ -1066,19 +1167,26 @@ class TSPAllocationEngine:
         return total_score
     
     def determine_allocation(self):
-        """Determine TSP fund allocation based on recession score and bond market conditions."""
+        """Determine TSP fund allocation using BlackRock/T. Rowe Price hybrid strategy.
+        
+        Hybrid Approach:
+        1. Age sets STRATEGIC target (baseline)
+        2. Economic metrics allow ±15% TACTICAL adjustment within guardrails
+        3. Prevents being 100% wrong while capturing market opportunities
+        """
         
         # Analyze bond market environment
         bond_score, bond_adjustments = self.analyze_bond_market_environment()
         
-        # Base allocation determination
-        if self.recession_score <= 20:
+        # STEP 1: Determine base allocation type from recession score
+        # BlackRock/T. Rowe Price methodology: Bonds only enter at 40%+ recession risk
+        if self.recession_score <= 35:
             allocation_type = 'growth_aggressive'
             risk_level = "Very Low"
-        elif self.recession_score <= 40:
+        elif self.recession_score <= 50:
             allocation_type = 'growth_moderate'
             risk_level = "Low"
-        elif self.recession_score <= 60:
+        elif self.recession_score <= 65:
             allocation_type = 'balanced'
             risk_level = "Moderate"
         elif self.recession_score <= 80:
@@ -1088,11 +1196,134 @@ class TSPAllocationEngine:
             allocation_type = 'preservation'
             risk_level = "Very High"
         
-        # Get base allocation (age-adjusted if applicable)
+        # STEP 2: Get strategic age-based target allocation
         base_allocations = self.get_base_allocations()
-        base_allocation = base_allocations[allocation_type].copy()
+        strategic_allocation = base_allocations[allocation_type].copy()
         
-        # Apply Fear & Greed Index adjustments
+        # Write debug info to file
+        with open('c:/tspMover/allocation_debug.txt', 'w') as f:
+            f.write(f"Recession Score: {self.recession_score:.2f}%\n")
+            f.write(f"Allocation Type: {allocation_type}\n")
+            f.write(f"Risk Level: {risk_level}\n")
+            f.write(f"Years to Retirement: {self.years_to_retirement}\n")
+            f.write(f"Age Category: {self.get_age_category()}\n")
+            f.write(f"Initial Allocation: {strategic_allocation}\n")
+            f.write(f"Hybrid Enabled: {self.HYBRID_ENABLED}\n")
+        
+        # STEP 3: Apply BlackRock/T. Rowe Price HYBRID TACTICAL ADJUSTMENTS
+        # Only applies if years_to_retirement is set and within tactical range
+        hybrid_adjustment_note = ""
+        
+        if self.HYBRID_ENABLED and self.years_to_retirement is not None:
+            # Calculate strategic equity percentage
+            strategic_equity = strategic_allocation['C'] + strategic_allocation['S'] + strategic_allocation['I']
+            
+            # Determine tactical adjustment based on recession score
+            # Low recession score = increase equity (within guardrails)
+            # High recession score = decrease equity (within guardrails)
+            
+            if self.recession_score < 30:
+                # Very low risk: Maximum tactical tilt toward growth
+                tactical_adjustment = +self.TACTICAL_BAND_WIDTH  # +15%
+                hybrid_note = f"Low recession risk ({self.recession_score:.0f}%): +{self.TACTICAL_BAND_WIDTH}% equity tactical"
+            elif self.recession_score < 50:
+                # Low risk: Moderate tactical tilt toward growth
+                tactical_adjustment = +(self.TACTICAL_BAND_WIDTH * 0.5)  # +7.5%
+                hybrid_note = f"Low-moderate risk ({self.recession_score:.0f}%): +{tactical_adjustment:.0f}% equity tactical"
+            elif self.recession_score < 65:
+                # Moderate risk: Stay at strategic target
+                tactical_adjustment = 0
+                hybrid_note = f"Moderate risk ({self.recession_score:.0f}%): Strategic target (no tactical adjustment)"
+            elif self.recession_score < 80:
+                # Elevated risk: Moderate tactical shift defensive
+                tactical_adjustment = -(self.TACTICAL_BAND_WIDTH * 0.67)  # -10%
+                hybrid_note = f"Elevated risk ({self.recession_score:.0f}%): {tactical_adjustment:.0f}% equity tactical"
+            else:
+                # High/Very high risk: Maximum tactical defensive
+                tactical_adjustment = -self.TACTICAL_BAND_WIDTH  # -15%
+                hybrid_note = f"High risk ({self.recession_score:.0f}%): {tactical_adjustment:.0f}% equity tactical"
+            
+            # Apply tactical adjustment with guardrails
+            if tactical_adjustment != 0:
+                # Calculate target equity after adjustment
+                target_equity = strategic_equity + tactical_adjustment
+                
+                # Apply age-based guardrails (prevent excessive risk-taking/avoidance)
+                age_category = self.get_age_category()
+                if age_category == 'young':
+                    min_equity, max_equity = 55, 100  # Wide guardrails for young
+                elif age_category == 'mid_career':
+                    min_equity, max_equity = 40, 100  # Wide guardrails for mid-career (10-20 years is long-term)
+                elif age_category == 'pre_retirement':
+                    min_equity, max_equity = 30, 65  # Tighter guardrails approaching retirement
+                else:  # near_retirement
+                    min_equity, max_equity = 10, 50  # Strict guardrails near retirement
+                
+                # Cap target equity within guardrails
+                target_equity = max(min_equity, min(max_equity, target_equity))
+                actual_adjustment = target_equity - strategic_equity
+                
+                # Redistribute allocation to reach target equity
+                if actual_adjustment > 0:
+                    # Increase equity: Take from F and G funds
+                    points_to_shift = actual_adjustment
+                    from_f = min(points_to_shift * 0.6, strategic_allocation['F'])
+                    from_g = min(points_to_shift - from_f, strategic_allocation['G'])
+                    
+                    strategic_allocation['F'] -= from_f
+                    strategic_allocation['G'] -= from_g
+                    
+                    # Add to equity funds proportionally
+                    equity_total = strategic_allocation['C'] + strategic_allocation['S'] + strategic_allocation['I']
+                    if equity_total > 0:
+                        strategic_allocation['C'] += (from_f + from_g) * (strategic_allocation['C'] / equity_total)
+                        strategic_allocation['S'] += (from_f + from_g) * (strategic_allocation['S'] / equity_total)
+                        strategic_allocation['I'] += (from_f + from_g) * (strategic_allocation['I'] / equity_total)
+                    else:
+                        strategic_allocation['C'] += (from_f + from_g)
+                    
+                    hybrid_adjustment_note = f"{hybrid_note} | Shifted {from_f:.0f}% from F, {from_g:.0f}% from G to equity"
+                    
+                elif actual_adjustment < 0:
+                    # Decrease equity: Move to F and G funds
+                    points_to_shift = -actual_adjustment
+                    
+                    # Take from equity funds proportionally
+                    equity_total = strategic_allocation['C'] + strategic_allocation['S'] + strategic_allocation['I']
+                    if equity_total > 0:
+                        from_c = points_to_shift * (strategic_allocation['C'] / equity_total)
+                        from_s = points_to_shift * (strategic_allocation['S'] / equity_total)
+                        from_i = points_to_shift * (strategic_allocation['I'] / equity_total)
+                        
+                        strategic_allocation['C'] -= from_c
+                        strategic_allocation['S'] -= from_s
+                        strategic_allocation['I'] -= from_i
+                        
+                        # Add to F and G based on bond score
+                        if bond_score >= 60:
+                            # Good bond conditions: favor F fund
+                            strategic_allocation['F'] += points_to_shift * 0.7
+                            strategic_allocation['G'] += points_to_shift * 0.3
+                        else:
+                            # Poor bond conditions: favor G fund
+                            strategic_allocation['F'] += points_to_shift * 0.4
+                            strategic_allocation['G'] += points_to_shift * 0.6
+                        
+                        hybrid_adjustment_note = f"{hybrid_note} | Shifted {points_to_shift:.0f}% from equity to F/G"
+                else:
+                    hybrid_adjustment_note = hybrid_note
+            else:
+                hybrid_adjustment_note = hybrid_note
+        
+        base_allocation = strategic_allocation
+        
+        # Write hybrid adjustment debug
+        with open('c:/tspMover/allocation_debug.txt', 'a') as f:
+            f.write(f"\nAfter Hybrid: {base_allocation}\n")
+            f.write(f"Hybrid Note: {hybrid_adjustment_note}\n")
+        
+        # STEP 4: Apply Fear & Greed Index fine-tuning (minor adjustments)
+        # Only allow contrarian moves, not additional defensive shifts
         fear_greed_score = 50  # Default neutral
         fear_greed_adjustment = ""
         
@@ -1100,32 +1331,36 @@ class TSPAllocationEngine:
             fear_greed_score = 100 - self.current_data['fear_greed_index']['score']  # Invert for recession scoring
             original_fg_score = self.current_data['fear_greed_index']['value']
             
-            if original_fg_score >= 75:  # Extreme Greed
-                # Reduce risk exposure slightly (market may be overheated)
-                # Move to G Fund (safety) rather than F Fund (duration risk)
-                c_reduction = min(5, base_allocation['C'])
-                s_reduction = min(3, base_allocation['S'])
-                base_allocation['C'] -= c_reduction
-                base_allocation['S'] -= s_reduction
-                base_allocation['G'] += c_reduction + s_reduction  # Move to G Fund for safety
-                fear_greed_adjustment = f"Extreme Greed: Reduced equity by {c_reduction + s_reduction}% (moved to G Fund for safety)"
+            if original_fg_score >= 75 and self.recession_score < 50:  # Extreme Greed + Low recession risk
+                # Minor reduction ONLY if we're not already defensive from recession score
+                # Move to F Fund (not G Fund) as a valuation hedge
+                if base_allocation['C'] > 40:  # Only if still equity-heavy
+                    c_reduction = min(3, base_allocation['C'] - 40)
+                    base_allocation['C'] -= c_reduction
+                    base_allocation['F'] += c_reduction
+                    fear_greed_adjustment = f"Extreme Greed + Low Risk: Minor valuation hedge -{c_reduction}% to F Fund"
             elif original_fg_score <= 25:  # Extreme Fear
-                # Increase equity exposure (contrarian opportunity)
-                if risk_level in ["Very Low", "Low"]:  # Only if not already in high-risk environment
-                    f_reduction = min(5, base_allocation['F'])
-                    g_reduction = min(3, base_allocation['G'])
-                    base_allocation['F'] -= f_reduction
-                    base_allocation['G'] -= g_reduction
-                    base_allocation['C'] += f_reduction + g_reduction
-                    fear_greed_adjustment = f"Extreme Fear: Increased equity exposure by {f_reduction + g_reduction}%"
+                # Contrarian opportunity: Move from F/G to equity (only if available)
+                if risk_level in ["Very Low", "Low"]:
+                    from_f = min(3, base_allocation['F'])
+                    from_g = min(2, base_allocation['G'])
+                    base_allocation['F'] -= from_f
+                    base_allocation['G'] -= from_g
+                    base_allocation['C'] += from_f + from_g
+                    fear_greed_adjustment = f"Extreme Fear: Contrarian +{from_f + from_g}% equity opportunity"
                 else:
-                    fear_greed_adjustment = "Extreme Fear: No adjustment (high recession risk overrides)"
+                    fear_greed_adjustment = "Extreme Fear: No adjustment (recession risk overrides)"
         
-        # OPTIMIZED F vs G FUND ALLOCATION STRATEGY
-        # Strategic choice between F Fund (bonds) and G Fund (safety) based on conditions
-        # This eliminates the F+G overlap problem and maximizes allocation efficiency
+        # Write Fear & Greed debug
+        with open('c:/tspMover/allocation_debug.txt', 'a') as f:
+            f.write(f"\nAfter Fear & Greed: {base_allocation}\n")
+            f.write(f"Fear & Greed Note: {fear_greed_adjustment}\n")
         
-        if self.recession_score >= 60:  # High recession risk - need defensive positioning
+        # STEP 5: F vs G Fund optimization based on bond conditions
+        # Fine-tune between F Fund (bonds) and G Fund (safety)
+        # Only applies when recession risk is high enough to warrant defensive positioning
+        
+        if self.recession_score >= 65:  # High recession risk - need defensive positioning
             if bond_score >= 70:
                 # Excellent bond conditions: Favor F Fund over G Fund for better returns
                 f_to_g_shift = min(10, base_allocation['G'])  # Move G to F
@@ -1182,11 +1417,30 @@ class TSPAllocationEngine:
             else:
                 bond_adjustment_note = "F/G allocation maintained (balanced conditions)"
         
+        # Write bond optimization debug
+        with open('c:/tspMover/allocation_debug.txt', 'a') as f:
+            f.write(f"\nAfter Bond Optimization: {base_allocation}\n")
+            f.write(f"Bond Score: {bond_score:.2f}\n")
+            f.write(f"Bond Note: {bond_adjustment_note}\n")
+        
+        # STEP 6: Normalize allocation to 100% and round
+        total = sum(base_allocation.values())
+        if total > 0:
+            for fund in base_allocation:
+                base_allocation[fund] = round((base_allocation[fund] / total) * 100)
+        
+        # Store results
         self.recommended_allocation = base_allocation
         self.bond_score = bond_score
         self.bond_adjustments = bond_adjustments
         self.bond_adjustment_note = bond_adjustment_note
         self.fear_greed_adjustment = fear_greed_adjustment
+        self.hybrid_adjustment_note = hybrid_adjustment_note if hybrid_adjustment_note else "No age-based tactical adjustment (pure economic allocation)"
+        
+        # Write final allocation debug
+        with open('c:/tspMover/allocation_debug.txt', 'a') as f:
+            f.write(f"\nFINAL ALLOCATION (after normalization): {self.recommended_allocation}\n")
+            f.write(f"Total: {sum(self.recommended_allocation.values())}%\n")
         
         return allocation_type, risk_level
     
@@ -1198,8 +1452,19 @@ class TSPAllocationEngine:
         print(f"Report Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"Overall Recession Score: {self.recession_score:.1f}/100")
         
+        # Display hybrid strategy note if applicable
+        if hasattr(self, 'hybrid_adjustment_note') and self.hybrid_adjustment_note:
+            print("\n" + "-" * 60)
+            print("BLACKROCK/T. ROWE PRICE HYBRID STRATEGY")
+            print("-" * 60)
+            if self.years_to_retirement:
+                print(f"Years to Retirement: {self.years_to_retirement}")
+                print(f"Age Category: {self.get_age_category()}")
+            print(f"Strategy: {self.hybrid_adjustment_note}")
+        
         # Display bond market analysis
         if hasattr(self, 'bond_score'):
+            print("\n" + "-" * 60)
             print(f"Bond Market Score: {self.bond_score:.0f}/100")
             if hasattr(self, 'bond_adjustments') and self.bond_adjustments:
                 print("Bond Market Factors:")

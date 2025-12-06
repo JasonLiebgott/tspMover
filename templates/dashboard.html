@@ -257,9 +257,10 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <h5>Traditional TSP Allocation</h5>
+                                        <small class="text-muted">BlackRock/T. Rowe Price Hybrid Strategy</small>
                                     </div>
                                     <div class="card-body">
-                                        {% for fund, percentage in data.allocation.items() %}
+                                        {% for fund, percentage in data.traditional_allocation.items() %}
                                         <div class="d-flex justify-content-between mb-2">
                                             <span><strong>{{ fund }} Fund:</strong></span>
                                             <span class="badge bg-primary">{{ percentage }}%</span>
@@ -272,10 +273,10 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <h5>Enhanced Allocation</h5>
-                                        <small class="text-muted">Adjusted for enhanced risk factors</small>
+                                        <small class="text-muted">With additional risk adjustments</small>
                                     </div>
                                     <div class="card-body">
-                                        {% for fund, percentage in data.enhanced_allocation.items() %}
+                                        {% for fund, percentage in data.allocation.items() %}
                                         <div class="d-flex justify-content-between mb-2">
                                             <span><strong>{{ fund }} Fund:</strong></span>
                                             <span class="badge {{ 'bg-success' if percentage > data.allocation[fund] else 'bg-danger' if percentage < data.allocation[fund] else 'bg-secondary' }}">

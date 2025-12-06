@@ -1,0 +1,20 @@
+Recession Score: 27.94%
+Allocation Type: growth_aggressive
+Risk Level: Very Low
+Years to Retirement: 12
+Age Category: mid_career
+Initial Allocation: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+Hybrid Enabled: True
+
+After Hybrid: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+Hybrid Note: Low recession risk (28%): +15% equity tactical
+
+After Fear & Greed: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+Fear & Greed Note: 
+
+After Bond Optimization: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+Bond Score: 80.00
+Bond Note: F Fund opportunity: +0% (exceptional bonds despite low recession risk)
+
+FINAL ALLOCATION (after normalization): {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+Total: 100%
