@@ -1,0 +1,1131 @@
+WARREN BUFFETT STOCK SCREENING - QUALIFYING STOCKS THAT DIDN'T MAKE THE CUT
+================================================================================
+QUALIFYING STOCKS NOT IN TOP 8 - OCTOBER 2025
+================================================================================
+
+� SUMMARY:
+   📈 Total Qualifying Stocks: 18
+   🎯 Stocks in Top Picks: 8
+   📉 Stocks Below Cut-off: 10
+   💡 Reason: Did not rank high enough for Buffett's concentrated portfolio approach
+
+📉 QUALIFYING STOCKS BELOW CUT-OFF (Ranked by Quality Score):
+-------------------------------------------------------------------------------------
+Rank Symbol   Score    Criteria           Status       Notes
+-------------------------------------------------------------------------------------
+9    AMAT     0.325    2025-Adjusted      NOT SELECTED Clean
+10   HON      0.302    2025-Adjusted      NOT SELECTED Clean
+11   HUBB     0.299    2025-Adjusted      NOT SELECTED Clean
+12   HSY      0.294    2025-Adjusted      NOT SELECTED Clean
+13   CME      0.271    2025-Adjusted      NOT SELECTED Clean
+14   HAL      0.237    2025-Adjusted      NOT SELECTED Clean
+15   AME      0.223    2025-Adjusted      NOT SELECTED Clean
+16   A        0.213    2025-Adjusted      NOT SELECTED Clean
+17   GD       0.205    2025-Adjusted      NOT SELECTED Clean
+18   EMN      0.185    2025-Adjusted      NOT SELECTED moat: FLAG: Quali...
+
+================================================================================
+DETAILED FUNDAMENTAL ANALYSES - QUALIFYING FAILS
+================================================================================
+
+
+================================================================================
+🟢 FUNDAMENTAL ANALYSIS: AMAT
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Buy
+📊 Composite Score: 0.325
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $261.32
+🏢 Market Cap: $208.2B
+
+💡 INVESTMENT THESIS:
+
+   AMAT represents a high-quality company that meets Warren Buffett's investment 
+   criteria in today's market environment. With a composite score of 0.325, it demonstrates
+   strong fundamentals including profitable operations, reasonable debt levels, and competitive
+   advantages that should support long-term shareholder value creation.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 35.5% - EXCELLENT
+   This shows how efficiently the company uses shareholder money to generate profits.
+   35.5% means for every $100 of shareholder equity, the company generates $35.5 in profit.
+   ✅ This is excellent - the company is very efficient with shareholder money.
+
+🏭 Operating Margin: 27.8% - EXCELLENT
+   This shows what percentage of revenue becomes operating profit after expenses.
+   27.8% means the company keeps $27.8 in operating profit for every $100 of sales.
+   ✅ Excellent margins indicate strong pricing power and cost control.
+
+💸 Free Cash Flow: $7.5B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Strong positive cash flow means the company generates real money, not just accounting profits.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.32 - GOOD
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.32 means the company has $0.32 of debt for every $1 of equity.
+   ✅ Good - manageable debt levels that shouldn't cause problems.
+
+🔢 Interest Coverage: 10.0x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 10.0 times more than needed to cover interest payments.
+   ✅ Good coverage - comfortable ability to service debt.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 25.6 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 25.6 means you pay $25.6 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 27.8 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 27.8 means you pay $27.8 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 5.2%
+   Over the last 3 years, earnings grew an average of 5.2% per year.
+   ⚠️ Modest growth - steady but not spectacular.
+
+📉 Growth Volatility: 0.036
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 28.4%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ✅ Excellent ROIC indicates strong competitive advantages.
+
+💪 Gross Margin Advantage: -11.3% vs industry average
+   The company's gross margin is 11.3% lower than competitors.
+   ❌ Below-average margins suggest competitive weakness.
+
+🏆 Brand Value Score: 100/100
+   ✅ Excellent brand strength provides pricing power and customer loyalty.
+
+🌐 Network Effects: Yes
+   ✅ Network effects make the product more valuable as more people use it.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   ✅ No major red flags identified in fundamental analysis.
+
+🎯 ACTION PLAN:
+   
+   📈 STRATEGY: Consider accumulating AMAT on market weakness
+   💰 TARGET ALLOCATION: 2-3% of portfolio
+   📊 ENTRY STRATEGY: Wait for 5-10% pullback or buy gradually
+   🎯 EXPECTATIONS: Modest outperformance over 2-3 years
+   ⏰ TIMELINE: Medium to long-term investment
+   
+   🔄 MONITORING: Watch quarterly results and debt levels
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟢 FUNDAMENTAL ANALYSIS: HON
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Buy
+📊 Composite Score: 0.302
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $192.99
+🏢 Market Cap: $130.1B
+
+💡 INVESTMENT THESIS:
+
+   HON represents a high-quality company that meets Warren Buffett's investment 
+   criteria in today's market environment. With a composite score of 0.302, it demonstrates
+   strong fundamentals including profitable operations, reasonable debt levels, and competitive
+   advantages that should support long-term shareholder value creation.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 34.6% - EXCELLENT
+   This shows how efficiently the company uses shareholder money to generate profits.
+   34.6% means for every $100 of shareholder equity, the company generates $34.6 in profit.
+   ✅ This is excellent - the company is very efficient with shareholder money.
+
+🏭 Operating Margin: 18.5% - GOOD
+   This shows what percentage of revenue becomes operating profit after expenses.
+   18.5% means the company keeps $18.5 in operating profit for every $100 of sales.
+   ✅ Good margins show the company runs an efficient operation.
+
+💸 Free Cash Flow: $4.9B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 2.15 - POOR
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 2.15 means the company has $2.15 of debt for every $1 of equity.
+   ❌ Poor - high debt levels create financial risk.
+
+🔢 Interest Coverage: 7.8x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 7.8 times more than needed to cover interest payments.
+   ✅ Good coverage - comfortable ability to service debt.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 20.4 - FAIR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 20.4 means you pay $20.4 for every $1 of annual profit.
+   ⚠️ Fair value - not cheap but not expensive.
+
+💰 Price-to-Free Cash Flow: 24.8 - FAIR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 24.8 means you pay $24.8 for every $1 of annual cash flow.
+   ⚠️ Fair - not a bargain but not overpriced.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 3.5%
+   Over the last 3 years, earnings grew an average of 3.5% per year.
+   ⚠️ Modest growth - steady but not spectacular.
+
+📉 Growth Volatility: 0.102
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 1 out of 3
+   ✅ Only one down year - generally reliable performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 27.7%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ✅ Excellent ROIC indicates strong competitive advantages.
+
+💪 Gross Margin Advantage: +11.9% vs industry average
+   The company's gross margin is 11.9% higher than competitors.
+   ✅ Significant margin advantage indicates strong pricing power.
+
+🏆 Brand Value Score: 100/100
+   ✅ Excellent brand strength provides pricing power and customer loyalty.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   1. High debt levels create financial risk
+
+🎯 ACTION PLAN:
+   
+   📈 STRATEGY: Consider accumulating HON on market weakness
+   💰 TARGET ALLOCATION: 2-3% of portfolio
+   📊 ENTRY STRATEGY: Wait for 5-10% pullback or buy gradually
+   🎯 EXPECTATIONS: Modest outperformance over 2-3 years
+   ⏰ TIMELINE: Medium to long-term investment
+   
+   🔄 MONITORING: Watch quarterly results and debt levels
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟢 FUNDAMENTAL ANALYSIS: HUBB
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Buy
+📊 Composite Score: 0.299
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $451.21
+🏢 Market Cap: $24.0B
+
+💡 INVESTMENT THESIS:
+
+   HUBB represents a high-quality company that meets Warren Buffett's investment 
+   criteria in today's market environment. With a composite score of 0.299, it demonstrates
+   strong fundamentals including profitable operations, reasonable debt levels, and competitive
+   advantages that should support long-term shareholder value creation.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 25.0% - EXCELLENT
+   This shows how efficiently the company uses shareholder money to generate profits.
+   25.0% means for every $100 of shareholder equity, the company generates $25.0 in profit.
+   ✅ This is excellent - the company is very efficient with shareholder money.
+
+🏭 Operating Margin: 22.6% - EXCELLENT
+   This shows what percentage of revenue becomes operating profit after expenses.
+   22.6% means the company keeps $22.6 in operating profit for every $100 of sales.
+   ✅ Excellent margins indicate strong pricing power and cost control.
+
+💸 Free Cash Flow: $0.8B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.58 - FAIR
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.58 means the company has $0.58 of debt for every $1 of equity.
+   ⚠️ Fair - moderate debt levels that need monitoring.
+
+🔢 Interest Coverage: 14.6x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 14.6 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 28.3 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 28.3 means you pay $28.3 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 29.6 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 29.6 means you pay $29.6 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 26.9%
+   Over the last 3 years, earnings grew an average of 26.9% per year.
+   ✅ Excellent growth rate showing strong business momentum.
+
+📉 Growth Volatility: 0.192
+   This measures how consistent the growth has been (lower is better).
+   ✅ Reasonably consistent - some variation but manageable.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 20.0%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ✅ Excellent ROIC indicates strong competitive advantages.
+
+💪 Gross Margin Advantage: +10.2% vs industry average
+   The company's gross margin is 10.2% higher than competitors.
+   ✅ Significant margin advantage indicates strong pricing power.
+
+🏆 Brand Value Score: 51.989854208/100
+   ⚠️ Moderate brand strength - some competitive protection.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   ✅ No major red flags identified in fundamental analysis.
+
+🎯 ACTION PLAN:
+   
+   📈 STRATEGY: Consider accumulating HUBB on market weakness
+   💰 TARGET ALLOCATION: 2-3% of portfolio
+   📊 ENTRY STRATEGY: Wait for 5-10% pullback or buy gradually
+   🎯 EXPECTATIONS: Modest outperformance over 2-3 years
+   ⏰ TIMELINE: Medium to long-term investment
+   
+   🔄 MONITORING: Watch quarterly results and debt levels
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟢 FUNDAMENTAL ANALYSIS: HSY
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Buy
+📊 Composite Score: 0.294
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $182.66
+🏢 Market Cap: $37.0B
+
+💡 INVESTMENT THESIS:
+
+   HSY represents a high-quality company that meets Warren Buffett's investment 
+   criteria in today's market environment. With a composite score of 0.294, it demonstrates
+   strong fundamentals including profitable operations, reasonable debt levels, and competitive
+   advantages that should support long-term shareholder value creation.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 31.0% - EXCELLENT
+   This shows how efficiently the company uses shareholder money to generate profits.
+   31.0% means for every $100 of shareholder equity, the company generates $31.0 in profit.
+   ✅ This is excellent - the company is very efficient with shareholder money.
+
+🏭 Operating Margin: 13.5% - FAIR
+   This shows what percentage of revenue becomes operating profit after expenses.
+   13.5% means the company keeps $13.5 in operating profit for every $100 of sales.
+   ⚠️ Fair margins suggest the business is competitive but not exceptional.
+
+💸 Free Cash Flow: $1.9B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 1.26 - POOR
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 1.26 means the company has $1.26 of debt for every $1 of equity.
+   ❌ Poor - high debt levels create financial risk.
+
+🔢 Interest Coverage: 15.2x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 15.2 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 27.3 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 27.3 means you pay $27.3 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 14.1 - GOOD
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 14.1 means you pay $14.1 for every $1 of annual cash flow.
+   ✅ Good - reasonable price for the cash generation.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 15.3%
+   Over the last 3 years, earnings grew an average of 15.3% per year.
+   ✅ Excellent growth rate showing strong business momentum.
+
+📉 Growth Volatility: 0.038
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 24.8%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ✅ Excellent ROIC indicates strong competitive advantages.
+
+💪 Gross Margin Advantage: +2.7% vs industry average
+   The company's gross margin is 2.7% higher than competitors.
+   ✅ Good margin advantage shows competitive strength.
+
+🏆 Brand Value Score: 58.520365056/100
+   ⚠️ Moderate brand strength - some competitive protection.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   1. High debt levels create financial risk
+
+🎯 ACTION PLAN:
+   
+   📈 STRATEGY: Consider accumulating HSY on market weakness
+   💰 TARGET ALLOCATION: 2-3% of portfolio
+   📊 ENTRY STRATEGY: Wait for 5-10% pullback or buy gradually
+   🎯 EXPECTATIONS: Modest outperformance over 2-3 years
+   ⏰ TIMELINE: Medium to long-term investment
+   
+   🔄 MONITORING: Watch quarterly results and debt levels
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟢 FUNDAMENTAL ANALYSIS: CME
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Buy
+📊 Composite Score: 0.271
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $272.06
+🏢 Market Cap: $98.1B
+
+💡 INVESTMENT THESIS:
+
+   CME represents a high-quality company that meets Warren Buffett's investment 
+   criteria in today's market environment. With a composite score of 0.271, it demonstrates
+   strong fundamentals including profitable operations, reasonable debt levels, and competitive
+   advantages that should support long-term shareholder value creation.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 13.3% - FAIR
+   This shows how efficiently the company uses shareholder money to generate profits.
+   13.3% means for every $100 of shareholder equity, the company generates $13.3 in profit.
+   ⚠️ This is acceptable but not impressive.
+
+🏭 Operating Margin: 63.4% - EXCELLENT
+   This shows what percentage of revenue becomes operating profit after expenses.
+   63.4% means the company keeps $63.4 in operating profit for every $100 of sales.
+   ✅ Excellent margins indicate strong pricing power and cost control.
+
+💸 Free Cash Flow: $3.6B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.13 - EXCELLENT
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.13 means the company has $0.13 of debt for every $1 of equity.
+   ✅ Excellent - very conservative debt levels provide financial flexibility.
+
+🔢 Interest Coverage: 29.2x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 29.2 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 26.4 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 26.4 means you pay $26.4 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 27.3 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 27.3 means you pay $27.3 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 10.2%
+   Over the last 3 years, earnings grew an average of 10.2% per year.
+   ✅ Good growth rate indicating a healthy business.
+
+📉 Growth Volatility: 0.075
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 10.7%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ⚠️ Fair ROIC - company has some competitive advantages.
+
+💪 Gross Margin Advantage: +30.0% vs industry average
+   The company's gross margin is 30.0% higher than competitors.
+   ✅ Significant margin advantage indicates strong pricing power.
+
+🏆 Brand Value Score: 89.053290496/100
+   ✅ Excellent brand strength provides pricing power and customer loyalty.
+
+🌐 Network Effects: Yes
+   ✅ Network effects make the product more valuable as more people use it.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   ✅ No major red flags identified in fundamental analysis.
+
+🎯 ACTION PLAN:
+   
+   📈 STRATEGY: Consider accumulating CME on market weakness
+   💰 TARGET ALLOCATION: 2-3% of portfolio
+   📊 ENTRY STRATEGY: Wait for 5-10% pullback or buy gradually
+   🎯 EXPECTATIONS: Modest outperformance over 2-3 years
+   ⏰ TIMELINE: Medium to long-term investment
+   
+   🔄 MONITORING: Watch quarterly results and debt levels
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟡 FUNDAMENTAL ANALYSIS: HAL
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Hold
+📊 Composite Score: 0.237
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $28.57
+🏢 Market Cap: $24.4B
+
+💡 INVESTMENT THESIS:
+
+   HAL is a decent company that marginally meets investment criteria. While it has
+   some attractive qualities with a score of 0.237, investors should monitor closely
+   and consider whether better opportunities exist in the market.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 12.8% - FAIR
+   This shows how efficiently the company uses shareholder money to generate profits.
+   12.8% means for every $100 of shareholder equity, the company generates $12.8 in profit.
+   ⚠️ This is acceptable but not impressive.
+
+🏭 Operating Margin: 12.9% - FAIR
+   This shows what percentage of revenue becomes operating profit after expenses.
+   12.9% means the company keeps $12.9 in operating profit for every $100 of sales.
+   ⚠️ Fair margins suggest the business is competitive but not exceptional.
+
+💸 Free Cash Flow: $2.4B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.84 - POOR
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.84 means the company has $0.84 of debt for every $1 of equity.
+   ❌ Poor - high debt levels create financial risk.
+
+🔢 Interest Coverage: 8.2x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 8.2 times more than needed to cover interest payments.
+   ✅ Good coverage - comfortable ability to service debt.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 18.9 - GOOD
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 18.9 means you pay $18.9 for every $1 of annual profit.
+   ✅ Good value - reasonable price for the earnings.
+
+💰 Price-to-Free Cash Flow: 9.9 - EXCELLENT
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 9.9 means you pay $9.9 for every $1 of annual cash flow.
+   ✅ Excellent - getting cash generation at a great price.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 24.0%
+   Over the last 3 years, earnings grew an average of 24.0% per year.
+   ✅ Excellent growth rate showing strong business momentum.
+
+📉 Growth Volatility: 0.316
+   This measures how consistent the growth has been (lower is better).
+   ⚠️ Moderate volatility - growth can be unpredictable.
+
+📅 Negative Growth Years: 1 out of 3
+   ✅ Only one down year - generally reliable performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 10.2%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ⚠️ Fair ROIC - company has some competitive advantages.
+
+💪 Gross Margin Advantage: -3.8% vs industry average
+   The company's gross margin is 3.8% lower than competitors.
+   ❌ Below-average margins suggest competitive weakness.
+
+🏆 Brand Value Score: 52.17729024/100
+   ⚠️ Moderate brand strength - some competitive protection.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: MEDIUM RISK
+
+🚨 Key Risks to Monitor:
+   1. High debt levels create financial risk
+   2. Volatile earnings make future performance unpredictable
+
+🎯 ACTION PLAN:
+   
+   📊 STRATEGY: Hold current position but don't add new money
+   🔍 MONITORING: Watch closely for improvement or deterioration
+   ⚖️ REVIEW: Consider selling if better opportunities arise
+   📉 EXIT TRIGGERS: Sell if fundamentals worsen or valuation becomes excessive
+   
+   🔄 DECISION POINT: Reassess in 6 months
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟡 FUNDAMENTAL ANALYSIS: AME
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Hold
+📊 Composite Score: 0.223
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $201.59
+🏢 Market Cap: $46.6B
+
+💡 INVESTMENT THESIS:
+
+   AME is a decent company that marginally meets investment criteria. While it has
+   some attractive qualities with a score of 0.223, investors should monitor closely
+   and consider whether better opportunities exist in the market.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 14.6% - FAIR
+   This shows how efficiently the company uses shareholder money to generate profits.
+   14.6% means for every $100 of shareholder equity, the company generates $14.6 in profit.
+   ⚠️ This is acceptable but not impressive.
+
+🏭 Operating Margin: 25.8% - EXCELLENT
+   This shows what percentage of revenue becomes operating profit after expenses.
+   25.8% means the company keeps $25.8 in operating profit for every $100 of sales.
+   ✅ Excellent margins indicate strong pricing power and cost control.
+
+💸 Free Cash Flow: $1.7B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.26 - EXCELLENT
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.26 means the company has $0.26 of debt for every $1 of equity.
+   ✅ Excellent - very conservative debt levels provide financial flexibility.
+
+🔢 Interest Coverage: 15.7x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 15.7 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 31.8 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 31.8 means you pay $31.8 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 27.3 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 27.3 means you pay $27.3 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 11.7%
+   Over the last 3 years, earnings grew an average of 11.7% per year.
+   ✅ Good growth rate indicating a healthy business.
+
+📉 Growth Volatility: 0.054
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 11.7%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ⚠️ Fair ROIC - company has some competitive advantages.
+
+💪 Gross Margin Advantage: +10.9% vs industry average
+   The company's gross margin is 10.9% higher than competitors.
+   ✅ Significant margin advantage indicates strong pricing power.
+
+🏆 Brand Value Score: 63.279003648/100
+   ⚠️ Moderate brand strength - some competitive protection.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   1. High valuation leaves little margin of safety
+
+🎯 ACTION PLAN:
+   
+   📊 STRATEGY: Hold current position but don't add new money
+   🔍 MONITORING: Watch closely for improvement or deterioration
+   ⚖️ REVIEW: Consider selling if better opportunities arise
+   📉 EXIT TRIGGERS: Sell if fundamentals worsen or valuation becomes excessive
+   
+   🔄 DECISION POINT: Reassess in 6 months
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟡 FUNDAMENTAL ANALYSIS: A
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Hold
+📊 Composite Score: 0.213
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $140.91
+🏢 Market Cap: $39.9B
+
+💡 INVESTMENT THESIS:
+
+   A is a decent company that marginally meets investment criteria. While it has
+   some attractive qualities with a score of 0.213, investors should monitor closely
+   and consider whether better opportunities exist in the market.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 20.6% - EXCELLENT
+   This shows how efficiently the company uses shareholder money to generate profits.
+   20.6% means for every $100 of shareholder equity, the company generates $20.6 in profit.
+   ✅ This is excellent - the company is very efficient with shareholder money.
+
+🏭 Operating Margin: 23.8% - EXCELLENT
+   This shows what percentage of revenue becomes operating profit after expenses.
+   23.8% means the company keeps $23.8 in operating profit for every $100 of sales.
+   ✅ Excellent margins indicate strong pricing power and cost control.
+
+💸 Free Cash Flow: $1.4B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.50 - GOOD
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.50 means the company has $0.50 of debt for every $1 of equity.
+   ✅ Good - manageable debt levels that shouldn't cause problems.
+
+🔢 Interest Coverage: 16.8x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 16.8 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 30.8 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 30.8 means you pay $30.8 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 29.1 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 29.1 means you pay $29.1 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 3.7%
+   Over the last 3 years, earnings grew an average of 3.7% per year.
+   ⚠️ Modest growth - steady but not spectacular.
+
+📉 Growth Volatility: 0.021
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 16.5%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ✅ Excellent ROIC indicates strong competitive advantages.
+
+💪 Gross Margin Advantage: -2.6% vs industry average
+   The company's gross margin is 2.6% lower than competitors.
+   ❌ Below-average margins suggest competitive weakness.
+
+🏆 Brand Value Score: 59.974729728/100
+   ⚠️ Moderate brand strength - some competitive protection.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   1. High valuation leaves little margin of safety
+
+🎯 ACTION PLAN:
+   
+   📊 STRATEGY: Hold current position but don't add new money
+   🔍 MONITORING: Watch closely for improvement or deterioration
+   ⚖️ REVIEW: Consider selling if better opportunities arise
+   📉 EXIT TRIGGERS: Sell if fundamentals worsen or valuation becomes excessive
+   
+   🔄 DECISION POINT: Reassess in 6 months
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟡 FUNDAMENTAL ANALYSIS: GD
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Hold
+📊 Composite Score: 0.205
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $338.39
+🏢 Market Cap: $91.4B
+
+💡 INVESTMENT THESIS:
+
+   GD is a decent company that marginally meets investment criteria. While it has
+   some attractive qualities with a score of 0.205, investors should monitor closely
+   and consider whether better opportunities exist in the market.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 17.8% - GOOD
+   This shows how efficiently the company uses shareholder money to generate profits.
+   17.8% means for every $100 of shareholder equity, the company generates $17.8 in profit.
+   ✅ This is solid - the company uses shareholder money well.
+
+🏭 Operating Margin: 10.5% - FAIR
+   This shows what percentage of revenue becomes operating profit after expenses.
+   10.5% means the company keeps $10.5 in operating profit for every $100 of sales.
+   ⚠️ Fair margins suggest the business is competitive but not exceptional.
+
+💸 Free Cash Flow: $3.2B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.40 - GOOD
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.40 means the company has $0.40 of debt for every $1 of equity.
+   ✅ Good - manageable debt levels that shouldn't cause problems.
+
+🔢 Interest Coverage: 12.6x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 12.6 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 21.9 - FAIR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 21.9 means you pay $21.9 for every $1 of annual profit.
+   ⚠️ Fair value - not cheap but not expensive.
+
+💰 Price-to-Free Cash Flow: 28.6 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 28.6 means you pay $28.6 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 6.1%
+   Over the last 3 years, earnings grew an average of 6.1% per year.
+   ⚠️ Modest growth - steady but not spectacular.
+
+📉 Growth Volatility: 0.062
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 1 out of 3
+   ✅ Only one down year - generally reliable performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 14.2%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ✅ Good ROIC suggests solid competitive positioning.
+
+💪 Gross Margin Advantage: -9.7% vs industry average
+   The company's gross margin is 9.7% lower than competitors.
+   ❌ Below-average margins suggest competitive weakness.
+
+🏆 Brand Value Score: 85.70303283199999/100
+   ✅ Excellent brand strength provides pricing power and customer loyalty.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   ✅ No major red flags identified in fundamental analysis.
+
+🎯 ACTION PLAN:
+   
+   📊 STRATEGY: Hold current position but don't add new money
+   🔍 MONITORING: Watch closely for improvement or deterioration
+   ⚖️ REVIEW: Consider selling if better opportunities arise
+   📉 EXIT TRIGGERS: Sell if fundamentals worsen or valuation becomes excessive
+   
+   🔄 DECISION POINT: Reassess in 6 months
+
+================================================================================
+
+================================================================================
+
+
+================================================================================
+🟡 FUNDAMENTAL ANALYSIS: EMN
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Hold
+📊 Composite Score: 0.185
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $65.47
+🏢 Market Cap: $7.5B
+
+💡 INVESTMENT THESIS:
+
+   EMN is a decent company that marginally meets investment criteria. While it has
+   some attractive qualities with a score of 0.185, investors should monitor closely
+   and consider whether better opportunities exist in the market.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 12.1% - FAIR
+   This shows how efficiently the company uses shareholder money to generate profits.
+   12.1% means for every $100 of shareholder equity, the company generates $12.1 in profit.
+   ⚠️ This is acceptable but not impressive.
+
+🏭 Operating Margin: 9.7% - POOR
+   This shows what percentage of revenue becomes operating profit after expenses.
+   9.7% means the company keeps $9.7 in operating profit for every $100 of sales.
+   ❌ Poor margins indicate pricing pressure or inefficient operations.
+
+💸 Free Cash Flow: $0.7B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.89 - POOR
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.89 means the company has $0.89 of debt for every $1 of equity.
+   ❌ Poor - high debt levels create financial risk.
+
+🔢 Interest Coverage: 6.0x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 6.0 times more than needed to cover interest payments.
+   ✅ Good coverage - comfortable ability to service debt.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 10.9 - EXCELLENT
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 10.9 means you pay $10.9 for every $1 of annual profit.
+   ✅ Excellent value - you're getting earnings at a discount.
+
+💰 Price-to-Free Cash Flow: 10.9 - EXCELLENT
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 10.9 means you pay $10.9 for every $1 of annual cash flow.
+   ✅ Excellent - getting cash generation at a great price.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 7.1%
+   Over the last 3 years, earnings grew an average of 7.1% per year.
+   ⚠️ Modest growth - steady but not spectacular.
+
+📉 Growth Volatility: 0.073
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 9.7%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ⚠️ Fair ROIC - company has some competitive advantages.
+
+💪 Gross Margin Advantage: -12.1% vs industry average
+   The company's gross margin is 12.1% lower than competitors.
+   ❌ Below-average margins suggest competitive weakness.
+
+🏆 Brand Value Score: 43.759326208/100
+   ❌ Weak brand - limited protection from competition.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   1. High debt levels create financial risk
+
+🎯 ACTION PLAN:
+   
+   📊 STRATEGY: Hold current position but don't add new money
+   🔍 MONITORING: Watch closely for improvement or deterioration
+   ⚖️ REVIEW: Consider selling if better opportunities arise
+   📉 EXIT TRIGGERS: Sell if fundamentals worsen or valuation becomes excessive
+   
+   🔄 DECISION POINT: Reassess in 6 months
+
+================================================================================
+
+================================================================================
+
