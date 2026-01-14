@@ -398,7 +398,8 @@ class WheelConfig:
         self.max_atr_pct = 3.5  # Maximum 3.5% daily price swing (ATR as % of price)
         self.min_market_cap = 10_000_000_000  # $10B minimum (large cap only)
         self.max_annualized_for_boring = 0.25  # 25% max annualized (anything higher = hidden risk)
-        self.boring_wheel_mode = False  # Set to True to enable strict boring filters
+        self.boring_wheel_mode = False  # Set to True to STRICTLY reject non-boring stocks
+        # NOTE: When False, runs "mixed mode" - boring-friendly scoring but allows non-boring stocks with penalty
         
         # HIGH-VOL / GAP-PRONE STOCKS: Apply stricter rules
         self.high_vol_tickers = {'ABNB', 'PINS', 'WDAY', 'ZS', 'PANW', 'FTNT'}
@@ -973,7 +974,9 @@ class WheelScanner:
         df.loc[df['beta'] > 1.5, 'risk_penalty'] += 0.2  # -20% for high beta
         df.loc[df['hist_vol'] > 40, 'risk_penalty'] += 0.2  # -20% for high volatility  
         df.loc[df['atr_pct'] > 4.0, 'risk_penalty'] += 0.1  # -10% for high daily swings
-        df.loc[df['has_earnings_before_expiry'] == True, 'risk_penalty'] += 0.4  # -40% for earnings risk (MAJOR penalty)
+        # Only apply earnings penalty if config flag is enabled
+        if self.config.earnings_penalty_in_scoring:
+            df.loc[df['has_earnings_before_expiry'] == True, 'risk_penalty'] += 0.4  # -40% for earnings risk (MAJOR penalty)
         
         # Calculate composite score: base metrics + stability bonus - risk penalty
         # Weights: 2x annualized (capped), 2x cushion, 1x premium, 1x PoP, 1x liquidity, 2x stability, -1x risk
@@ -1180,22 +1183,22 @@ def create_detailed_report(df: pd.DataFrame, filename: str = None):
         f.write("\n---\n\n")
         
         f.write("### Annualized Yield (Double Weight in Score)\n")
-        f.write("**Definition:** The ROC extrapolated to a full year. Calculated as (ROC / Days to Expiry) × 365. ")
-        f.write("This normalizes returns across different time periods.\n\n")
+        f.write("**Definition:** The ROC extrapolated to a full year based on trading days. Calculated as (ROC / DTE) × 252. ")
+        f.write("This normalizes returns across different time periods using trading-day annualization (252 business days per year).\n\n")
         f.write("**Why it matters:** Allows you to compare a 21-day trade with a 45-day trade on equal footing. ")
         f.write("Shows the theoretical annual return if you could repeat this exact trade throughout the year. ")
         f.write("**Gets double weight in composite score.**\n\n")
         f.write("**Target:** 20-40% is conservative, 40-60% is moderate, 60%+ is aggressive.\n\n")
         
         for idx, row in top3.iterrows():
-            f.write(f"**{row['ticker']} {row['expiry']} ${row['strike']:.2f} Strike:** {row['annualized_yield']:.1f}%\n")
+            f.write(f"**{row['ticker']} {row['expiry']} ${row['strike']:.2f} Strike:** {row['annualized_yield']*100:.1f}%\n")
         f.write("\n---\n\n")
         
         f.write("### PoP (Probability of Profit)\n")
-        f.write("**Definition:** Estimated probability that the option will expire worthless (profitable for the seller). ")
-        f.write("Calculated as 1 - |delta|. A delta of -0.25 gives PoP of 75%, delta of -0.15 gives PoP of 85%.\n\n")
+        f.write("**Definition:** Estimated probability that the option will expire OTM (out-of-the-money), meaning profitable for the seller. ")
+        f.write("Calculated using Black-Scholes d2 probability approximation. This is a risk-neutral probability estimate based on implied volatility.\n\n")
         f.write("**Why it matters:** Higher PoP means the stock has more room to move against you before you lose money or get assigned. ")
-        f.write("It's the statistical likelihood of keeping the full premium.\n\n")
+        f.write("It's the statistical likelihood of keeping the full premium. Note: This does NOT account for earnings or gap risk.\n\n")
         f.write("**Target:** 80-85% is ideal for the wheel strategy - very high probability with reasonable premium.\n\n")
         
         for idx, row in top3.iterrows():
@@ -1237,10 +1240,10 @@ def create_detailed_report(df: pd.DataFrame, filename: str = None):
         f.write("\n---\n\n")
         
         f.write("### Days to Expiry (DTE)\n")
-        f.write("**Definition:** Number of calendar days until the option expires.\n\n")
+        f.write("**Definition:** Number of trading days (business days) until the option expires. Calculated using np.busday_count().\n\n")
         f.write("**Why it matters:** Shorter DTE means faster premium collection and more control (can adjust sooner), ")
         f.write("but requires more active management. Longer DTE means less frequent trading but capital is tied up longer.\n\n")
-        f.write("**Target:** 21-45 days is the sweet spot for the wheel - balances premium decay with flexibility.\n\n")
+        f.write("**Target:** 21-45 trading days is the sweet spot for the wheel - balances premium decay with flexibility.\n\n")
         
         for idx, row in top3.iterrows():
             f.write(f"**{row['ticker']} {row['expiry']} ${row['strike']:.2f} Strike:** {row['days_to_expiry']} days\n")
@@ -1297,7 +1300,7 @@ def create_detailed_report(df: pd.DataFrame, filename: str = None):
         for rank, (idx, row) in enumerate(top3.iterrows(), 1):
             f.write(f"| {rank} | {row['ticker']} | {row['expiry']} | ")
             f.write(f"${row['strike']:.2f} | ${row['premium']:.2f} | ")
-            f.write(f"{row['roc']:.2f}% | {row['annualized_yield']:.1f}% | ")
+            f.write(f"{row['roc']:.2f}% | {row['annualized_yield']*100:.1f}% | ")
             f.write(f"{row['pop']:.1f}% | {row['cushion']:.1f}% | {row['days_to_expiry']} |\n")
         
         f.write("\n---\n\n")
@@ -1346,11 +1349,11 @@ def get_default_universe() -> List[str]:
         'UNH', 'JNJ', 'LLY', 'ABBV', 'MRK', 'PFE', 'TMO', 'ABT', 'DHR', 'BMY',
         'AMGN', 'GILD', 'VRTX', 'REGN', 'BIIB', 'MRNA', 'BNTX', 'ZTS', 'ISRG', 'SYK',
         'BSX', 'MDT', 'EW', 'IDXX', 'DXCM', 'ALGN', 'HCA', 'UHS', 'DGX', 'LH',
-        'CI', 'HUM', 'CNC', 'MOH', 'ELV', 'CAH', 'MCK', 'ABC', 'VEEV',
+        'CI', 'HUM', 'CNC', 'MOH', 'ELV', 'CAH', 'MCK', 'VEEV',
         
         # Energy & Utilities (Boring wheel favorites!)
         'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'PSX', 'MPC', 'VLO', 'OXY', 'HAL',
-        'BKR', 'NOV', 'DVN', 'FANG', 'MRO', 'APA', 'KMI', 'WMB',
+        'BKR', 'NOV', 'DVN', 'FANG', 'APA', 'KMI', 'WMB',
         'NEE', 'DUK', 'SO', 'D', 'AEP', 'EXC', 'SRE', 'PEG', 'XEL', 'ED',
         
         # Industrials & Aerospace
@@ -1377,8 +1380,7 @@ def get_default_universe() -> List[str]:
         'BABA', 'JD', 'BIDU', 'NIO', 'XPEV', 'LI', 'TME', 'BILI',
         
         # ETFs (Broad market + Sector)
-        'SPY', 'QQQ', 'IWM', 'VTI', 'VOO', 'VEA', 'VWO', 'EEM', 'EFA',
-        'XLF', 'XLE', 'XLK', 'XLV', 'GLD', 'SLV', 'USO', 'TLT', 'HYG', 'LQD', 
+        'SPY', 'QQQ', 'IWM', 'TLT', 
         
         # REITs & Infrastructure
         'VTR', 'ARE', 'INVH', 'MAA', 'ESS', 'UDR', 'CPT', 'AIV', 'PEAK', 'IRM'

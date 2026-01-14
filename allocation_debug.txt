@@ -1,20 +1,20 @@
-Recession Score: 31.25%
-Allocation Type: growth_aggressive
-Risk Level: Very Low
+Recession Score: 38.43%
+Allocation Type: growth_moderate
+Risk Level: Low
 Years to Retirement: 13
 Age Category: mid_career
-Initial Allocation: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+Initial Allocation: {'C': 65, 'S': 20, 'I': 10, 'F': 5, 'G': 0}
 Hybrid Enabled: True
 
-After Hybrid: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
-Hybrid Note: Low-moderate risk (31%): +8% equity tactical
+After Hybrid: {'C': 67.05263157894737, 'S': 20.63157894736842, 'I': 10.31578947368421, 'F': 2.0, 'G': 0}
+Hybrid Note: Low-moderate risk (38%): +8% equity tactical | Shifted 3% from F, 0% from G to equity
 
-After Fear & Greed: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+After Fear & Greed: {'C': 67.05263157894737, 'S': 20.63157894736842, 'I': 10.31578947368421, 'F': 2.0, 'G': 0}
 Fear & Greed Note: 
 
-After Bond Optimization: {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+After Bond Optimization: {'C': 67.05263157894737, 'S': 20.63157894736842, 'I': 10.31578947368421, 'F': 2.0, 'G': 0}
 Bond Score: 80.00
 Bond Note: F Fund enhanced: +0% from G Fund (strong bond environment)
 
-FINAL ALLOCATION (after normalization): {'C': 75, 'S': 20, 'I': 5, 'F': 0, 'G': 0}
+FINAL ALLOCATION (after normalization): {'C': 67, 'S': 21, 'I': 10, 'F': 2, 'G': 0}
 Total: 100%
