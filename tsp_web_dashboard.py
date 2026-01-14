@@ -1031,19 +1031,15 @@ class TSPDashboard:
         plt.tight_layout()
         self.charts['risk_factors'] = self.fig_to_base64(fig)
 
-# Create dashboard instance
-dashboard = TSPDashboard()
-
 @app.route('/')
 def index():
     """Main dashboard view."""
     # Get years_to_retirement from query parameter
     years_to_retirement = request.args.get('years_to_retirement', type=int)
     
-    # Update dashboard with age parameter if provided
-    if years_to_retirement is not None:
-        dashboard.years_to_retirement = years_to_retirement
-        dashboard.engine = TSPAllocationEngine(years_to_retirement=years_to_retirement)
+    # Create NEW dashboard instance with the specified age parameter
+    # This ensures each request gets fresh allocation calculations
+    dashboard = TSPDashboard(years_to_retirement=years_to_retirement)
     
     success = dashboard.generate_data()
     if not success:
@@ -1059,10 +1055,8 @@ def print_view():
     # Get years_to_retirement from query parameter
     years_to_retirement = request.args.get('years_to_retirement', type=int)
     
-    # Update dashboard with age parameter if provided
-    if years_to_retirement is not None:
-        dashboard.years_to_retirement = years_to_retirement
-        dashboard.engine = TSPAllocationEngine(years_to_retirement=years_to_retirement)
+    # Create NEW dashboard instance with the specified age parameter
+    dashboard = TSPDashboard(years_to_retirement=years_to_retirement)
     
     success = dashboard.generate_data()
     if not success:
@@ -1075,6 +1069,12 @@ def print_view():
 @app.route('/api/data')
 def api_data():
     """API endpoint for dashboard data."""
+    # Get years_to_retirement from query parameter
+    years_to_retirement = request.args.get('years_to_retirement', type=int)
+    
+    # Create NEW dashboard instance with the specified age parameter
+    dashboard = TSPDashboard(years_to_retirement=years_to_retirement)
+    
     success = dashboard.generate_data()
     if not success:
         return jsonify({'error': 'Failed to generate data'}), 500
