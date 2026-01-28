@@ -1,0 +1,130 @@
+WARREN BUFFETT STOCK SCREENING - QUALIFYING STOCKS THAT DIDN'T MAKE THE CUT
+================================================================================
+QUALIFYING STOCKS NOT IN TOP 5 - OCTOBER 2025
+================================================================================
+
+� SUMMARY:
+   📈 Total Qualifying Stocks: 6
+   🎯 Stocks in Top Picks: 5
+   📉 Stocks Below Cut-off: 1
+   💡 Reason: Did not rank high enough for Buffett's concentrated portfolio approach
+
+📉 QUALIFYING STOCKS BELOW CUT-OFF (Ranked by Quality Score):
+-------------------------------------------------------------------------------------
+Rank Symbol   Score    Criteria           Status       Notes
+-------------------------------------------------------------------------------------
+6    AME      0.223    2025-Adjusted      NOT SELECTED Clean
+
+================================================================================
+DETAILED FUNDAMENTAL ANALYSES - QUALIFYING FAILS
+================================================================================
+
+
+================================================================================
+🟡 FUNDAMENTAL ANALYSIS: AME
+================================================================================
+
+🎯 OVERALL RECOMMENDATION: Hold
+📊 Composite Score: 0.223
+✅ Passed Criteria: 2025-Adjusted
+💰 Current Price: $215.65
+🏢 Market Cap: $49.8B
+
+💡 INVESTMENT THESIS:
+
+   AME is a decent company that marginally meets investment criteria. While it has
+   some attractive qualities with a score of 0.223, investors should monitor closely
+   and consider whether better opportunities exist in the market.
+
+
+💰 PROFITABILITY ANALYSIS:
+   
+📈 Return on Equity (ROE): 14.6% - FAIR
+   This shows how efficiently the company uses shareholder money to generate profits.
+   14.6% means for every $100 of shareholder equity, the company generates $14.6 in profit.
+   ⚠️ This is acceptable but not impressive.
+
+🏭 Operating Margin: 25.8% - EXCELLENT
+   This shows what percentage of revenue becomes operating profit after expenses.
+   25.8% means the company keeps $25.8 in operating profit for every $100 of sales.
+   ✅ Excellent margins indicate strong pricing power and cost control.
+
+💸 Free Cash Flow: $1.7B per year
+   This is the actual cash the company generates that could be returned to shareholders.
+   ✅ Positive cash flow is good - the company generates actual cash.
+
+🛡️ FINANCIAL STABILITY:
+
+💳 Debt-to-Equity Ratio: 0.26 - EXCELLENT
+   This shows how much debt the company has relative to shareholder equity.
+   A ratio of 0.26 means the company has $0.26 of debt for every $1 of equity.
+   ✅ Excellent - very conservative debt levels provide financial flexibility.
+
+🔢 Interest Coverage: 15.7x
+   This shows how easily the company can pay its interest expenses.
+   The company earns 15.7 times more than needed to cover interest payments.
+   ✅ Excellent coverage - no concerns about meeting debt obligations.
+
+💵 VALUATION ANALYSIS:
+
+📊 Price-to-Earnings (P/E): 34.0 - POOR
+   This shows how much investors pay for each dollar of annual earnings.
+   A P/E of 34.0 means you pay $34.0 for every $1 of annual profit.
+   ❌ Expensive - you're paying a premium for earnings.
+
+💰 Price-to-Free Cash Flow: 29.2 - POOR
+   This shows how much you pay for each dollar of actual cash the company generates.
+   A ratio of 29.2 means you pay $29.2 for every $1 of annual cash flow.
+   ❌ Expensive - paying a high price for cash flow.
+
+🚀 PEG Ratio: 1.50
+   This adjusts the P/E ratio for growth rate. A PEG under 1.0 suggests good value.
+   ⚠️ Fair - paying for growth but not excessive.
+
+📈 GROWTH CONSISTENCY:
+
+📊 Average Annual Earnings Growth: 11.7%
+   Over the last 3 years, earnings grew an average of 11.7% per year.
+   ✅ Good growth rate indicating a healthy business.
+
+📉 Growth Volatility: 0.054
+   This measures how consistent the growth has been (lower is better).
+   ✅ Very consistent growth - predictable business model.
+
+📅 Negative Growth Years: 0 out of 3
+   ✅ No down years - remarkably consistent performance.
+
+🏰 COMPETITIVE MOAT:
+
+🎯 Return on Invested Capital (ROIC): 11.7%
+   This shows how efficiently the company uses its invested capital to generate returns.
+   ⚠️ Fair ROIC - company has some competitive advantages.
+
+💪 Gross Margin Advantage: +10.9% vs industry average
+   The company's gross margin is 10.9% higher than competitors.
+   ✅ Significant margin advantage indicates strong pricing power.
+
+🏆 Brand Value Score: 64.902608896/100
+   ⚠️ Moderate brand strength - some competitive protection.
+
+🌐 Network Effects: No
+   ⚠️ No network effects - growth depends on traditional competitive advantages.
+
+⚠️ RISK ASSESSMENT: LOW RISK
+
+🚨 Key Risks to Monitor:
+   1. High valuation leaves little margin of safety
+
+🎯 ACTION PLAN:
+   
+   📊 STRATEGY: Hold current position but don't add new money
+   🔍 MONITORING: Watch closely for improvement or deterioration
+   ⚖️ REVIEW: Consider selling if better opportunities arise
+   📉 EXIT TRIGGERS: Sell if fundamentals worsen or valuation becomes excessive
+   
+   🔄 DECISION POINT: Reassess in 6 months
+
+================================================================================
+
+================================================================================
+

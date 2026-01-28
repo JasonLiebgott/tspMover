@@ -11,6 +11,11 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
 import warnings
 import time
+import os
+import smtplib
+from email.message import EmailMessage
+from zoneinfo import ZoneInfo
+import argparse
 from scipy.stats import norm
 from scipy.stats import percentileofscore
 warnings.filterwarnings('ignore')
@@ -412,6 +417,16 @@ class WheelConfig:
         # EARNINGS RISK MANAGEMENT (applies to ALL tickers, not just high-vol)
         self.exclude_earnings_all = False  # Set True to exclude ALL options with earnings before expiry
         self.earnings_penalty_in_scoring = True  # Add risk penalty for earnings (if not excluding)
+
+        # Scheduling (market open window) and local timezone
+        # NOTE: If you want true MST year-round (no DST), use "America/Phoenix"
+        self.user_timezone = "America/Denver"
+        self.market_open_window_minutes = 15
+
+        # GO/NO GO thresholds for top boring candidate
+        self.go_min_composite_score = 70.0
+        self.go_min_pop = 0.80
+        self.go_min_cushion = 0.03
 
 
 class WheelScanner:
@@ -1315,6 +1330,119 @@ def create_detailed_report(df: pd.DataFrame, filename: str = None):
     return filename
 
 
+def should_run_now(config: WheelConfig) -> bool:
+    """Return True if now is within the market open window on a weekday."""
+    try:
+        local_tz = ZoneInfo(config.user_timezone)
+        now_local = datetime.now(local_tz)
+        if now_local.weekday() >= 5:
+            return False
+
+        eastern_tz = ZoneInfo("America/New_York")
+        now_eastern = now_local.astimezone(eastern_tz)
+        market_open = now_eastern.replace(hour=9, minute=30, second=0, microsecond=0)
+        window_end = market_open + timedelta(minutes=config.market_open_window_minutes)
+        return market_open <= now_eastern <= window_end
+    except Exception:
+        return False
+
+
+def get_top_boring_candidate(df: pd.DataFrame) -> Optional[pd.Series]:
+    """Return the top boring candidate by composite score, or None if none exist."""
+    if len(df) == 0 or 'is_boring' not in df.columns:
+        return None
+    boring_df = df[df['is_boring'] == True].copy()
+    if len(boring_df) == 0:
+        return None
+    boring_df = boring_df.sort_values('composite_score', ascending=False)
+    return boring_df.iloc[0]
+
+
+def build_go_no_go_statement(df: pd.DataFrame, config: WheelConfig) -> str:
+    """Build GO/NO GO statement for the top boring candidate."""
+    top = get_top_boring_candidate(df)
+    if top is None:
+        return "NO GO - No boring wheel candidates passed filters today. Better to wait for a more optimal day to trade."
+
+    score = float(top['composite_score'])
+    pop = float(top['pop'])
+    cushion = float(top['cushion']) / 100.0
+    annualized = float(top['annualized_yield'])
+
+    meets = (
+        score >= config.go_min_composite_score and
+        pop >= config.go_min_pop and
+        cushion >= config.go_min_cushion and
+        annualized <= config.max_annualized_for_boring
+    )
+
+    ticker = top['ticker']
+    expiry = top['expiry']
+    strike = float(top['strike'])
+    pop_pct = pop * 100.0
+    cushion_pct = float(top['cushion'])
+
+    if meets:
+        return (
+            f"GO - Top boring wheel candidate {ticker} {expiry} ${strike:.2f} "
+            f"scores {score:.1f} with {pop_pct:.0f}% PoP and {cushion_pct:.1f}% cushion. "
+            "Looks worthy of a trade."
+        )
+
+    return (
+        f"NO GO - Top boring wheel candidate {ticker} {expiry} ${strike:.2f} "
+        f"scores {score:.1f} with {pop_pct:.0f}% PoP and {cushion_pct:.1f}% cushion, "
+        "but does not meet thresholds. Better to wait for a more optimal day to trade."
+    )
+
+
+def send_email_with_attachments(subject: str, body: str, attachments: List[str], config: WheelConfig) -> None:
+    """Send an email with attachments using SMTP settings from environment variables."""
+    smtp_host = os.getenv("EMAIL_HOST", "")
+    smtp_port = int(os.getenv("EMAIL_PORT", "465"))
+    smtp_user = os.getenv("EMAIL_USER", "")
+    smtp_pass = os.getenv("EMAIL_PASS", "")
+    from_addr = os.getenv("EMAIL_FROM", smtp_user)
+    to_addr = os.getenv("EMAIL_TO", "TRADCLIMBER@GMAIL.COM")
+
+    if not smtp_host or not smtp_user or not smtp_pass or not from_addr:
+        print("Email not sent: missing EMAIL_HOST/EMAIL_USER/EMAIL_PASS/EMAIL_FROM settings.")
+        return
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = from_addr
+    msg["To"] = to_addr
+    msg.set_content(body)
+
+    for path in attachments:
+        if not path or not os.path.exists(path):
+            continue
+        filename = os.path.basename(path)
+        if filename.lower().endswith(".xlsx"):
+            maintype = "application"
+            subtype = "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        elif filename.lower().endswith(".md"):
+            maintype = "text"
+            subtype = "markdown"
+        else:
+            maintype = "application"
+            subtype = "octet-stream"
+
+        with open(path, "rb") as f:
+            msg.add_attachment(f.read(), maintype=maintype, subtype=subtype, filename=filename)
+
+    if smtp_port == 465:
+        with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+    else:
+        with smtplib.SMTP(smtp_host, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+
+
 def get_default_universe() -> List[str]:
     """Return expanded ticker universe for scanning - 300+ stocks across all sectors (deduplicated)"""
     
@@ -1392,12 +1520,23 @@ def get_default_universe() -> List[str]:
 
 def main():
     """Main execution"""
-    
+    parser = argparse.ArgumentParser(description="Wheel Strategy Scanner")
+    parser.add_argument(
+        "--run-now",
+        action="store_true",
+        help="Bypass the market-open schedule guard"
+    )
+    args = parser.parse_args()
+
     # Initialize data provider
     provider = YFinanceProvider()
     
     # Initialize config with default settings
     config = WheelConfig()
+
+    if not args.run_now and not should_run_now(config):
+        print("Outside market open window. Use --run-now to bypass.")
+        return
     
     # Customize config if needed
     # config.min_dte = 25
@@ -1431,8 +1570,25 @@ def main():
     
     # Save to Excel with highlighting and create detailed report
     if len(results) > 0:
-        save_results(results)  # Saves as Excel with green highlighting
-        create_detailed_report(results)  # Creates markdown report for top 3
+        excel_path = save_results(results)  # Saves as Excel with green highlighting
+        md_path = create_detailed_report(results)  # Creates markdown report for top 3
+
+        go_no_go = build_go_no_go_statement(results, config)
+        md_body = ""
+        if md_path and os.path.exists(md_path):
+            with open(md_path, "r", encoding="utf-8") as f:
+                md_body = f.read()
+        else:
+            md_body = "No markdown report was generated."
+
+        email_body = f"{go_no_go}\n\n{md_body}"
+        subject = f"Wheel Scanner Results {datetime.now().strftime('%Y-%m-%d')}"
+        send_email_with_attachments(subject, email_body, [excel_path, md_path], config)
+    else:
+        go_no_go = build_go_no_go_statement(results, config)
+        email_body = f"{go_no_go}\n\nNo candidates found."
+        subject = f"Wheel Scanner Results {datetime.now().strftime('%Y-%m-%d')}"
+        send_email_with_attachments(subject, email_body, [], config)
 
 
 if __name__ == "__main__":

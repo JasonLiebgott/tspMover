@@ -1,0 +1,118 @@
+====================================================================================================
+SENATE TIER-1 COMMITTEE TRADING ANALYSIS
+====================================================================================================
+Generated: 2026-01-17 10:05:04
+Lookback Period: 12 months
+Minimum Trades for Pattern: 3
+
+METHODOLOGY:
+----------------------------------------------------------------------------------------------------
+1. Focus: Senators on Tier-1 committees (Finance, Banking, Appropriations, Intelligence, Armed Services)
+2. Transactions: BUY trades only (sales excluded)
+3. Pattern Detection: Same sector traded repeatedly over time (minimum 3 trades)
+4. Weighting: Heavy emphasis on Tier-1 committee membership (40% of score)
+5. Confirmation: House data used as secondary validation (10% of score)
+6. One-off Filter: Single trades ignored to focus on sustained patterns
+
+TIER-1 COMMITTEES:
+----------------------------------------------------------------------------------------------------
+  • Senate Appropriations
+  • Senate Armed Services
+  • Senate Banking, Housing, and Urban Affairs
+  • Senate Committee on Appropriations
+  • Senate Committee on Armed Services
+  • Senate Committee on Banking, Housing, and Urban Affairs
+  • Senate Committee on Finance
+  • Senate Finance
+  • Senate Select Committee on Intelligence
+
+SUMMARY STATISTICS:
+----------------------------------------------------------------------------------------------------
+Total Senators Analyzed: 3
+Senators on Tier-1 Committees: 3
+Sector Patterns Identified: 3
+Total Buy Transactions in Patterns: 12
+
+TOP SECTOR TRADING PATTERNS:
+====================================================================================================
+
+RANK #1 - SCORE: 58.4/100
+----------------------------------------------------------------------------------------------------
+Senator: Senator Finance Chair
+Sector: Technology
+Tier-1 Committees: Senate Finance, Senate Banking, Housing, and Urban Affairs
+Committee Score: 200
+
+Trading Activity:
+  • Buy Transactions: 4
+  • Unique Tickers: AMD, AVGO, NVDA
+  • Total Amount: $257,502
+  • Average Per Trade: $64,376
+  • Trading Frequency: 1.48 trades/month
+  • Period: 2025-09-15 to 2025-12-05
+
+Pattern Quality:
+  • Consistency Score: 0.56/1.00
+  • House Confirmations: 0
+  • House Confirmation Score: 0.00/1.00
+
+Score Breakdown:
+  • Committee Weight (40%): 26.7
+  • Consistency Weight (30%): 16.9
+  • Frequency Weight (20%): 14.8
+  • House Confirmation (10%): 0.0
+
+
+RANK #2 - SCORE: 40.9/100
+----------------------------------------------------------------------------------------------------
+Senator: Senator Defense Lead
+Sector: Defense
+Tier-1 Committees: Senate Armed Services
+Committee Score: 100
+
+Trading Activity:
+  • Buy Transactions: 4
+  • Unique Tickers: LMT, NOC, RTX
+  • Total Amount: $500,002
+  • Average Per Trade: $125,000
+  • Trading Frequency: 1.09 trades/month
+  • Period: 2025-08-12 to 2025-11-30
+
+Pattern Quality:
+  • Consistency Score: 0.56/1.00
+  • House Confirmations: 0
+  • House Confirmation Score: 0.00/1.00
+
+Score Breakdown:
+  • Committee Weight (40%): 13.3
+  • Consistency Weight (30%): 16.7
+  • Frequency Weight (20%): 10.9
+  • House Confirmation (10%): 0.0
+
+
+RANK #3 - SCORE: 54.2/100
+----------------------------------------------------------------------------------------------------
+Senator: Senator Appropriations
+Sector: Healthcare
+Tier-1 Committees: Senate Appropriations, Senate Finance
+Committee Score: 200
+
+Trading Activity:
+  • Buy Transactions: 4
+  • Unique Tickers: CVS, JNJ, UNH
+  • Total Amount: $215,002
+  • Average Per Trade: $53,750
+  • Trading Frequency: 1.19 trades/month
+  • Period: 2025-09-05 to 2025-12-15
+
+Pattern Quality:
+  • Consistency Score: 0.52/1.00
+  • House Confirmations: 0
+  • House Confirmation Score: 0.00/1.00
+
+Score Breakdown:
+  • Committee Weight (40%): 26.7
+  • Consistency Weight (30%): 15.7
+  • Frequency Weight (20%): 11.9
+  • House Confirmation (10%): 0.0
+
