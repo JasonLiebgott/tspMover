@@ -38,6 +38,35 @@ class TSPDashboard:
         self.years_to_retirement = years_to_retirement
         # FRED API key for enhanced analysis
         self.fred_api_key = '4dddd13c29efb8f5a21eb8d5b07a65ee'
+        # Institutional floor: ensure key macro indicators keep meaningful influence.
+        self.min_indicator_weight = 0.05
+        self.floor_weight_indicators = [
+            'financial_conditions',
+            'lei_index',
+            'ism_pmi',
+            'gdp_growth',
+            'sp500_ma200'
+        ]
+        self._apply_institutional_weight_floors()
+
+    def _apply_institutional_weight_floors(self):
+        """Apply minimum indicator weights and renormalize to sum to 1.0."""
+        base_weights = dict(getattr(self.engine, 'METRIC_WEIGHTS', {}))
+        if not base_weights:
+            return
+
+        adjusted_weights = dict(base_weights)
+        for indicator in self.floor_weight_indicators:
+            if indicator in adjusted_weights:
+                adjusted_weights[indicator] = max(adjusted_weights[indicator], self.min_indicator_weight)
+
+        total_weight = sum(adjusted_weights.values())
+        if total_weight <= 0:
+            return
+
+        self.engine.METRIC_WEIGHTS = {
+            key: value / total_weight for key, value in adjusted_weights.items()
+        }
         
     def _fetch_fred_data(self, series_id, months_back=12):
         """Fetch data from FRED API."""
@@ -434,6 +463,7 @@ class TSPDashboard:
                 'fear_greed_sentiment': self._get_fear_greed_sentiment(getattr(self.engine.current_data.get('fear_greed_index', {}), 'value', 50)),
                 'years_to_retirement': self.years_to_retirement,
                 'age_category': age_category,
+                'metric_weights': {k: round(v * 100, 2) for k, v in self.engine.METRIC_WEIGHTS.items()},
                 'fund_info': {
                     'C': {'name': 'C Fund', 'description': 'Common Stock Index (S&P 500)', 'color': '#1f77b4'},
                     'S': {'name': 'S Fund', 'description': 'Small Cap Stock Index', 'color': '#ff7f0e'},

@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import argparse
+import io
+import urllib.request
 from scipy.stats import pearsonr
 import warnings
 warnings.filterwarnings("ignore")
@@ -123,6 +125,53 @@ class EnhancedThreatAssessmentV2:
         # Historical data cache for trend analysis
         self.data_cache = {}
         self.persistence_cache = {}
+
+    def normalize_oas_to_percent(self, raw_oas_value):
+        """Normalize OAS to percent units if a source returns basis points."""
+        if raw_oas_value is None:
+            return None, "unknown"
+
+        value = float(raw_oas_value)
+        if value > 100:
+            return value / 100.0, "bps_converted_to_percent"
+        return value, "percent"
+
+    def fetch_us_hy_oas_from_fred(self):
+        """
+        Fetch ICE BofA US High Yield OAS from FRED.
+        Series: BAMLH0A0HYM2 (US, not Global).
+        """
+        series_id = "BAMLH0A0HYM2"
+        fred_url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
+
+        try:
+            with urllib.request.urlopen(fred_url, timeout=10) as response:
+                csv_data = response.read().decode("utf-8")
+
+            df = pd.read_csv(io.StringIO(csv_data))
+            if df.empty or "DATE" not in df.columns or series_id not in df.columns:
+                raise ValueError("FRED response missing expected columns")
+
+            df[series_id] = pd.to_numeric(df[series_id], errors="coerce")
+            df = df.dropna(subset=["DATE", series_id])
+            if df.empty:
+                raise ValueError("FRED returned no usable HY OAS values")
+
+            latest = df.iloc[-1]
+            asof_dt = pd.to_datetime(latest["DATE"]).to_pydatetime()
+            oas_value_pct, units_note = self.normalize_oas_to_percent(latest[series_id])
+            stale_days = (datetime.now().date() - asof_dt.date()).days
+
+            return {
+                "value_pct": oas_value_pct,
+                "asof": asof_dt,
+                "stale_days": stale_days,
+                "source": f"FRED:{series_id}",
+                "units_note": units_note
+            }
+        except Exception as e:
+            print(f"   ⚠️ Unable to fetch US HY OAS from FRED ({series_id}): {e}")
+            return None
         
     def get_enhanced_data(self):
         """Enhanced data collection with new proven indicators"""
@@ -217,21 +266,25 @@ class EnhancedThreatAssessmentV2:
             # Investment grade corporate bonds (existing)
             data['credit_spread_ig'] = 3.5  # Would need corporate bond ETF data
             
-            # High-yield (junk) bonds - early warning indicator
-            try:
-                # Try to get high-yield ETF as proxy
-                hy_etf = yf.Ticker("HYG")  # iShares High Yield Corporate Bond ETF
-                hy_data = hy_etf.history(period="5d")
-                treasury_data = tnx_data['Close'].iloc[-1] if not tnx_data.empty else 4.0
-                
-                # Approximate high-yield spread (simplified calculation)
-                if not hy_data.empty:
-                    # This is a simplified approximation - real calculation would need bond yields
-                    data['credit_spread_hy'] = treasury_data + 4.5  # Typical HY spread
-                else:
-                    data['credit_spread_hy'] = 8.0  # Default high-yield spread
-            except:
-                data['credit_spread_hy'] = 8.0
+            # Real US HY OAS: ICE BofA US High Yield OAS from FRED.
+            hy_oas = self.fetch_us_hy_oas_from_fred()
+            if hy_oas and hy_oas.get("value_pct") is not None:
+                data['credit_spread_hy'] = hy_oas["value_pct"]
+                data['credit_spread_hy_source'] = hy_oas["source"]
+                data['credit_spread_hy_asof'] = hy_oas["asof"]
+                data['credit_spread_hy_stale_days'] = hy_oas["stale_days"]
+
+                asof_text = hy_oas["asof"].strftime("%Y-%m-%d")
+                print(f"   ✅ US HY OAS ({hy_oas['source']}): {hy_oas['value_pct']:.2f}% as of {asof_text}")
+
+                if hy_oas["stale_days"] > 5:
+                    print(f"   ⚠️ HY OAS data is {hy_oas['stale_days']} days stale")
+            else:
+                data['credit_spread_hy'] = None
+                data['credit_spread_hy_source'] = "unavailable"
+                data['credit_spread_hy_asof'] = None
+                data['credit_spread_hy_stale_days'] = None
+                print("   ⚠️ US HY OAS unavailable - credit_spread_hy will be skipped")
             
             # Cross-correlation analysis (regime change detection)
             data['correlation_breakdown'] = self.detect_correlation_breakdown(
@@ -621,11 +674,21 @@ class EnhancedThreatAssessmentV2:
             report.append("   ⚡ NY Fed indicator approaching inversion - Monitor closely")
         
         # Credit market analysis
-        hy_spread = data.get('credit_spread_hy', 8.0)
+        hy_spread = data.get('credit_spread_hy')
         ig_spread = data.get('credit_spread_ig', 3.5)
-        
-        if hy_spread > 10.0:
-            report.append("   🏦 High-yield credit stress detected - Early recession warning")
+
+        if hy_spread is None:
+            report.append("   ⚠️ US HY OAS unavailable - HY credit stress not scored")
+        else:
+            if hy_spread > 10.0:
+                report.append("   🏦 High-yield credit stress detected - Early recession warning")
+
+            hy_asof = data.get('credit_spread_hy_asof')
+            hy_stale_days = data.get('credit_spread_hy_stale_days')
+            if hy_asof:
+                report.append(f"   ℹ️ HY OAS source date: {hy_asof.strftime('%Y-%m-%d')}")
+            if hy_stale_days is not None and hy_stale_days > 5:
+                report.append(f"   ⚠️ HY OAS is delayed by {hy_stale_days} days")
         
         # Sector divergence analysis
         divergence = data.get('sector_divergence', 1.0)

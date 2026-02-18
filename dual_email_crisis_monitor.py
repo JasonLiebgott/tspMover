@@ -857,7 +857,7 @@ An even-handed interpretation:
         # Add threshold monitoring
         key_thresholds = [
             ('yield_spread_10y3m', 'NY Fed Indicator', data.get('yield_spread_10y3m', 0), 0.0, 'Inversion'),
-            ('credit_spread_hy', 'High-Yield Spreads', data.get('credit_spread_hy', 8), 10.0, 'Crisis Level'),
+            ('credit_spread_hy', 'High-Yield Spreads', data.get('credit_spread_hy'), 10.0, 'Crisis Level'),
             ('vix', 'VIX Fear Index', data.get('vix', 20), 30.0, 'High Volatility')
         ]
         
